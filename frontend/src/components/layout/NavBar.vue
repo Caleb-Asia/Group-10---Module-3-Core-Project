@@ -1,154 +1,137 @@
-<!--
+<!-- 
   Purpose: Main navigation bar with cart badge and mobile menu
   Module: Component - Layout - NavBar
   Owner: Caleb Asia
   Created: 2026-08-31
-  Notes: Used on ALL pages including Sisamila's homepage.
-         Mobile-first with hamburger menu. Live cart badge from cartStore.
+  Notes: Desktop top bar + Mobile bottom tab bar (matches approved mockup).
 -->
 
 <template>
   <nav class="navbar" :class="{ 'navbar--scrolled': isScrolled }">
     <div class="navbar__container">
-      <!-- Logo -->
+      <!-- Logo (Desktop) -->
       <router-link to="/" class="navbar__logo">
-        <span class="navbar__logo-icon">📦</span>
-        <span class="navbar__logo-text">Food<span class="text-orange">Boxx</span></span>
+        <img src="/images/foodboxx-logo.png" alt="FoodBoxx Logo" class="navbar__logo-img" />
       </router-link>
 
       <!-- Desktop Navigation Links -->
-      <ul class="navbar__links" :class="{ 'navbar__links--open': isMobileMenuOpen }">
+      <ul class="navbar__links">
         <li>
-          <router-link to="/" @click="closeMobileMenu">Home</router-link>
+          <router-link to="/">Home</router-link>
         </li>
         <li>
-          <router-link to="/menu" @click="closeMobileMenu">Menu</router-link>
+          <router-link to="/menu">Menu</router-link>
         </li>
         <li>
-          <router-link to="/builder" @click="closeMobileMenu">Build a Box</router-link>
+          <router-link to="/builder">Build a Box</router-link>
         </li>
         <li>
-          <router-link to="/pods" @click="closeMobileMenu">Pickup Pods</router-link>
+          <router-link to="/pods">Pickup Pods</router-link>
         </li>
       </ul>
 
-      <!-- Right Side: Auth + Cart -->
+      <!-- Right Side: Auth + Cart (Desktop) -->
       <div class="navbar__actions">
-        <!-- Cart Button with Badge -->
         <router-link to="/cart" class="navbar__cart">
           <svg class="navbar__cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="9" cy="21" r="1"/>
             <circle cx="20" cy="21" r="1"/>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
           </svg>
-          <span v-if="cartCount > 0" class="navbar__cart-badge">
-            {{ cartCount > 99 ? '99+' : cartCount }}
+          <span v-if="cartStore.itemCount > 0" class="navbar__cart-badge">
+            {{ cartStore.itemCount > 99 ? '99+' : cartStore.itemCount }}
           </span>
         </router-link>
 
-        <!-- Auth Buttons -->
-        <template v-if="isAuthenticated">
-          <router-link to="/dashboard" class="btn btn--outline btn--sm" @click="closeMobileMenu">
-            Account
-          </router-link>
+        <template v-if="authStore.isAuthenticated">
+          <router-link to="/dashboard" class="btn btn--outline btn--sm">Account</router-link>
         </template>
         <template v-else>
-          <router-link to="/login" class="btn btn--outline btn--sm" @click="closeMobileMenu">
-            Login
-          </router-link>
-          <router-link to="/register" class="btn btn--primary btn--sm" @click="closeMobileMenu">
-            Sign Up
-          </router-link>
+          <router-link to="/login" class="btn btn--outline btn--sm">Login</router-link>
+          <router-link to="/register" class="btn btn--primary btn--sm">Sign Up</router-link>
         </template>
-
-        <!-- Mobile Hamburger -->
-        <button 
-          class="navbar__hamburger" 
-          :class="{ 'navbar__hamburger--open': isMobileMenuOpen }"
-          @click="toggleMobileMenu"
-          aria-label="Toggle menu"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
       </div>
     </div>
+  </nav>
 
-    <!-- Mobile Menu Overlay -->
-    <div 
-      v-if="isMobileMenuOpen" 
-      class="navbar__overlay"
-      @click="closeMobileMenu"
-    ></div>
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav">
+    <router-link to="/" class="mobile-bottom-nav__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Home</span>
+    </router-link>
+
+    <router-link to="/menu" class="mobile-bottom-nav__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="8" y1="6" x2="21" y2="6"/>
+        <line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/>
+        <line x1="3" y1="12" x2="3.01" y2="12"/>
+        <line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span>Menu</span>
+    </router-link>
+
+    <router-link to="/cart" class="mobile-bottom-nav__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="21" r="1"/>
+        <circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      <span>Cart</span>
+      <span v-if="cartStore.itemCount > 0" class="mobile-bottom-nav__badge">
+        {{ cartStore.itemCount }}
+      </span>
+    </router-link>
+
+    <router-link to="/dashboard" class="mobile-bottom-nav__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Account</span>
+    </router-link>
   </nav>
 </template>
 
 <script setup>
-/**
- * NavBar Component
- * Owner: Caleb Asia
- * Shows navigation, cart badge, auth state
- */
-
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import { useCartStore } from '@/store/cartStore'
 import { useAuthStore } from '@/store/authStore'
 
-// Stores
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 
-// State
 const isScrolled = ref(false)
-const isMobileMenuOpen = ref(false)
 
-// Computed
-const cartCount = computed(() => cartStore.itemCount)
-const isAuthenticated = computed(() => authStore.isAuthenticated)
-
-// Methods
-function toggleMobileMenu() {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value
-  // Prevent body scroll when menu open
-  document.body.style.overflow = isMobileMenuOpen.value ? 'hidden' : ''
+if (typeof window !== 'undefined') {
+  window.addEventListener('scroll', () => {
+    isScrolled.value = window.scrollY > 50
+  })
 }
-
-function closeMobileMenu() {
-  isMobileMenuOpen.value = false
-  document.body.style.overflow = ''
-}
-
-function handleScroll() {
-  isScrolled.value = window.scrollY > 50
-}
-
-// Lifecycle
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-  // Restore cart from localStorage
-  cartStore.restore()
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-  document.body.style.overflow = ''
-})
 </script>
 
 <style scoped>
-/*
+/* 
  * NavBar Styles
  * Owner: Caleb Asia
- * Mobile-first, sticky on scroll
  */
 
+/* ============================================
+   DESKTOP TOP NAVBAR - STICKY
+   ============================================ */
 .navbar {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
-  z-index: var(--z-fixed);
+  width: 100%;
+  height: 70px;
+  z-index: 9999;
   background: var(--color-navy);
   transition: all var(--transition-base);
 }
@@ -162,36 +145,30 @@ onUnmounted(() => {
 .navbar__container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--spacing-4) var(--spacing-4);
+  height: 100%;
+  padding: 0 var(--spacing-6); /* Increased outer padding */
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-/* Logo */
 .navbar__logo {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
   text-decoration: none;
-  color: var(--color-white);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-xl);
+  margin-right: var(--spacing-8); /* Increased space between logo and links */
 }
 
-.navbar__logo-icon {
-  font-size: 1.5rem;
+.navbar__logo-img {
+  height: 40px;
+  object-fit: contain;
 }
 
-.text-orange {
-  color: var(--color-orange);
-}
-
-/* Desktop Links - Hidden on Mobile */
+/* Nav Links - Increased Spacing */
 .navbar__links {
   display: none;
   list-style: none;
-  gap: var(--spacing-6);
+  gap: var(--spacing-8); /* Increased gap between links */
   margin: 0;
   padding: 0;
 }
@@ -202,6 +179,7 @@ onUnmounted(() => {
   font-weight: var(--font-weight-medium);
   transition: color var(--transition-fast);
   position: relative;
+  padding: var(--spacing-2) 0;
 }
 
 .navbar__links a:hover,
@@ -220,23 +198,22 @@ onUnmounted(() => {
   border-radius: var(--radius-full);
 }
 
-/* Right Actions */
+/* Right Side Actions - Increased Spacing */
 .navbar__actions {
-  display: flex;
+  display: none;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: var(--spacing-5); /* Increased gap between cart and buttons */
+  margin-left: var(--spacing-8); /* Increased space between links and right side */
 }
 
-/* Cart Button */
 .navbar__cart {
   position: relative;
   color: var(--color-white);
   padding: var(--spacing-2);
   transition: color var(--transition-fast);
-}
-
-.navbar__cart:hover {
-  color: var(--color-orange);
+  display: flex;
+  align-items: center;
+  margin-right: var(--spacing-2); /* Extra spacing before buttons */
 }
 
 .navbar__cart-icon {
@@ -247,7 +224,7 @@ onUnmounted(() => {
 .navbar__cart-badge {
   position: absolute;
   top: 0;
-  right: 0;
+  right: -2px;
   background: var(--color-orange);
   color: var(--color-white);
   font-size: 10px;
@@ -259,20 +236,22 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   padding: 0 4px;
+  line-height: 1;
 }
 
 /* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
-  padding: var(--spacing-2) var(--spacing-4);
+  justify-content: center;
+  padding: var(--spacing-2) var(--spacing-5); /* More padding for wider buttons */
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   text-decoration: none;
-  transition: all var(--transition-fast);
   cursor: pointer;
   border: none;
+  transition: all var(--transition-fast);
 }
 
 .btn--primary {
@@ -287,7 +266,7 @@ onUnmounted(() => {
 .btn--outline {
   background: transparent;
   color: var(--color-white);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .btn--outline:hover {
@@ -296,107 +275,83 @@ onUnmounted(() => {
 }
 
 .btn--sm {
-  padding: var(--spacing-1) var(--spacing-3);
-  font-size: var(--font-size-xs);
-}
-
-/* Hide desktop buttons on mobile, show hamburger */
-.navbar__actions .btn {
-  display: none;
-}
-
-/* Hamburger */
-.navbar__hamburger {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: var(--spacing-2);
-}
-
-.navbar__hamburger span {
-  display: block;
-  width: 24px;
-  height: 2px;
-  background: var(--color-white);
-  border-radius: var(--radius-full);
-  transition: all var(--transition-base);
-}
-
-.navbar__hamburger--open span:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-.navbar__hamburger--open span:nth-child(2) {
-  opacity: 0;
-}
-
-.navbar__hamburger--open span:nth-child(3) {
-  transform: rotate(-45deg) translate(5px, -5px);
-}
-
-/* Mobile Menu Overlay */
-.navbar__overlay {
-  display: none;
-}
-
-/* Mobile Menu Open State */
-.navbar__links--open {
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 60px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--color-navy);
-  padding: var(--spacing-8) var(--spacing-6);
-  gap: var(--spacing-6);
-  z-index: var(--z-modal);
-}
-
-.navbar__links--open a {
-  font-size: var(--font-size-xl);
+  padding: var(--spacing-2) var(--spacing-5);
+  font-size: var(--font-size-sm);
 }
 
 /* ============================================
-   TABLET (768px+)
+   MOBILE BOTTOM NAVBAR
+   ============================================ */
+.mobile-bottom-nav {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--color-navy);
+  border-top: 2px solid var(--color-orange);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 9999;
+}
+
+.mobile-bottom-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.mobile-bottom-nav__item svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mobile-bottom-nav__item.router-link-active {
+  color: var(--color-orange);
+  border-top: 3px solid var(--color-orange);
+  margin-top: -3px;
+}
+
+.mobile-bottom-nav__badge {
+  position: absolute;
+  top: 6px;
+  right: 25%;
+  background: var(--color-orange);
+  color: var(--color-white);
+  font-size: 9px;
+  font-weight: bold;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   RESPONSIVE
    ============================================ */
 @media (min-width: 768px) {
-  .navbar__container {
-    padding: var(--spacing-4) var(--spacing-6);
-  }
-
   .navbar__links {
     display: flex;
   }
-
-  .navbar__actions .btn {
-    display: inline-flex;
-  }
-
-  .navbar__hamburger {
-    display: none;
-  }
-
-  .navbar__links--open {
+  
+  .navbar__actions {
     display: flex;
-    flex-direction: row;
-    position: static;
-    background: none;
-    padding: 0;
-    gap: var(--spacing-6);
   }
-}
 
-/* ============================================
-   DESKTOP (1024px+)
-   ============================================ */
-@media (min-width: 1024px) {
-  .navbar__container {
-    padding: var(--spacing-5) var(--spacing-8);
+  .mobile-bottom-nav {
+    display: none;
   }
 }
 </style>
