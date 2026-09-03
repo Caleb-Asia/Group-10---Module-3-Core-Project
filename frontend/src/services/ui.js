@@ -6,8 +6,21 @@
 */
 import Swal from 'sweetalert2';
 
+// Global SweetAlert configuration to force it above the sticky navbar
+Swal.mixin({
+  customClass: {
+    container: 'swal2-container' 
+  },
+  didOpen: (toast) => {
+    // Directly set the style on the DOM element after it opens to guarantee it stays on top
+    if (toast) {
+      toast.parentElement.style.zIndex = '99999';
+    }
+  }
+});
+
 // Success Toast
-export const showSuccess = (title, text = '') => {
+export const showSuccess = (title, text = '', iconHtml = '') => {
   Swal.fire({
     icon: 'success',
     title,
@@ -15,7 +28,12 @@ export const showSuccess = (title, text = '') => {
     timer: 2000,
     showConfirmButton: false,
     toast: true,
-    position: 'top-end'
+    position: 'bottom-end',
+    customClass: {
+      popup: 'swal-toast-fix'
+    },
+    // If iconHtml is provided, it overrides the default checkmark
+    ...(iconHtml && { iconHtml })
   });
 };
 

@@ -1,4 +1,3 @@
-
 <template>
   <div class="auth-page bg-cream py-8">
     <div class="container">
@@ -29,7 +28,7 @@
                   type="email" 
                   v-model="form.email" 
                   class="auth-input" 
-                  placeholder="aisha@myuct.ac.za"
+                  placeholder="demo@uni.ac.za"
                   :class="{ 'auth-input--error': errors.email }"
                 />
                 <span v-if="errors.email" class="form-error">{{ errors.email }}</span>
@@ -57,6 +56,13 @@
                 <span class="auth-link">Forgot password?</span>
               </div>
 
+              <!-- Demo Credentials Box -->
+              <div class="demo-box mb-6">
+                <strong>Demo Credentials:</strong><br>
+                Email: <code>demo@uni.ac.za</code><br>
+                Password: <code>12345678!</code>
+              </div>
+
               <!-- Submit -->
               <button type="submit" class="btn btn--primary btn--full" :disabled="isLoading">
                 <span v-if="isLoading" class="spinner spinner--dark"></span>
@@ -65,9 +71,11 @@
             </form>
           </div>
 
-          <!-- Visual side -->
+          <!-- Visual side with Image Background -->
           <div class="auth-visual-side">
-            <div class="auth-visual-bg"></div>
+            <img src="/images/standard-box.png" class="auth-visual-bg" alt="Food background" />
+            <div class="auth-visual-overlay"></div>
+            
             <div class="auth-visual-icon">🥗</div>
             <div class="auth-visual-content">
               <div class="auth-visual-title">
@@ -85,10 +93,6 @@
 </template>
 
 <script setup>
-/**
- * LoginView
- * Owner: Caleb Asia
- */
 import { ref, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/store/authStore';
@@ -98,7 +102,6 @@ const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 
-// State
 const isLoading = ref(false);
 const form = reactive({
   email: '',
@@ -106,7 +109,6 @@ const form = reactive({
   rememberMe: false
 });
 
-// Validation
 const errors = reactive({});
 
 function validateForm() {
@@ -114,7 +116,6 @@ function validateForm() {
   errors.password = '';
   let isValid = true;
 
-  // Email regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!form.email) {
     errors.email = 'Email is required.';
@@ -140,7 +141,6 @@ async function handleLogin() {
     const result = await authStore.login(form.email, form.password);
     if (result.success) {
       showSuccess('Login Successful', 'Welcome back!');
-      // Redirect to dashboard or requested page
       const redirect = route.query.redirect || '/dashboard';
       router.push(redirect);
     } else {
@@ -155,14 +155,12 @@ async function handleLogin() {
 </script>
 
 <style scoped>
-/* 
- * Login Styles (Matches Mockup)
- * Owner: Caleb Asia
- */
 .auth-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
+  /* REDUCED the padding significantly */
+  padding: 80px 0 20px; 
 }
 
 .auth-card {
@@ -170,7 +168,8 @@ async function handleLogin() {
   border-radius: 14px;
   overflow: hidden;
   border: 0.5px solid #E5E3DA;
-  max-width: 760px;
+  max-width: 900px; /* Slightly smaller to reduce height */
+  width: 100%;
   margin: 0 auto;
   box-shadow: var(--shadow-lg);
 }
@@ -179,27 +178,26 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 22px;
+  padding: 14px 24px;
 }
 
 .auth-logo {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: var(--font-weight-bold);
 }
 
 .auth-header-icon {
   color: #FFFFFF;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .auth-body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
-  padding: 40px 30px;
+  padding: 20px; 
 }
 
-/* Mobile-first */
 @media (min-width: 768px) {
   .auth-body {
     grid-template-columns: 1.1fr 1fr;
@@ -211,40 +209,40 @@ async function handleLogin() {
   background: #FFFFFF;
   border: 0.5px solid #E5E3DA;
   border-radius: 12px;
-  padding: 32px 30px;
+  padding: 32px 40px; /* Reduced padding */
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .auth-title {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: var(--font-weight-bold);
   color: var(--color-navy);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .auth-subtitle {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-gray-500);
-  margin-bottom: 24px;
+  margin-bottom: 24px; /* Reduced margin */
   line-height: 1.6;
 }
 
 .auth-label {
-  font-size: 10.5px;
+  font-size: 12px;
   color: #8A8A85;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   display: block;
 }
 
 .auth-input {
   width: 100%;
   background: #F7F5EF;
-  border: 0.5px solid #E5E3DA;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 12.5px;
+  border: 1px solid #E5E3DA;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 15px;
   color: var(--color-navy);
   transition: all var(--transition-fast);
 }
@@ -260,68 +258,89 @@ async function handleLogin() {
 }
 
 .auth-link {
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--color-orange);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
 }
 
-/* Visual Side */
+.demo-box {
+  background: #FFF7ED;
+  border: 1px dashed var(--color-orange);
+  border-radius: 10px;
+  padding: 14px; /* Reduced padding */
+  font-size: 14px;
+  color: var(--color-gray-700);
+  text-align: center;
+  line-height: 1.8;
+}
+
+.demo-box code {
+  background: rgba(242, 106, 27, 0.1);
+  color: var(--color-orange);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+/* Visual Side with Z-Index Image */
 .auth-visual-side {
-  background: var(--color-navy);
-  border-radius: 0 12px 12px 0;
   position: relative;
-  padding: 26px;
+  padding: 40px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 260px;
+  min-height: 400px; 
   overflow: hidden;
-  margin-top: 20px;
-}
-
-@media (min-width: 768px) {
-  .auth-visual-side {
-    margin-top: 0;
-  }
+  border-radius: 0 12px 12px 0;
 }
 
 .auth-visual-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #1D3348 0%, #0F1F2C 100%);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1; /* Image behind everything */
+}
+
+.auth-visual-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 33, 55, 0.7); /* Semi-transparent navy overlay */
+  z-index: 2;
 }
 
 .auth-visual-icon {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 30px;
+  right: 30px;
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  background: #20384D;
+  background: rgba(32, 56, 77, 0.8); /* Slightly transparent circle */
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
-  font-size: 26px;
+  z-index: 3;
+  font-size: 30px;
 }
 
 .auth-visual-content {
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 
 .auth-visual-title {
-  font-size: 16px;
+  font-size: 24px;
   font-weight: var(--font-weight-bold);
   color: #FFFFFF;
-  line-height: 1.3;
-  margin-bottom: 6px;
+  line-height: 1.4;
+  margin-bottom: 10px;
 }
 
 .auth-visual-subtext {
-  font-size: 10.5px;
+  font-size: 14px;
   color: #B8C2CC;
 }
 </style>

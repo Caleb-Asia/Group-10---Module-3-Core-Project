@@ -1,4 +1,3 @@
-
 <template>
   <div class="auth-page bg-cream py-8">
     <div class="container">
@@ -75,7 +74,7 @@
 
               <!-- Dietary Preferences -->
               <div class="mb-4">
-                <label class="auth-label text-uppercase">Dietary preference</label>
+                <label class="auth-label text-uppercase">Dietary Preference</label>
                 <div class="dietary-chips">
                   <button 
                     v-for="tag in dietaryOptions" 
@@ -98,9 +97,10 @@
             </form>
           </div>
 
-          <!-- Visual side -->
+          <!-- Visual side with Image Background -->
           <div class="auth-visual-side">
-            <div class="auth-visual-bg"></div>
+            <img src="/images/vegan-box.png" class="auth-visual-bg" alt="Food background" />
+            <div class="auth-visual-overlay"></div>
             
             <div class="auth-offer">
               🎁 50% off your first box
@@ -122,10 +122,6 @@
 </template>
 
 <script setup>
-/**
- * RegisterView
- * Owner: Caleb Asia
- */
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/authStore';
@@ -134,7 +130,6 @@ import { showError, showSuccess } from '@/services/ui';
 const authStore = useAuthStore();
 const router = useRouter();
 
-// State
 const isLoading = ref(false);
 const dietaryOptions = ['Standard', 'Vegan', 'Halal', 'Keto', 'Nut-Free', 'Gluten-Free'];
 
@@ -146,7 +141,6 @@ const form = reactive({
   dietary_preferences: []
 });
 
-// Validation
 const errors = reactive({});
 
 function toggleDietary(tag) {
@@ -219,16 +213,12 @@ async function handleRegister() {
 </script>
 
 <style scoped>
-/* 
- * Register Styles (Matches Mockup)
- * Owner: Caleb Asia
- */
 .auth-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  padding-top: 80px; /* Offset for fixed NavBar */
-  padding-bottom: 80px;
+  /* Matches Login page size */
+  padding: 80px 0 20px; 
 }
 
 .auth-card {
@@ -236,7 +226,8 @@ async function handleRegister() {
   border-radius: 14px;
   overflow: hidden;
   border: 0.5px solid #E5E3DA;
-  max-width: 760px;
+  max-width: 900px; 
+  width: 100%;
   margin: 0 auto;
   box-shadow: var(--shadow-lg);
 }
@@ -245,24 +236,24 @@ async function handleRegister() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 22px;
+  padding: 14px 24px;
 }
 
 .auth-logo {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: var(--font-weight-bold);
 }
 
 .auth-header-icon {
   color: #FFFFFF;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .auth-body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
-  padding: 36px 30px;
+  padding: 20px; 
 }
 
 @media (min-width: 768px) {
@@ -276,26 +267,26 @@ async function handleRegister() {
   background: #FFFFFF;
   border: 0.5px solid #E5E3DA;
   border-radius: 12px;
-  padding: 28px 30px;
+  padding: 32px 40px; 
 }
 
 .auth-title {
-  font-size: 21px;
+  font-size: 28px;
   font-weight: var(--font-weight-bold);
   color: var(--color-navy);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .auth-subtitle {
-  font-size: 11.5px;
+  font-size: 14px;
   color: var(--color-gray-500);
-  margin-bottom: 18px;
+  margin-bottom: 24px;
 }
 
 .row-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 16px;
 }
 
 @media (min-width: 500px) {
@@ -305,19 +296,19 @@ async function handleRegister() {
 }
 
 .auth-label {
-  font-size: 10px;
+  font-size: 12px;
   color: #8A8A85;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   display: block;
 }
 
 .auth-input {
   width: 100%;
   background: #F7F5EF;
-  border: 0.5px solid #E5E3DA;
-  border-radius: 8px;
-  padding: 9px 11px;
-  font-size: 11.5px;
+  border: 1px solid #E5E3DA;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 15px;
   color: var(--color-navy);
   transition: all var(--transition-fast);
 }
@@ -334,75 +325,109 @@ async function handleRegister() {
 
 .dietary-chips {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-bold);
+  font-size: 16px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: var(--color-orange);
+  color: var(--color-white);
+}
+
+.btn--primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn--primary:hover {
+  background: var(--color-orange-hover);
+}
+
+/* Visual Side with Z-Index Image */
 .auth-visual-side {
-  background: var(--color-navy);
-  border-radius: 0 12px 12px 0;
   position: relative;
-  padding: 24px;
+  padding: 40px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 340px;
+  min-height: 400px; 
   overflow: hidden;
-  margin-top: 20px;
-}
-
-@media (min-width: 768px) {
-  .auth-visual-side {
-    margin-top: 0;
-  }
+  border-radius: 0 12px 12px 0;
 }
 
 .auth-visual-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #1D3348 0%, #0F1F2C 100%);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1; /* Image behind everything */
+}
+
+.auth-visual-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 33, 55, 0.7); /* Semi-transparent navy overlay */
+  z-index: 2;
 }
 
 .auth-offer {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   background: var(--color-orange);
-  border-radius: 10px;
-  padding: 12px 14px;
+  border-radius: 12px;
+  padding: 16px;
   align-self: flex-start;
-  font-size: 11.5px;
+  font-size: 14px;
   font-weight: var(--font-weight-bold);
   color: #FFFFFF;
 }
 
 .auth-visual-content {
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 
 .auth-visual-icon {
-  width: 64px;
-  height: 64px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
-  background: #20384D;
+  background: rgba(32, 56, 77, 0.8); /* Slightly transparent circle */
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 14px;
-  font-size: 26px;
+  margin-bottom: 16px;
+  font-size: 30px;
 }
 
 .auth-visual-title {
-  font-size: 15px;
+  font-size: 24px;
   font-weight: var(--font-weight-bold);
   color: #FFFFFF;
-  line-height: 1.3;
-  margin-bottom: 6px;
+  line-height: 1.4;
+  margin-bottom: 8px;
 }
 
 .auth-visual-subtext {
-  font-size: 10.5px;
+  font-size: 14px;
   color: #B8C2CC;
+}
+
+.text-uppercase {
+  text-transform: uppercase;
 }
 </style>

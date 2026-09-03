@@ -1747,3 +1747,11 @@ ul, ol {
     text-decoration: underline;
   }
 }
+
+/* ============================================
+   25. SWEET ALERT OVERRIDES
+   ============================================ */
+
+.swal2-container {
+  z-index: 99999 !important;
+}

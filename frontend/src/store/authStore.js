@@ -13,45 +13,68 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref(JSON.parse(localStorage.getItem('foodboxx_user') || 'null'));
   const token = ref(localStorage.getItem('foodboxx_token') || '');
 
-  // Getters - NavBar uses `isAuthenticated`
+  // Getters
   const isAuthenticated = computed(() => !!token.value);
   const currentUser = computed(() => user.value);
 
   // Actions
   async function login(email, password) {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      
-      token.value = response.data.token;
-      user.value = response.data.user;
+      // TEMPORARY MOCK LOGIN (Remove when backend is live!)
+      if (email === 'demo@uni.ac.za' && password === '12345678!') {
+        const mockUser = {
+          id: 1,
+          name: 'Demo User',
+          email: 'demo@uni.ac.za',
+          dietary_preferences: 'Standard',
+          pickup_pod: 'UCT Library'
+        };
+        const mockToken = 'demo-mock-jwt-token';
 
-      // Persist to localStorage
-      localStorage.setItem('foodboxx_token', token.value);
-      localStorage.setItem('foodboxx_user', JSON.stringify(user.value));
+        token.value = mockToken;
+        user.value = mockUser;
 
-      return { success: true };
+        localStorage.setItem('foodboxx_token', mockToken);
+        localStorage.setItem('foodboxx_user', JSON.stringify(mockUser));
+
+        return { success: true };
+      } else {
+        return { 
+          success: false, 
+          message: 'Invalid credentials. Use demo@uni.ac.za / 12345678!'
+        };
+      }
     } catch (error) {
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed. Check your credentials.' 
+        message: 'Login failed.' 
       };
     }
   }
 
+  // For Demo, allow anyone to register and instantly log them in
   async function register(userData) {
     try {
-      const response = await api.post('/auth/register', userData);
-      if (response.data.token) {
-        token.value = response.data.token;
-        user.value = response.data.user;
-        localStorage.setItem('foodboxx_token', token.value);
-        localStorage.setItem('foodboxx_user', JSON.stringify(user.value));
-      }
+      const mockUser = {
+        id: 1,
+        name: userData.name,
+        email: userData.email,
+        dietary_preferences: userData.dietary_preferences || 'Standard',
+        pickup_pod: 'UCT Library'
+      };
+      const mockToken = 'demo-mock-jwt-token';
+
+      token.value = mockToken;
+      user.value = mockUser;
+
+      localStorage.setItem('foodboxx_token', mockToken);
+      localStorage.setItem('foodboxx_user', JSON.stringify(mockUser));
+
       return { success: true };
     } catch (error) {
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Registration failed.' 
+        message: 'Registration failed.' 
       };
     }
   }
@@ -59,17 +82,6 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchMe() {
     try {
       const response = await api.get('/auth/me');
-      user.value = response.data;
-      localStorage.setItem('foodboxx_user', JSON.stringify(user.value));
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async function updateProfile(profileData) {
-    try {
-      const response = await api.patch('/auth/me', profileData);
       user.value = response.data;
       localStorage.setItem('foodboxx_user', JSON.stringify(user.value));
       return response.data;
@@ -88,12 +100,11 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     user,
     token,
-    isAuthenticated, // NavBar expects this
+    isAuthenticated,
     currentUser,
     login,
     register,
     fetchMe,
-    updateProfile,
     logout
   };
 });

@@ -3,7 +3,8 @@
   Module: Frontend - Views
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: Displays active subscription, loyalty reward, referral, and quick links.
+  Notes: Displays active subscription summary, loyalty reward, and quick links. 
+         Promotional card has a dynamic float animation.
 -->
 <template>
   <div class="dashboard-page">
@@ -12,10 +13,10 @@
       <!-- Page Title -->
       <h1 class="page-title mb-6">My Dashboard</h1>
 
-      <!-- Active Subscription Card -->
-      <div class="card p-6 mb-6">
+      <!-- Active Subscription Summary -->
+      <div class="dashboard-card p-6 mb-6">
         <div class="d-flex justify-between align-center mb-4">
-          <div class="subscription-status">
+          <div class="status-badge">
             <span class="status-dot"></span> ACTIVE SUBSCRIPTION
           </div>
           <div class="subscription-price">R79/wk</div>
@@ -24,72 +25,59 @@
         <h3 class="text-navy mb-1">Standard Box</h3>
         <p class="text-muted small mb-4">Weekly delivery · UCT Library Pod</p>
 
-        <!-- Next Charge & Pickup Info -->
-        <div class="info-row mb-6">
+        <div class="info-row mb-4">
           <div class="info-block">
-            <span class="info-label">NEXT CHARGE</span>
+            <span class="info-label">Next Charge</span>
             <span class="info-value">Mon, 2 Sep 2026</span>
           </div>
           <div class="info-block">
-            <span class="info-label">PICKUP POD</span>
+            <span class="info-label">Pickup Pod</span>
             <span class="info-value">UCT Library</span>
           </div>
         </div>
 
-        <!-- Action Buttons (Pill shaped) -->
-        <div class="action-grid">
-          <button class="action-btn" @click="handleAction('pause')">Pause for a week</button>
-          <button class="action-btn" @click="handleAction('skip')">Skip this week</button>
-          <button class="action-btn" @click="handleAction('resume')">Resume</button>
-          <button class="action-btn cancel-btn" @click="handleAction('cancel')">Cancel</button>
-        </div>
+        <!-- Link to manage subscription -->
+        <router-link to="/dashboard/subscriptions" class="btn btn--outline btn--sm">
+          Manage Subscription
+        </router-link>
       </div>
 
-      <!-- Loyalty Reward Card -->
-      <div class="card p-6 mb-6">
+      <!-- Loyalty Reward -->
+      <div class="dashboard-card p-6 mb-6">
         <div class="d-flex justify-between align-center mb-4">
-          <h4 class="text-navy mb-0">Loyalty Reward</h4>
-          <span class="badge-reward">7th Every 8th Box Free</span>
+          <h4 class="card-title mb-0">Loyalty Reward</h4>
+          <span class="reward-badge">🎁 Every 8th box free</span>
         </div>
-        
         <div class="progress progress--lg mb-2">
           <div class="progress__bar" style="width: 37.5%;"></div>
         </div>
         <p class="text-muted small mb-0">3 of 8 boxes completed — 5 more to go!</p>
       </div>
 
-      <!-- Referral Card -->
+      <!-- Promotional Referral Card (Animated) -->
       <div class="referral-card p-6 mb-6">
         <div class="d-flex align-center justify-between">
           <div>
             <h4 class="text-navy mb-1">Share the box!</h4>
-            <p class="text-muted small mb-0">Friends get R50 off, you get a free box.</p>
+            <p class="text-muted small mb-0">Friends get <strong>50% off</strong>, you get a free box.</p>
           </div>
           <button class="btn btn--primary btn--sm" @click="handleReferral">Refer</button>
         </div>
       </div>
 
-      <!-- Quick Links Grid -->
-      <h3 class="section-title mb-4">Quick Links</h3>
+      <!-- Quick Links (Only Orders and Profile remain) -->
+      <h3 class="quick-links-title mb-4">Quick Links</h3>
       <div class="quick-links-grid">
         <router-link to="/dashboard/orders" class="quick-link-card">
-          <span class="quick-link-icon">📦</span>
+          <div class="quick-link-icon">📦</div>
           <span class="quick-link-text">Order History</span>
+          <span class="chevron">›</span>
         </router-link>
 
         <router-link to="/dashboard/profile" class="quick-link-card">
-          <span class="quick-link-icon">👤</span>
+          <div class="quick-link-icon">👤</div>
           <span class="quick-link-text">My Profile</span>
-        </router-link>
-
-        <router-link to="/pods" class="quick-link-card">
-          <span class="quick-link-icon">📍</span>
-          <span class="quick-link-text">Pickup Pods</span>
-        </router-link>
-
-        <router-link to="/builder" class="quick-link-card">
-          <span class="quick-link-icon">🍱</span>
-          <span class="quick-link-text">Build a Box</span>
+          <span class="chevron">›</span>
         </router-link>
       </div>
 
@@ -98,32 +86,7 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '@/store/authStore';
-import { showSuccess, showConfirm } from '@/services/ui';
-
-const authStore = useAuthStore();
-
-// Mock actions for now until backend is connected
-const handleAction = (action) => {
-  switch(action) {
-    case 'pause':
-      showSuccess('Subscription Paused', 'We will not charge you next week.');
-      break;
-    case 'skip':
-      showSuccess('Week Skipped', 'Your next charge date has been moved by 7 days.');
-      break;
-    case 'resume':
-      showSuccess('Subscription Resumed', 'Your box is back on track!');
-      break;
-    case 'cancel':
-      showConfirm('Cancel Subscription?', 'Are you sure you want to cancel?', 'Yes, cancel').then((result) => {
-        if (result.isConfirmed) {
-          showSuccess('Cancelled', 'Your subscription has been cancelled.');
-        }
-      });
-      break;
-  }
-};
+import { showSuccess } from '@/services/ui';
 
 const handleReferral = () => {
   showSuccess('Link Copied!', 'Send your referral link to a friend.');
@@ -132,17 +95,24 @@ const handleReferral = () => {
 
 <style scoped>
 .dashboard-page {
-  padding: var(--spacing-8) 0;
+  background-color: var(--color-cream);
   min-height: 100vh;
+  padding: var(--spacing-8) 0;
 }
 
 .page-title {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
+  color: var(--color-navy);
 }
 
-/* Active Subscription */
-.subscription-status {
+.dashboard-card {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.status-badge {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -194,93 +164,95 @@ const handleReferral = () => {
   color: var(--color-navy);
 }
 
-/* Action Buttons */
-.action-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-2);
-}
-
-.action-btn {
-  background: var(--color-white);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-full);
-  padding: var(--spacing-3);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.action-btn:hover {
-  border-color: var(--color-orange);
-  color: var(--color-orange);
-}
-
-.cancel-btn {
-  background: #FFF1F2;
-  border-color: #FECDD3;
-  color: #E11D48;
-}
-
-.cancel-btn:hover {
-  background: var(--color-error);
-  color: var(--color-white);
-  border-color: var(--color-error);
-}
-
-/* Loyalty */
-.badge-reward {
-  background: var(--color-orange);
-  color: var(--color-white);
-  font-size: var(--font-size-xs);
+.card-title {
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
+  color: var(--color-navy);
+}
+
+.reward-badge {
+  background: rgba(242, 106, 27, 0.1);
+  color: var(--color-orange);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-full);
 }
 
-/* Referral */
+/* Promotional Referral Card - Faster Animation */
 .referral-card {
-  background: #FFF7ED;
-  border: 1px solid #FED7AA;
+  background: var(--color-orange);
   border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  /* The Animation - 1.5s instead of 3s */
+  animation: float-promo 1.5s ease-in-out infinite; 
 }
 
-/* Quick Links */
-.section-title {
-  font-size: var(--font-size-xl);
+@keyframes float-promo {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(8px); } 
+  100% { transform: translateX(0); } 
+}
+
+.quick-links-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-navy);
 }
 
 .quick-links-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--spacing-4);
+}
+
+@media (min-width: 768px) {
+  .quick-links-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .quick-link-card {
   background: var(--color-white);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
   padding: var(--spacing-5);
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: var(--spacing-4);
   text-decoration: none;
-  transition: all var(--transition-base);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .quick-link-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .quick-link-icon {
-  font-size: 1.5rem;
+  font-size: 24px;
 }
 
 .quick-link-text {
-  color: var(--color-navy);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
+  color: var(--color-navy);
 }
+
+.chevron {
+  margin-left: auto;
+  font-size: 1.5rem;
+  color: var(--color-gray-400);
+}
+
+/* Utility */
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--spacing-1); }
+.mb-2 { margin-bottom: var(--spacing-2); }
+.mb-4 { margin-bottom: var(--spacing-4); }
+.mb-6 { margin-bottom: var(--spacing-6); }
+.p-6 { padding: var(--spacing-6); }
+.small { font-size: var(--font-size-sm); }
+.text-navy { color: var(--color-navy); }
+.text-muted { color: var(--color-gray-500); }
 </style>

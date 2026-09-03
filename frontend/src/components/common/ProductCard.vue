@@ -3,11 +3,14 @@
   Module: Frontend - Components
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: Uses local images. Emits add-to-cart event to parent.
+  Notes: Clicking card routes to ProductDetailView. 
+         "Add to Box" button has @click.stop to only add to cart.
+         Features IntersectionObserver scroll-reveal animation.
 -->
 
 <template>
-  <div class="product-card">
+  <div ref="card" class="product-card" :class="{ 'product-card--revealed': isRevealed }" @click="goToDetail">
+    
     <!-- Image Area -->
     <div class="product-card__image-wrapper">
       <img 
@@ -16,9 +19,14 @@
         class="product-card__image"
         loading="lazy"
       />
+    </div>
+
+    <!-- Body Area -->
+    <div class="product-card__body">
+      <h3 class="product-card__name">{{ product.name }}</h3>
       
-      <!-- Dietary Tags Overlay -->
-      <div class="product-card__tags">
+      <!-- Tags placed directly below the name (BIGGER) -->
+      <div class="product-card__tag-list">
         <span 
           v-for="tag in getDietaryTags(product)" 
           :key="tag" 
@@ -28,23 +36,13 @@
         </span>
       </div>
 
-      <!-- Category Badge (NEW) -->
-      <span class="product-card__category">{{ product.category || 'Box' }}</span>
-    </div>
-
-    <!-- Content Area -->
-    <div class="product-card__body">
-      <h3 class="product-card__name">{{ product.name }}</h3>
-      <!-- Fallback Description (NEW) -->
-      <p class="product-card__description">{{ product.description || 'Performance fuel for your busy day.' }}</p>
-
-      <!-- Footer with Price and Button -->
       <div class="product-card__footer">
         <span class="price price--lg">R{{ Number(product.price).toFixed(2) }}</span>
         
+        <!-- @click.stop prevents the card's goToDetail from firing -->
         <button 
           class="btn btn--primary btn--sm" 
-          @click="handleAddToCart"
+          @click.stop="handleAddToCart"
           :disabled="isAdding"
         >
           <span v-if="isAdding" class="spinner spinner--dark"></span>
@@ -56,7 +54,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onBeforeUnmount, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 const props = defineProps({
   product: {
@@ -66,18 +65,33 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['add-to-cart']);
+const router = useRouter();
 
-// Local state for button loading
 const isAdding = ref(false);
+const isRevealed = ref(false);
+const card = ref(null);
+let observer;
 
-/**
- * Helper to retrieve the correct local image based on the product name
- */
-const getImage = (product) => {
-  if (product.image_url) {
-    return product.image_url;
+onMounted(() => {
+  if (!card.value || !('IntersectionObserver' in window)) {
+    isRevealed.value = true;
+    return;
   }
 
+  observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      isRevealed.value = true;
+      observer.unobserve(entry.target);
+    }
+  }, { threshold: 0.15 });
+
+  observer.observe(card.value);
+});
+
+onBeforeUnmount(() => observer?.disconnect());
+
+const getImage = (product) => {
+  if (product.image_url) return product.image_url;
   const imageMap = {
     'Starter Box': '/images/starter-box.png',
     'Standard Box': '/images/standard-box.png',
@@ -86,32 +100,31 @@ const getImage = (product) => {
     'Keto Fuel Box': '/images/keto-box.png',
     'Nut-Free Safety Box': '/images/nut-free-box.png',
     'Monthly Snack Box': '/images/snack-box.png',
-    'Builder Snack Mix': '/images/builder-snacks.png',
+    'Builder Snack Mix': '/images/builder-snack.png',
     'Gluten-Free': '/images/gluten-free-box.png',
+    'Builder Meals': '/images/builder-meal.png',
+    'Builder Snacks': '/images/builder-snack.png',
+    'Grilled Chicken Meal': '/images/builder-meal.png',
+    'Protein Balls': '/images/builder-snack.png'
   };
-
   return imageMap[product.name] || '/images/placeholder-product.png';
 };
 
-/**
- * Helper to normalize dietary tags (handle strings or arrays)
- */
 const getDietaryTags = (product) => {
-  if (Array.isArray(product.dietary_tags)) {
-    return product.dietary_tags;
-  }
-  if (typeof product.dietary_tags === 'string' && product.dietary_tags.trim()) {
-    return product.dietary_tags.split(',').map(tag => tag.trim());
-  }
+  if (Array.isArray(product.dietary_tags)) return product.dietary_tags;
+  if (typeof product.dietary_tags === 'string' && product.dietary_tags.trim()) return product.dietary_tags.split(',').map(tag => tag.trim());
   return [];
 };
 
-/**
- * Emit the add-to-cart event with a small delay to simulate loading
- */
+// Route to full detail page
+const goToDetail = () => {
+  // Set to 'false' so the detail page knows to go back to the Menu
+  sessionStorage.setItem('builder_context', 'false'); 
+  router.push(`/product/${props.product.id}`);
+};
+
 const handleAddToCart = () => {
   isAdding.value = true;
-  
   setTimeout(() => {
     emit('add-to-cart', props.product);
     isAdding.value = false;
@@ -119,7 +132,7 @@ const handleAddToCart = () => {
 };
 </script>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
 .product-card {
   background: var(--color-white);
   border-radius: var(--radius-xl);
@@ -129,6 +142,17 @@ const handleAddToCart = () => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 480ms ease var(--reveal-delay, 0ms),
+    transform 480ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    box-shadow var(--transition-base);
+
+  &--revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
   
   &:hover {
     transform: translateY(-4px);
@@ -137,7 +161,7 @@ const handleAddToCart = () => {
 
   &__image-wrapper {
     position: relative;
-    padding-top: 75%; // 4:3 aspect ratio
+    padding-top: 75%;
     overflow: hidden;
     background: var(--color-gray-100);
   }
@@ -156,31 +180,6 @@ const handleAddToCart = () => {
     transform: scale(1.05);
   }
 
-  &__tags {
-    position: absolute;
-    top: var(--spacing-2);
-    left: var(--spacing-2);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-1);
-    z-index: 2;
-  }
-
-  /* Category Badge Styles (Added) */
-  &__category {
-    position: absolute;
-    top: var(--spacing-2);
-    right: var(--spacing-2);
-    background: var(--color-navy);
-    color: var(--color-white);
-    padding: 2px 10px;
-    border-radius: var(--radius-full);
-    font-size: 11px;
-    font-weight: var(--font-weight-semibold);
-    text-transform: capitalize;
-    z-index: 2;
-  }
-
   &__body {
     padding: var(--spacing-4);
     display: flex;
@@ -196,15 +195,13 @@ const handleAddToCart = () => {
     line-height: 1.3;
   }
 
-  &__description {
-    font-size: var(--font-size-sm);
-    color: var(--color-gray-500);
+  /* FORCED to be inside the body, under the name */
+  &__tag-list {
+    position: static !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
     margin-bottom: var(--spacing-4);
-    flex-grow: 1;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
   }
 
   &__footer {
@@ -214,6 +211,25 @@ const handleAddToCart = () => {
     padding-top: var(--spacing-4);
     border-top: 1px solid var(--color-gray-100);
     gap: var(--spacing-3);
+  }
+}
+
+/* Make dietary tags BIGGER and bolder */
+.product-card :deep(.chip--dietary) {
+  background: var(--color-cream);
+  border: 1px solid var(--color-gray-200);
+  color: var(--color-navy);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card {
+    opacity: 1;
+    transform: none;
+    transition: box-shadow var(--transition-base);
   }
 }
 </style>
