@@ -1,16 +1,20 @@
 /* 
   Purpose: Payment controller | Module: controllers 
   Owner: Adam | Created: 4 Sep 2026 
+  Notes: Handles payment processing simulation requests with authentication.
 */
 
 const paymentService = require('../services/payment.service');
 
 const paymentController = {
+  /**
+   * Process simulated payment
+   */
   processPayment: async (req, res, next) => {
     try {
       const { cardNumber, amount } = req.body;
 
-      // Call the payment service (it will throw if validation fails or card is declined)
+      // Call the payment service (throws 400 for bad input, 402 for declined card ending in '0002')
       const result = await paymentService.processPayment({ cardNumber, amount });
 
       // Send success response
@@ -21,7 +25,7 @@ const paymentController = {
         amount: result.amount
       });
     } catch (error) {
-      next(error); // pass to global error handler (sends 402 for declined card)
+      next(error); // Forward to global error handler
     }
   }
 };

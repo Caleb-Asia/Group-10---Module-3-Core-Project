@@ -1,14 +1,17 @@
 {
   "name": "group-10---module-3-core-project",
   "version": "1.0.0",
-  "description": "",
+  "description": "FoodBoxx Full-Stack E-Commerce Web Application",
   "main": "server.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "db:schema": "mysql -u root -p < database/schema.sql",
+    "db:seed": "mysql -u root -p < database/seed.sql",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",

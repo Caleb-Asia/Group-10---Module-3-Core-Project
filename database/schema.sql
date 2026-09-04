@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(100) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
-  dietary_preferences ENUM('standard','vegan','halal','keto','nut-free','gluten-free') DEFAULT 'standard',
+  dietary_preferences SET('standard','vegan','halal','keto','nut-free','gluten-free') DEFAULT 'standard',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -2,10 +2,21 @@
 
 Base URL: `http://localhost:3000/api`
 
-All protected routes require a JWT token in the `Authorization` header:
+All protected routes require a JSON Web Token (JWT) supplied in the `Authorization` header:
 ```http
 Authorization: Bearer <token>
 ```
+
+---
+
+## Approved Cape Town Pickup Pod Locations
+All order and subscription requests must specify one of the following approved pickup pods:
+* `UCT Library`
+* `Res Hall A`
+* `Stellenbosch Neelsie`
+* `CPUT Woodstock`
+* `Workshop17 Woodstock`
+* `Virgin Active Woodstock`
 
 ---
 
@@ -19,8 +30,9 @@ Authorization: Bearer <token>
    - [POST /api/payments](#post-apipayments)
 3. [Order Routes](#3-order-routes)
    - [POST /api/orders](#post-apiorders)
+   - [POST /api/orders/custom](#post-apiorderscustom)
    - [POST /api/orders/subscription](#post-apiorderssubscription)
-   - [GET /api/orders/:userId](#get-apiordersuserid)
+   - [GET /api/orders/user/:userId](#get-apiordersuseruserid)
    - [GET /api/orders/:id](#get-apiordersid)
 4. [Subscription Routes](#4-subscription-routes)
    - [GET /api/subscriptions/user/:userId](#get-apisubscriptionsuseruserid)
@@ -28,17 +40,17 @@ Authorization: Bearer <token>
    - [PATCH /api/subscriptions/:id/resume](#patch-apisubscriptionsidresume)
    - [PATCH /api/subscriptions/:id/skip](#patch-apisubscriptionsidskip)
    - [PATCH /api/subscriptions/:id/cancel](#patch-apisubscriptionsidcancel)
-5. [Product Routes](#5-product-routes-contract--upcoming)
+5. [Product Routes (Contract / Upcoming)](#5-product-routes-contract--upcoming)
    - [GET /api/products](#get-apiproducts)
    - [GET /api/products/builder-items](#get-apiproductsbuilder-items)
-6. [General Error Format](#6-general-error-format)
+6. [General Error Format & Status Codes](#6-general-error-format--status-codes)
 
 ---
 
 ## 1. Auth Routes
 
 ### POST /api/auth/register
-- **Description:** Registers a new user account with default or specified dietary preferences.
+- **Description:** Registers a new user account with dietary preferences.
 - **Method & Path:** `POST /api/auth/register`
 - **Authentication:** None (Public)
 - **Request Body:**
@@ -47,10 +59,10 @@ Authorization: Bearer <token>
   "name": "Jane Doe",
   "email": "jane@example.com",
   "password": "SecurePassword123!",
-  "dietary_preferences": "vegan"
+  "dietary_preferences": "vegan,gluten-free"
 }
 ```
-> *Note:* `dietary_preferences` is optional and defaults to `"standard"`. Supported values: `"standard"`, `"vegan"`, `"halal"`, `"keto"`, `"nut-free"`, `"gluten-free"`.
+> *Note:* `dietary_preferences` is stored as a MySQL `SET` and can be comma-delimited (supported values: `"standard"`, `"vegan"`, `"halal"`, `"keto"`, `"nut-free"`, `"gluten-free"`). Defaults to `"standard"`.
 
 - **Success Response (201 Created):**
 ```json
@@ -62,7 +74,7 @@ Authorization: Bearer <token>
 ```
 
 - **Error Responses:**
-  - **400 Bad Request** (Missing required fields):
+  - **400 Bad Request** (Missing fields):
     ```json
     {
       "success": false,
@@ -72,7 +84,7 @@ Authorization: Bearer <token>
       }
     }
     ```
-  - **409 Conflict** (Email already in use):
+  - **409 Conflict** (Email already exists):
     ```json
     {
       "success": false,
@@ -86,7 +98,7 @@ Authorization: Bearer <token>
 ---
 
 ### POST /api/auth/login
-- **Description:** Authenticates user credentials and returns a JWT access token along with profile summary.
+- **Description:** Authenticates user credentials and returns a JWT access token valid for 2 hours.
 - **Method & Path:** `POST /api/auth/login`
 - **Authentication:** None (Public)
 - **Request Body:**
@@ -106,7 +118,7 @@ Authorization: Bearer <token>
     "id": 1,
     "name": "Jane Doe",
     "email": "jane@example.com",
-    "dietary_preferences": "vegan"
+    "dietary_preferences": "vegan,gluten-free"
   }
 }
 ```
@@ -122,7 +134,7 @@ Authorization: Bearer <token>
       }
     }
     ```
-  - **401 Unauthorized** (Invalid credentials):
+  - **401 Unauthorized** (Invalid email or password):
     ```json
     {
       "success": false,
@@ -149,7 +161,7 @@ Authorization: Bearer <token>
     "id": 1,
     "name": "Jane Doe",
     "email": "jane@example.com",
-    "dietary_preferences": "vegan"
+    "dietary_preferences": "vegan,gluten-free"
   }
 }
 ```
@@ -165,7 +177,7 @@ Authorization: Bearer <token>
       }
     }
     ```
-  - **404 Not Found** (User no longer exists):
+  - **404 Not Found** (User does not exist):
     ```json
     {
       "success": false,
@@ -179,7 +191,7 @@ Authorization: Bearer <token>
 ---
 
 ### PATCH /api/auth/me
-- **Description:** Updates the profile information of the currently authenticated user.
+- **Description:** Updates the profile information of the authenticated user.
 - **Method & Path:** `PATCH /api/auth/me`
 - **Authentication:** Required (`Bearer <token>`)
 - **Request Body:**
@@ -187,10 +199,9 @@ Authorization: Bearer <token>
 {
   "name": "Jane Smith",
   "email": "janesmith@example.com",
-  "dietary_preferences": "gluten-free"
+  "dietary_preferences": "keto,gluten-free"
 }
 ```
-> *Note:* All fields are optional. Send only the fields to be modified.
 
 - **Success Response (200 OK):**
 ```json
@@ -201,13 +212,13 @@ Authorization: Bearer <token>
     "id": 1,
     "name": "Jane Smith",
     "email": "janesmith@example.com",
-    "dietary_preferences": "gluten-free"
+    "dietary_preferences": "keto,gluten-free"
   }
 }
 ```
 
 - **Error Responses:**
-  - **401 Unauthorized** (Missing or invalid token):
+  - **401 Unauthorized**:
     ```json
     {
       "success": false,
@@ -217,7 +228,7 @@ Authorization: Bearer <token>
       }
     }
     ```
-  - **409 Conflict** (Email already taken by another account):
+  - **409 Conflict** (Email already taken):
     ```json
     {
       "success": false,
@@ -234,15 +245,15 @@ Authorization: Bearer <token>
 
 ### POST /api/payments
 - **Description:** Simulates an external payment gateway transaction with a 1500ms processing delay.
-  - Cards ending in `0002` trigger a simulated decline (`402 Payment Required`).
-  - All other card numbers result in an approved transaction.
+  - Cards ending in `0002` simulate a decline (`402 Payment Required`).
+  - All other cards approve and return a unique reference string (`FBX-timestamp-randomHex`).
 - **Method & Path:** `POST /api/payments`
-- **Authentication:** None (Internal / Public gateway endpoint)
+- **Authentication:** Required (`Bearer <token>`)
 - **Request Body:**
 ```json
 {
-  "cardNumber": "4532 1234 5678 0001",
-  "amount": 250.00
+  "cardNumber": "4532 1234 5678 1234",
+  "amount": 74.00
 }
 ```
 
@@ -251,80 +262,18 @@ Authorization: Bearer <token>
 {
   "success": true,
   "message": "Payment approved successfully",
-  "txnRef": "FBX-1756800000-xyz12345",
-  "amount": 250.00
+  "txnRef": "FBX-1756800000-a1b2c3d4",
+  "amount": 74.00
 }
 ```
 
 - **Error Responses:**
-  - **400 Bad Request** (Missing card number or amount):
+  - **400 Bad Request** (Missing card number or invalid amount):
     ```json
     {
       "success": false,
       "error": {
         "message": "Card number and amount are required",
-        "details": null
-      }
-    }
-    ```
-  - **402 Payment Required** (Card ending in `0002`):
-    ```json
-    {
-      "success": false,
-      "error": {
-        "message": "Card declined. Please try a different payment method.",
-        "details": null
-      }
-    }
-    ```
-
----
-
-## 3. Order Routes
-
-### POST /api/orders
-- **Description:** Creates a one-off or custom order (without a recurring subscription). Processes payment and generates a pickup QR token within an atomic database transaction.
-- **Method & Path:** `POST /api/orders`
-- **Authentication:** Required (`Bearer <token>`)
-- **Request Body:**
-```json
-{
-  "items": [
-    {
-      "productId": 10,
-      "quantity": 2,
-      "unitPrice": 45.00
-    },
-    {
-      "productId": 14,
-      "quantity": 1,
-      "unitPrice": 30.00
-    }
-  ],
-  "totalAmount": 120.00,
-  "cardNumber": "4532 1234 5678 1234",
-  "pickupPod": "Pod #4 - Cape Town Waterfront"
-}
-```
-
-- **Success Response (201 Created):**
-```json
-{
-  "success": true,
-  "message": "Order created successfully",
-  "orderId": 101,
-  "qrToken": "a1b2c3d4e5f6...",
-  "txnRef": "FBX-1756800000-xyz12345"
-}
-```
-
-- **Error Responses:**
-  - **400 Bad Request** (Missing required fields):
-    ```json
-    {
-      "success": false,
-      "error": {
-        "message": "Missing required fields: items, totalAmount, cardNumber, pickupPod",
         "details": null
       }
     }
@@ -352,46 +301,50 @@ Authorization: Bearer <token>
 
 ---
 
-### POST /api/orders/subscription
-- **Description:** Creates an initial order linked to a subscription. Automatically creates a new subscription record (next charge in 7 days) if none exists, links the order, and increments the subscription's `boxes_completed` counter.
-- **Method & Path:** `POST /api/orders/subscription`
+## 3. Order Routes
+
+> **Server-Side Pricing Security Notice:**
+> The server queries the authoritative `products` table in MySQL during the atomic transaction to calculate prices. Client-supplied unit prices or totals are completely ignored to ensure financial integrity.
+> If the payment is declined, the database transaction is immediately **rolled back**, resulting in **zero** created records.
+
+### POST /api/orders
+- **Description:** Creates a standard one-off order (`order_type = 'one-off'`). Generates an atomic transaction with payment processing and a cryptographically secure QR token.
+- **Method & Path:** `POST /api/orders`
 - **Authentication:** Required (`Bearer <token>`)
 - **Request Body:**
 ```json
 {
-  "productId": 1,
   "items": [
     {
       "productId": 1,
-      "quantity": 1,
-      "unitPrice": 220.00
+      "quantity": 1
     }
   ],
-  "totalAmount": 220.00,
   "cardNumber": "4532 1234 5678 1234",
-  "pickupPod": "Pod #2 - Johannesburg Sandton"
+  "pickupPod": "Workshop17 Woodstock"
 }
 ```
+*(Example uses pre-set box ID 1 at R79.00)*
 
 - **Success Response (201 Created):**
 ```json
 {
   "success": true,
-  "message": "Subscription order created successfully",
-  "orderId": 102,
-  "subscriptionId": 5,
-  "qrToken": "9f8e7d6c5b4a...",
-  "txnRef": "FBX-1756800000-abc98765"
+  "message": "Order created successfully",
+  "orderId": 101,
+  "totalAmount": 79.00,
+  "qrToken": "5f8a7e3d1b9c24e6a8d0f1a3b5c7e9f05f8a7e3d1b9c24e6a8d0f1a3b5c7e9f0",
+  "txnRef": "FBX-1756800000-a1b2c3d4"
 }
 ```
 
 - **Error Responses:**
-  - **400 Bad Request** (Missing fields):
+  - **400 Bad Request** (Missing fields, inactive product, or invalid quantity):
     ```json
     {
       "success": false,
       "error": {
-        "message": "Missing required fields: productId, items, totalAmount, cardNumber, pickupPod",
+        "message": "Missing required fields: items, cardNumber, pickupPod",
         "details": null
       }
     }
@@ -401,7 +354,133 @@ Authorization: Bearer <token>
     {
       "success": false,
       "error": {
-        "message": "Invalid or expired token",
+        "message": "No token provided",
+        "details": null
+      }
+    }
+    ```
+  - **402 Payment Required** (Simulated decline for card ending in 0002; transaction rolled back):
+    ```json
+    {
+      "success": false,
+      "error": {
+        "message": "Card declined. Please try a different payment method.",
+        "details": null
+      }
+    }
+    ```
+  - **404 Not Found** (Product ID does not exist):
+    ```json
+    {
+      "success": false,
+      "error": {
+        "message": "Product with ID 99 not found",
+        "details": null
+      }
+    }
+    ```
+
+---
+
+### POST /api/orders/custom
+- **Description:** Creates a custom Box Builder order (`order_type = 'custom'`) with individual meals (R25) and snacks (R12).
+- **Method & Path:** `POST /api/orders/custom`
+- **Authentication:** Required (`Bearer <token>`)
+- **Request Body:**
+```json
+{
+  "items": [
+    {
+      "productId": 10,
+      "quantity": 2
+    },
+    {
+      "productId": 14,
+      "quantity": 2
+    }
+  ],
+  "cardNumber": "4532 1234 5678 1234",
+  "pickupPod": "UCT Library"
+}
+```
+*(Example: 2 x R25 meals + 2 x R12 snacks = R74.00 server-calculated total)*
+
+- **Success Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": "Custom box order created successfully",
+  "orderId": 102,
+  "totalAmount": 74.00,
+  "qrToken": "b4e2a1c9f0d7e6a5b8c3d2e1f4a7b9c0d2e5f8a1b4c7d0e3f6a9b2c5d8e1f4a7",
+  "txnRef": "FBX-1756800000-c5d6e7f8"
+}
+```
+
+- **Error Responses:**
+  - **400 Bad Request**:
+    ```json
+    {
+      "success": false,
+      "error": {
+        "message": "Missing required fields: items, cardNumber, pickupPod",
+        "details": null
+      }
+    }
+    ```
+  - **402 Payment Required** (Card declined; transaction rolled back):
+    ```json
+    {
+      "success": false,
+      "error": {
+        "message": "Card declined. Please try a different payment method.",
+        "details": null
+      }
+    }
+    ```
+
+---
+
+### POST /api/orders/subscription
+- **Description:** Creates a recurring subscription order (`order_type = 'subscription'`). If the user does not have an active subscription (or if their previous subscription was cancelled), a new subscription is created (next charge date set to +7 days) and loyalty progress (`boxes_completed`) is incremented.
+- **Method & Path:** `POST /api/orders/subscription`
+- **Authentication:** Required (`Bearer <token>`)
+- **Request Body:**
+```json
+{
+  "productId": 2,
+  "items": [
+    {
+      "productId": 2,
+      "quantity": 1
+    }
+  ],
+  "cardNumber": "4532 1234 5678 1234",
+  "pickupPod": "CPUT Woodstock"
+}
+```
+*(Example uses box ID 2 at R89.00)*
+
+- **Success Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": "Subscription order created successfully",
+  "orderId": 103,
+  "subscriptionId": 5,
+  "totalAmount": 89.00,
+  "qrToken": "7d9e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b1c3d5e7f9a1b3c5d7e9f1a3b5c7d9e",
+  "txnRef": "FBX-1756800000-e9f0a1b2"
+}
+```
+
+- **Error Responses:**
+  - **400 Bad Request** (Missing fields or inactive box):
+    ```json
+    {
+      "success": false,
+      "error": {
+        "message": "Missing required fields: productId, items, cardNumber, pickupPod",
         "details": null
       }
     }
@@ -416,15 +495,24 @@ Authorization: Bearer <token>
       }
     }
     ```
+  - **404 Not Found** (Box product does not exist):
+    ```json
+    {
+      "success": false,
+      "error": {
+        "message": "Subscription box product not found",
+        "details": null
+      }
+    }
+    ```
 
 ---
 
-### GET /api/orders/:userId
-- **Description:** Retrieves all orders placed by a specific user, sorted newest first, including line items for each order.
-- **Method & Path:** `GET /api/orders/:userId`
+### GET /api/orders/user/:userId
+- **Description:** Retrieves all orders placed by the user, newest first, including line items.
+- **Method & Path:** `GET /api/orders/user/:userId`
 - **Authentication:** Required (`Bearer <token>`)
-- **Path Parameters:**
-  - `userId` (number, required) — ID of the user.
+- **Ownership Verification:** The requested `userId` must match the authenticated `req.userId`.
 - **Request Body:** None
 
 - **Success Response (200 OK):**
@@ -435,22 +523,29 @@ Authorization: Bearer <token>
     {
       "id": 102,
       "user_id": 1,
-      "subscription_id": 5,
-      "order_type": "subscription",
-      "total_amount": "220.00",
+      "subscription_id": null,
+      "order_type": "custom",
+      "total_amount": "74.00",
       "payment_status": "paid",
-      "payment_txn_ref": "FBX-1756800000-abc98765",
-      "qr_token": "9f8e7d6c5b4a...",
-      "pickup_pod": "Pod #2 - Johannesburg Sandton",
+      "payment_txn_ref": "FBX-1756800000-c5d6e7f8",
+      "qr_token": "b4e2a1c9f0d7e6a5b8c3d2e1f4a7b9c0d2e5f8a1b4c7d0e3f6a9b2c5d8e1f4a7",
+      "pickup_pod": "UCT Library",
       "status": "confirmed",
-      "created_at": "2026-09-04T12:00:00.000Z",
+      "created_at": "2026-09-04T13:30:00.000Z",
       "items": [
         {
-          "id": 204,
+          "id": 201,
           "order_id": 102,
-          "product_id": 1,
-          "quantity": 1,
-          "unit_price": "220.00"
+          "product_id": 10,
+          "quantity": 2,
+          "unit_price": "25.00"
+        },
+        {
+          "id": 202,
+          "order_id": 102,
+          "product_id": 14,
+          "quantity": 2,
+          "unit_price": "12.00"
         }
       ]
     }
@@ -469,15 +564,24 @@ Authorization: Bearer <token>
       }
     }
     ```
+  - **403 Forbidden** (Attempting to view orders of another user):
+    ```json
+    {
+      "success": false,
+      "error": {
+        "message": "Forbidden: You cannot access order history for another user",
+        "details": null
+      }
+    }
+    ```
 
 ---
 
 ### GET /api/orders/:id
-- **Description:** Retrieves full details for a single order by ID, including its associated line items (useful for confirmation and receipt screens).
+- **Description:** Retrieves details for a specific order and its line items.
 - **Method & Path:** `GET /api/orders/:id`
 - **Authentication:** Required (`Bearer <token>`)
-- **Path Parameters:**
-  - `id` (number, required) — ID of the order.
+- **Ownership Verification:** The order must belong to `req.userId`.
 - **Request Body:** None
 
 - **Success Response (200 OK):**
@@ -489,27 +593,20 @@ Authorization: Bearer <token>
     "user_id": 1,
     "subscription_id": null,
     "order_type": "one-off",
-    "total_amount": "120.00",
+    "total_amount": "79.00",
     "payment_status": "paid",
-    "payment_txn_ref": "FBX-1756800000-xyz12345",
-    "qr_token": "a1b2c3d4e5f6...",
-    "pickup_pod": "Pod #4 - Cape Town Waterfront",
+    "payment_txn_ref": "FBX-1756800000-a1b2c3d4",
+    "qr_token": "5f8a7e3d1b9c24e6a8d0f1a3b5c7e9f05f8a7e3d1b9c24e6a8d0f1a3b5c7e9f0",
+    "pickup_pod": "Workshop17 Woodstock",
     "status": "confirmed",
-    "created_at": "2026-09-04T11:45:00.000Z",
+    "created_at": "2026-09-04T12:00:00.000Z",
     "items": [
       {
-        "id": 201,
+        "id": 200,
         "order_id": 101,
-        "product_id": 10,
-        "quantity": 2,
-        "unit_price": "45.00"
-      },
-      {
-        "id": 202,
-        "order_id": 101,
-        "product_id": 14,
+        "product_id": 1,
         "quantity": 1,
-        "unit_price": "30.00"
+        "unit_price": "79.00"
       }
     ]
   }
@@ -517,12 +614,12 @@ Authorization: Bearer <token>
 ```
 
 - **Error Responses:**
-  - **401 Unauthorized**:
+  - **403 Forbidden** (Attempting to view an order belonging to someone else):
     ```json
     {
       "success": false,
       "error": {
-        "message": "Invalid or expired token",
+        "message": "Forbidden: You do not have access to this order",
         "details": null
       }
     }
@@ -542,12 +639,12 @@ Authorization: Bearer <token>
 
 ## 4. Subscription Routes
 
+All subscription endpoints verify that the target subscription belongs to the authenticated user.
+
 ### GET /api/subscriptions/user/:userId
-- **Description:** Retrieves the most recent subscription record for a specific user.
+- **Description:** Retrieves the active or latest subscription for the user.
 - **Method & Path:** `GET /api/subscriptions/user/:userId`
 - **Authentication:** Required (`Bearer <token>`)
-- **Path Parameters:**
-  - `userId` (number, required) — ID of the user.
 - **Request Body:** None
 
 - **Success Response (200 OK):**
@@ -557,23 +654,23 @@ Authorization: Bearer <token>
   "subscription": {
     "id": 5,
     "user_id": 1,
-    "product_id": 1,
+    "product_id": 2,
     "status": "active",
     "next_charge_date": "2026-09-11",
     "boxes_completed": 1,
-    "pickup_pod": "Pod #2 - Johannesburg Sandton",
+    "pickup_pod": "CPUT Woodstock",
     "created_at": "2026-09-04T12:00:00.000Z"
   }
 }
 ```
 
 - **Error Responses:**
-  - **401 Unauthorized**:
+  - **403 Forbidden**:
     ```json
     {
       "success": false,
       "error": {
-        "message": "No token provided",
+        "message": "Forbidden: You cannot access subscriptions for another user",
         "details": null
       }
     }
@@ -592,11 +689,10 @@ Authorization: Bearer <token>
 ---
 
 ### PATCH /api/subscriptions/:id/pause
-- **Description:** Pauses an active subscription, setting its status to `'paused'`.
+- **Description:** Pauses an active subscription (`status = 'paused'`).
 - **Method & Path:** `PATCH /api/subscriptions/:id/pause`
 - **Authentication:** Required (`Bearer <token>`)
-- **Path Parameters:**
-  - `id` (number, required) — ID of the subscription.
+- **State Constraint:** Can only pause an `active` subscription. Cannot pause if already `paused` or `cancelled`.
 - **Request Body:** None
 
 - **Success Response (200 OK):**
@@ -608,12 +704,22 @@ Authorization: Bearer <token>
 ```
 
 - **Error Responses:**
-  - **401 Unauthorized**:
+  - **400 Bad Request** (Invalid state transition):
     ```json
     {
       "success": false,
       "error": {
-        "message": "Invalid or expired token",
+        "message": "Subscription is already paused",
+        "details": null
+      }
+    }
+    ```
+  - **403 Forbidden**:
+    ```json
+    {
+      "success": false,
+      "error": {
+        "message": "Forbidden: You do not have access to this subscription",
         "details": null
       }
     }
@@ -622,11 +728,10 @@ Authorization: Bearer <token>
 ---
 
 ### PATCH /api/subscriptions/:id/resume
-- **Description:** Resumes a paused subscription, setting its status back to `'active'`.
+- **Description:** Resumes a paused subscription (`status = 'active'`).
 - **Method & Path:** `PATCH /api/subscriptions/:id/resume`
 - **Authentication:** Required (`Bearer <token>`)
-- **Path Parameters:**
-  - `id` (number, required) — ID of the subscription.
+- **State Constraint:** Can only resume a `paused` subscription. A `cancelled` subscription cannot be resumed.
 - **Request Body:** None
 
 - **Success Response (200 OK):**
@@ -638,12 +743,12 @@ Authorization: Bearer <token>
 ```
 
 - **Error Responses:**
-  - **401 Unauthorized**:
+  - **400 Bad Request**:
     ```json
     {
       "success": false,
       "error": {
-        "message": "Invalid or expired token",
+        "message": "Cannot resume a cancelled subscription",
         "details": null
       }
     }
@@ -652,11 +757,10 @@ Authorization: Bearer <token>
 ---
 
 ### PATCH /api/subscriptions/:id/skip
-- **Description:** Skips the current week for a subscription by pushing `next_charge_date` forward by 7 days.
+- **Description:** Skips the next scheduled delivery by advancing `next_charge_date` by +7 days.
 - **Method & Path:** `PATCH /api/subscriptions/:id/skip`
 - **Authentication:** Required (`Bearer <token>`)
-- **Path Parameters:**
-  - `id` (number, required) — ID of the subscription.
+- **State Constraint:** Allowed only when status is `active`.
 - **Request Body:** None
 
 - **Success Response (200 OK):**
@@ -668,12 +772,12 @@ Authorization: Bearer <token>
 ```
 
 - **Error Responses:**
-  - **401 Unauthorized**:
+  - **400 Bad Request**:
     ```json
     {
       "success": false,
       "error": {
-        "message": "Invalid or expired token",
+        "message": "Cannot skip subscription when status is paused. Must be active.",
         "details": null
       }
     }
@@ -682,11 +786,9 @@ Authorization: Bearer <token>
 ---
 
 ### PATCH /api/subscriptions/:id/cancel
-- **Description:** Cancels an active subscription, setting its status to `'cancelled'`.
+- **Description:** Cancels an active or paused subscription (`status = 'cancelled'`). Once cancelled, it can never be transitioned out of this state.
 - **Method & Path:** `PATCH /api/subscriptions/:id/cancel`
 - **Authentication:** Required (`Bearer <token>`)
-- **Path Parameters:**
-  - `id` (number, required) — ID of the subscription.
 - **Request Body:** None
 
 - **Success Response (200 OK):**
@@ -698,12 +800,12 @@ Authorization: Bearer <token>
 ```
 
 - **Error Responses:**
-  - **401 Unauthorized**:
+  - **400 Bad Request**:
     ```json
     {
       "success": false,
       "error": {
-        "message": "Invalid or expired token",
+        "message": "Subscription is already cancelled",
         "details": null
       }
     }
@@ -713,17 +815,16 @@ Authorization: Bearer <token>
 
 ## 5. Product Routes (Contract / Upcoming)
 
-> *Notice:* These endpoints represent the contract for the catalog and custom box-builder APIs.
+> *Notice:* Product routes will be mounted under `/api/products` upon completion by Michaela.
 
 ### GET /api/products
-- **Description:** Retrieves the list of available catalog products (boxes, meals, snacks) with optional filtering by dietary tag and text search.
+- **Description:** Retrieves all catalog products with optional query filtering.
 - **Method & Path:** `GET /api/products`
 - **Authentication:** None (Public)
 - **Query Parameters:**
-  - `diet` (string, optional) — Filter products by dietary requirement (e.g. `vegan`, `keto`, `halal`, `nut-free`, `gluten-free`).
-  - `search` (string, optional) — Search keyword against product name and description.
-- **Example Request:**
-  `GET /api/products?diet=vegan&search=curry`
+  - `diet` (string, optional) — Filter products by dietary tag (e.g., `vegan`, `keto`, `halal`).
+  - `search` (string, optional) — Search term matching product name or description.
+- **Example:** `GET /api/products?diet=vegan&search=harvest`
 - **Request Body:** None
 
 - **Success Response (200 OK):**
@@ -732,45 +833,23 @@ Authorization: Bearer <token>
   "success": true,
   "products": [
     {
-      "id": 3,
-      "name": "Vegan Chickpea & Spinach Curry",
-      "description": "Slow-cooked chickpeas, fresh baby spinach, coconut cream, and aromatic basmati rice.",
-      "price": "68.00",
-      "category": "meal",
-      "dietary_tags": ["vegan", "gluten-free"],
-      "image_url": "/assets/images/products/chickpea-curry.jpg",
-      "is_active": true
-    },
-    {
-      "id": 7,
-      "name": "Green Vitality Harvest Box",
-      "description": "Curated weekly plant-based box with 5 chef-crafted meals.",
-      "price": "299.00",
+      "id": 1,
+      "name": "Green Vitality Box",
+      "description": "5 plant-based meals prepared fresh for the week",
+      "price": "79.00",
       "category": "box",
       "dietary_tags": ["vegan"],
-      "image_url": "/assets/images/products/vitality-box.jpg",
+      "image_url": "/assets/images/vitality-box.jpg",
       "is_active": true
     }
   ]
 }
 ```
 
-- **Error Responses:**
-  - **500 Internal Server Error**:
-    ```json
-    {
-      "success": false,
-      "error": {
-        "message": "Failed to fetch products",
-        "details": null
-      }
-    }
-    ```
-
 ---
 
 ### GET /api/products/builder-items
-- **Description:** Fetches all individual meal and snack items eligible for inclusion in the custom Box Builder, grouped or taggable for custom selection.
+- **Description:** Fetches all individual meal and snack items eligible for inclusion in the custom Box Builder.
 - **Method & Path:** `GET /api/products/builder-items`
 - **Authentication:** None (Public)
 - **Request Body:** None
@@ -783,65 +862,52 @@ Authorization: Bearer <token>
     {
       "id": 10,
       "name": "Grilled Lemon Herb Chicken Bowl",
-      "description": "Tender chicken breast, quinoa, and roasted seasonal vegetables.",
-      "price": "55.00",
+      "description": "Tender chicken breast with seasonal vegetables",
+      "price": "25.00",
       "category": "meal",
       "dietary_tags": ["gluten-free", "keto"],
-      "image_url": "/assets/images/products/lemon-chicken.jpg",
+      "image_url": "/assets/images/lemon-chicken.jpg",
       "is_active": true
     },
     {
       "id": 14,
       "name": "Roasted Almond Energy Bites",
-      "description": "Raw honey, cacao, chia seeds, and roasted almonds.",
-      "price": "25.00",
+      "description": "Raw honey, cacao, chia seeds, and almonds",
+      "price": "12.00",
       "category": "snack",
       "dietary_tags": ["standard", "gluten-free"],
-      "image_url": "/assets/images/products/energy-bites.jpg",
+      "image_url": "/assets/images/energy-bites.jpg",
       "is_active": true
     }
   ]
 }
 ```
 
-- **Error Responses:**
-  - **500 Internal Server Error**:
-    ```json
-    {
-      "success": false,
-      "error": {
-        "message": "Failed to fetch builder items",
-        "details": null
-      }
-    }
-    ```
-
 ---
 
-## 6. General Error Format
+## 6. General Error Format & Status Codes
 
-All API errors adhere to a standard JSON envelope managed by the global error middleware (`server/middleware/error.middleware.js`).
-
-### Format
+All API errors return a standard JSON structure managed by `error.middleware.js`:
 ```json
 {
   "success": false,
   "error": {
-    "message": "Human-readable error explanation",
+    "message": "Human-readable error description",
     "details": null
   }
 }
 ```
 
-### Standard HTTP Status Codes
+### Standard Status Codes
 
-| HTTP Status | Name | Typical Cause |
+| HTTP Status | Meaning | Typical Trigger |
 |---|---|---|
-| **200** | OK | Successful fetch, update, or general request. |
-| **201** | Created | Resource successfully created (registration, order). |
-| **400** | Bad Request | Missing required parameters or malformed input payload. |
+| **200** | OK | Successful fetch, update, or payment approval. |
+| **201** | Created | User registered or order placed successfully. |
+| **400** | Bad Request | Missing required payload fields, invalid quantities, or invalid subscription state transitions. |
 | **401** | Unauthorized | Missing JWT token, invalid signature, or expired session. |
-| **402** | Payment Required | Payment card declined by payment gateway (e.g. card ending in `0002`). |
-| **404** | Not Found | Requested entity (user, order, subscription) does not exist. |
-| **409** | Conflict | Duplicate resource conflict (e.g. email already in use). |
-| **500** | Internal Server Error | Unhandled server exception or database transaction failure. |
+| **402** | Payment Required | Simulated gateway payment decline (e.g., card ending in `0002`). |
+| **403** | Forbidden | User attempting to view or alter another user's orders or subscriptions. |
+| **404** | Not Found | Target user, product, order, subscription, or API route does not exist. |
+| **409** | Conflict | Unique constraint violation (e.g. email already registered). |
+| **500** | Internal Server Error | Unhandled server error (internal SQL or stack traces are shielded). |

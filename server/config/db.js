@@ -1,13 +1,12 @@
 /* 
   Purpose: MySQL connection pool for FoodBoxx | Module: config 
   Owner: Adam | Created: 1 Sep 2026 
-  Notes: All queries MUST use parameterised SQL (? placeholders) to prevent injection
+  Notes: All queries MUST use parameterised SQL (? placeholders) to prevent injection. Provides pool and dedicated connections.
 */
 
 const mysql = require('mysql2/promise');
-require('dotenv').config();
 
-// Create a connection pool (reuses connections for better performance)
+// Create a connection pool configured from environment variables
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
@@ -17,16 +16,5 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
-
-// Test the connection on startup (optional but helpful)
-(async function testConnection() {
-  try {
-    const connection = await pool.getConnection();
-    console.log(' MySQL connected successfully');
-    connection.release();
-  } catch (error) {
-    console.error(' MySQL connection error:', error.message);
-  }
-})();
 
 module.exports = pool;

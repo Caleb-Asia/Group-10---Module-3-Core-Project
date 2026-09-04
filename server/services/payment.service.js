@@ -7,37 +7,43 @@
 const ApiError = require('../utils/apiError');
 
 const paymentService = {
+  /**
+   * Process payment simulation
+   * @param {Object} param0 - { cardNumber, amount }
+   * @returns {Promise<Object>} - Transaction result
+   */
   processPayment: async ({ cardNumber, amount }) => {
     // Step 1: Validate that the card number and amount were actually sent in the request
-    if (!cardNumber || !amount) {
+    if (!cardNumber || amount === undefined || amount === null) {
       throw new ApiError(400, 'Card number and amount are required');
     }
 
-    // Step 2: Format the card number (remove spaces) and get the last 4 digits
-    // The .replace(/\s/g, '') removes all spaces from the string
-    // The .slice(-4) grabs the last 4 characters
-    const cleanedCard = cardNumber.replace(/\s/g, '');
+    const numericAmount = Number(amount);
+    if (isNaN(numericAmount) || numericAmount < 0) {
+      throw new ApiError(400, 'Invalid payment amount');
+    }
+
+    // Step 2: Format the card number (remove all whitespace) and get the last 4 digits
+    const cleanedCard = String(cardNumber).replace(/\s/g, '');
     const lastFour = cleanedCard.slice(-4);
 
-    // Step 3: Simulate a fake delay (1500ms) so the frontend shows a "Processing..." spinner
-    // Specific code: the Promise with setTimeout creates a 1.5 second pause
+    // Step 3: Simulate a fake gateway network delay (1500ms)
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    // Step 4: Apply the business rule - if it ends in 0002, DECLINE
+    // Step 4: Apply simulated rule - card ending in '0002' triggers a 402 Payment Required
     if (lastFour === '0002') {
-      // Throw a 402 Payment Required error so the global error handler catches it
       throw new ApiError(402, 'Card declined. Please try a different payment method.');
     }
 
-    // Step 5: If not declined, APPROVE - Generate a fake transaction reference
-    // Specific code: 'FBX-' + Date.now() (current timestamp) + random string
-    const txnRef = 'FBX-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8);
+    // Step 5: Generate unique transaction reference (using substring instead of deprecated substr)
+    const randomHex = Math.random().toString(36).substring(2, 10);
+    const txnRef = `FBX-${Date.now()}-${randomHex}`;
 
-    // Step 6: Return the success object to whoever called this function
+    // Step 6: Return payment confirmation object
     return {
       success: true,
-      txnRef,        // e.g. "FBX-1756800000-xyz12345"
-      amount,
+      txnRef,
+      amount: numericAmount,
       message: 'Payment approved successfully'
     };
   }

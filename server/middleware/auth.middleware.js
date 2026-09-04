@@ -1,6 +1,7 @@
 /* 
   Purpose: JWT verification middleware | Module: middleware 
   Owner: Adam | Created: 1 Sep 2026 
+  Notes: Verifies Bearer token, extracts userId, and attaches it to req.
 */
 
 const jwt = require('jsonwebtoken');
