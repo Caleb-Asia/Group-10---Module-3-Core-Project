@@ -28,6 +28,9 @@ app.get('/api/health', (req, res) => {
 
 // --- API Routes ---
 app.use('/api/auth', require('./server/routes/auth.routes'));
+app.use('/api/payments', require('./server/routes/payment.routes'));
+app.use('/api/orders', require('./server/routes/order.routes'));
+app.use('/api/subscriptions', require('./server/routes/subscription.routes'));
 
 // --- Global Error Handler ---
 app.use(require('./server/middleware/error.middleware'));
