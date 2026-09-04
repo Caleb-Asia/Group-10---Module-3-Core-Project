@@ -93,6 +93,7 @@ onBeforeUnmount(() => observer?.disconnect());
 const getImage = (product) => {
   if (product.image_url) return product.image_url;
   const imageMap = {
+    // Original Boxes
     'Starter Box': '/images/starter-box.png',
     'Standard Box': '/images/standard-box.png',
     'Premium Box': '/images/premium-box.png',
@@ -100,12 +101,43 @@ const getImage = (product) => {
     'Keto Fuel Box': '/images/keto-box.png',
     'Nut-Free Safety Box': '/images/nut-free-box.png',
     'Monthly Snack Box': '/images/snack-box.png',
-    'Builder Snack Mix': '/images/builder-snack.png',
-    'Gluten-Free': '/images/gluten-free-box.png',
+
+    // New Creative Boxes
+    'Campus Grind Box': '/images/campus-grind.png',
+    'Freshman 15 (Keto)': '/images/freshman-15.png',
+    'Varsity Athlete Box': '/images/varsity-athlete.png',
+    'All-Nighter Box': '/images/all-nighter.png',
+    'Coffee Shop Box': '/images/coffee-shop.png',
+
+    // Exam Week Boxes
+    'Exam Week Survival: Study Fuel': '/images/exam-box1.png',
+    'Exam Week Survival: Brain Boost': '/images/exam-box2.png',
+
+    // Builder Meals (Original + New)
+    'Grilled Chicken & Rice': '/images/grilled-chicken-rice.png',
+    'Beef Teriyaki Bowl': '/images/beef-teriyaki-bowl.png',
+    'Zesty Lemon Salmon': '/images/zesty-lemon-salmon.png',
+    'Spicy Tofu Stir-fry': '/images/builder-meal.png',
+    'Herbed Pasta Primavera': '/images/herbed-pasta-primavera.png',
+    'BBQ Chicken Wrap': '/images/bbq-chicken-wrap.png',
+    'Power Rice Bowl': '/images/power-rice-bowl.png',
+    'Lean Steak & Greens': '/images/lean-steak-greens.png',
+    'Harvest Veggie Curry': '/images/harvest-curry.png',
+
+    // Builder Snacks (Original + New)
+    'Protein Power Balls': '/images/protein-power-balls.png',
+    'Salted Caramel Popcorn': '/images/salted-caramel-popcorn.png',
+    'Roasted Chickpeas': '/images/roasted-chickpeas.png',
+    'Fruit & Nut Mix': '/images/builder-snack.png',
+    'Greek Yogurt Cup': '/images/greek-yogurt-cup.png',
+    'Sea Salt Crisps': '/images/sea-salt-crisps.png',
+    'Dark Choc Almonds': '/images/dark-choc-almonds.png',
+    'Apple Cinnamon Bites': '/images/apple-cinnamon-bites.png',
+    'Pretzel Sticks': '/images/pretzel-sticks.png',
+
+    // Common fallbacks
     'Builder Meals': '/images/builder-meal.png',
-    'Builder Snacks': '/images/builder-snack.png',
-    'Grilled Chicken Meal': '/images/builder-meal.png',
-    'Protein Balls': '/images/builder-snack.png'
+    'Builder Snacks': '/images/builder-snack.png'
   };
   return imageMap[product.name] || '/images/placeholder-product.png';
 };

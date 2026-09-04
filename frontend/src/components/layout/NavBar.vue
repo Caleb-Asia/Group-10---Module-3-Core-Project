@@ -1,3 +1,10 @@
+<!-- 
+  Purpose: Main navigation bar with icon + text links, Dark Mode toggle, and sticky positioning.
+  Module: Frontend - Components
+  Owner: Caleb Asia
+  Created: 2026-09-01
+  Notes: Sticky positioning. Logo colors swap in Dark Mode. Navbar height increased to 90px.
+-->
 <template>
   <nav class="navbar" :class="{ 'navbar--scrolled': isScrolled }">
     <div class="navbar__container">
@@ -9,79 +16,59 @@
         </router-link>
       </div>
 
-      <!-- CENTER: Navigation Links & Actions -->
+      <!-- CENTER: Navigation Links + Actions (Grouped Together) -->
       <div class="navbar__center">
         <ul class="navbar__links">
           <li>
-            <router-link to="/" class="nav-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-              </svg>
+            <router-link to="/" class="nav-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               <span>Home</span>
             </router-link>
           </li>
           <li>
-            <router-link to="/menu" class="nav-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="8" y1="6" x2="21" y2="6"/>
-                <line x1="8" y1="12" x2="21" y2="12"/>
-                <line x1="8" y1="18" x2="21" y2="18"/>
-                <line x1="3" y1="6" x2="3.01" y2="6"/>
-                <line x1="3" y1="12" x2="3.01" y2="12"/>
-                <line x1="3" y1="18" x2="3.01" y2="18"/>
-              </svg>
+            <router-link to="/menu" class="nav-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
               <span>Menu</span>
             </router-link>
           </li>
           <li>
-            <router-link to="/pods" class="nav-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
+            <router-link to="/pods" class="nav-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               <span>Pickup Pods</span>
             </router-link>
           </li>
-          <!-- Added Custom Box -->
           <li>
-            <router-link to="/builder" class="nav-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-                <line x1="12" y1="22.08" x2="12" y2="12"/>
-              </svg>
+            <router-link to="/builder" class="nav-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
               <span>Custom Box</span>
             </router-link>
           </li>
         </ul>
 
-        <!-- Actions -->
         <div class="navbar__actions">
-          <router-link to="/cart" class="navbar__action-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="9" cy="21" r="1"/>
-              <circle cx="20" cy="21" r="1"/>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-            </svg>
+          <!-- Cart Icon Link -->
+          <router-link to="/cart" class="action-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
             <span>Cart</span>
             <span v-if="cartStore.itemCount > 0" class="navbar__cart-badge">
               {{ cartStore.itemCount > 99 ? '99+' : cartStore.itemCount }}
             </span>
           </router-link>
 
-          <router-link to="/dashboard" class="navbar__action-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
+          <!-- Account Icon Link -->
+          <router-link to="/dashboard" class="action-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>Account</span>
           </router-link>
         </div>
       </div>
 
-      <!-- RIGHT: Logout -->
+      <!-- RIGHT: Theme Toggle & Logout -->
       <div class="navbar__right">
+        <button class="theme-toggle" @click="toggleTheme" :aria-label="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
+          {{ isDarkMode ? '☀️' : '🌙' }}
+        </button>
+
         <button v-if="authStore.isAuthenticated" class="logout-btn" @click="handleLogout">
           Logout
         </button>
@@ -93,65 +80,37 @@
   <!-- Mobile Bottom Navigation -->
   <nav class="mobile-bottom-nav">
     <router-link to="/" class="mobile-bottom-nav__item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span>Home</span>
     </router-link>
-
     <router-link to="/menu" class="mobile-bottom-nav__item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="8" y1="6" x2="21" y2="6"/>
-        <line x1="8" y1="12" x2="21" y2="12"/>
-        <line x1="8" y1="18" x2="21" y2="18"/>
-        <line x1="3" y1="6" x2="3.01" y2="6"/>
-        <line x1="3" y1="12" x2="3.01" y2="12"/>
-        <line x1="3" y1="18" x2="3.01" y2="18"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
       <span>Menu</span>
     </router-link>
-
     <router-link to="/pods" class="mobile-bottom-nav__item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-        <circle cx="12" cy="10" r="3"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <span>Pods</span>
     </router-link>
-
     <router-link to="/builder" class="mobile-bottom-nav__item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-        <line x1="12" y1="22.08" x2="12" y2="12"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       <span>Custom</span>
     </router-link>
-
     <router-link to="/cart" class="mobile-bottom-nav__item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="9" cy="21" r="1"/>
-        <circle cx="20" cy="21" r="1"/>
-        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
       <span>Cart</span>
       <span v-if="cartStore.itemCount > 0" class="mobile-bottom-nav__badge">
         {{ cartStore.itemCount }}
       </span>
     </router-link>
-
     <router-link to="/dashboard" class="mobile-bottom-nav__item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-        <circle cx="12" cy="7" r="4"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span>Account</span>
     </router-link>
   </nav>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
@@ -160,6 +119,20 @@ import { showSuccess } from '@/services/ui';
 const router = useRouter();
 const cartStore = useCartStore();
 const authStore = useAuthStore();
+
+const isScrolled = ref(false);
+const isDarkMode = ref(false);
+
+onMounted(() => {
+  window.addEventListener('scroll', () => {
+    isScrolled.value = window.scrollY > 50;
+  });
+});
+
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value;
+  document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dark' : 'light');
+};
 
 const handleLogout = () => {
   authStore.logout();
@@ -175,56 +148,77 @@ const handleLogout = () => {
   left: 0;
   right: 0;
   width: 100%;
-  height: 80px;
+  /* Increased height to 90px */
+  height: 90px;
   z-index: 9999;
   background: var(--color-navy);
   transition: all var(--transition-base);
 }
 
 .navbar--scrolled {
-  background: rgba(15, 33, 55, 0.95);
-  backdrop-filter: blur(10px);
+  background: var(--color-navy);
   box-shadow: var(--shadow-lg);
 }
 
-.navbar__container {
-  width: 100%;
-  height: 100%;
-  padding: 0 40px; 
-  display: grid;
-  grid-template-columns: 1fr auto 1fr; 
-  align-items: center;
+/* Dark Mode Navbar */
+[data-theme="dark"] .navbar {
+  background: #0B1120;
 }
 
+[data-theme="dark"] .navbar--scrolled {
+  background: #0B1120;
+}
+
+.navbar__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* LEFT: Logo */
 .navbar__left {
-  justify-self: start;
+  flex-shrink: 0;
 }
 
 .navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
   text-decoration: none;
-}
-
-.navbar__logo-text {
-  font-size: 26px;
+  color: #FFFFFF !important;
   font-weight: var(--font-weight-bold);
-  letter-spacing: -0.5px;
+  font-size: var(--font-size-2xl);
 }
 
 .navbar__logo-food {
-  color: var(--color-white);
+  color: #FFFFFF !important;
 }
 
 .navbar__logo-boxx {
-  color: var(--color-orange);
+  color: var(--color-orange) !important;
 }
 
+/* DARK MODE LOGO SWAP */
+[data-theme="dark"] .navbar__logo-food {
+  color: var(--color-orange) !important;
+}
+
+[data-theme="dark"] .navbar__logo-boxx {
+  color: #FFFFFF !important;
+}
+
+/* CENTER: Links + Actions grouped tightly together */
 .navbar__center {
   display: flex;
   align-items: center;
-  gap: 40px;
-  justify-self: center;
+  gap: 40px; /* Tight gap between links and actions */
 }
 
+/* Desktop Links with Icons */
 .navbar__links {
   display: none;
   list-style: none;
@@ -233,86 +227,118 @@ const handleLogout = () => {
   padding: 0;
 }
 
-.nav-item {
+.nav-link {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  color: #FFFFFF;
+  color: #FFFFFF !important;
   text-decoration: none;
-  font-size: 13px;
-  font-weight: var(--font-weight-semibold);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
   transition: color var(--transition-fast);
-  line-height: 1;
+  position: relative;
+  padding: 4px 0;
 }
 
-.nav-item svg {
-  width: 30px;
-  height: 30px;
+.nav-link svg {
+  width: 24px;
+  height: 24px;
 }
 
-.nav-item:hover,
-.nav-item.router-link-active {
-  color: var(--color-orange);
+.nav-link.router-link-active,
+.nav-link.router-link-exact-active {
+  color: var(--color-orange) !important;
 }
 
+.nav-link.router-link-active::after,
+.nav-link.router-link-exact-active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-orange);
+  border-radius: var(--radius-full);
+}
+
+/* RIGHT: Actions with Icons */
 .navbar__actions {
   display: none;
   align-items: center;
   gap: 40px;
 }
 
-.navbar__action-item {
-  position: relative;
+.action-link {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  color: #FFFFFF;
+  position: relative;
+  color: #FFFFFF !important;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: var(--font-weight-semibold);
   transition: color var(--transition-fast);
-  line-height: 1;
 }
 
-.navbar__action-item svg {
-  width: 30px;
-  height: 30px;
+.action-link svg {
+  width: 24px;
+  height: 24px;
 }
 
-.navbar__action-item:hover,
-.navbar__action-item.router-link-active {
-  color: var(--color-orange);
+.action-link:hover,
+.action-link.router-link-active {
+  color: var(--color-orange) !important;
 }
 
 .navbar__cart-badge {
   position: absolute;
-  top: -8px;
-  right: 14px;
+  top: -6px;
+  right: 4px;
   background: var(--color-orange);
-  color: var(--color-white);
-  font-size: 12px;
+  color: #FFFFFF !important;
+  font-size: 10px;
   font-weight: var(--font-weight-bold);
-  min-width: 22px;
-  height: 22px;
+  min-width: 18px;
+  height: 18px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
   line-height: 1;
-  z-index: 10;
 }
 
+/* RIGHT: Theme & Logout */
 .navbar__right {
-  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-orange);
+  transform: translateY(-2px);
 }
 
 .logout-btn {
   background: transparent;
   border: 2px solid var(--color-error);
-  color: var(--color-error);
+  color: var(--color-error) !important;
   padding: 8px 16px;
   border-radius: var(--radius-full);
   font-size: 14px;
@@ -323,9 +349,10 @@ const handleLogout = () => {
 
 .logout-btn:hover {
   background: var(--color-error);
-  color: var(--color-white);
+  color: #FFFFFF !important;
 }
 
+/* Mobile Bottom Nav */
 .mobile-bottom-nav {
   position: sticky;
   bottom: 0;
@@ -341,47 +368,48 @@ const handleLogout = () => {
 }
 
 .mobile-bottom-nav__item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  color: #FFFFFF;
+  gap: 4px;
+  color: #FFFFFF !important;
   text-decoration: none;
   font-size: 11px;
   font-weight: var(--font-weight-medium);
-  position: relative;
   width: 100%;
   height: 100%;
 }
 
 .mobile-bottom-nav__item svg {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
 }
 
 .mobile-bottom-nav__item.router-link-active {
-  color: var(--color-orange);
+  color: var(--color-orange) !important;
   border-top: 3px solid var(--color-orange);
   margin-top: -3px;
 }
 
 .mobile-bottom-nav__badge {
   position: absolute;
-  top: 6px;
+  top: 8px;
   right: 25%;
   background: var(--color-orange);
-  color: var(--color-white);
-  font-size: 10px;
+  color: #FFFFFF !important;
+  font-size: 9px;
   font-weight: bold;
-  min-width: 18px;
-  height: 18px;
+  min-width: 16px;
+  height: 16px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* Responsive */
 @media (min-width: 768px) {
   .navbar__links {
     display: flex;

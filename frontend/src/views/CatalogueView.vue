@@ -3,7 +3,7 @@
   Module: Frontend - Views
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: All filtering happens client-side. Uses reusable DietaryFilterPills component.
+  Notes: All filtering happens client-side. Uses reusable components: DietaryFilterPills and LoaderSpinner.
 -->
 <template>
   <div class="catalogue-page">
@@ -51,7 +51,8 @@
             <strong>{{ filteredProducts.length }}</strong> boxes found
             <span v-if="activeFilters.length > 0" class="text-muted">(filtered by {{ activeFilters.join(', ') }})</span>
           </span>
-          <span v-if="isLoading" class="spinner spinner--orange"></span>
+          <!-- Reusable LoaderSpinner -->
+          <LoaderSpinner v-if="isLoading" />
         </div>
       </div>
     </section>
@@ -62,7 +63,8 @@
         
         <!-- Loading State -->
         <div v-if="isLoading" class="empty-state">
-          <div class="spinner spinner--lg spinner--orange mx-auto mb-4"></div>
+          <!-- Reusable LoaderSpinner -->
+          <LoaderSpinner size="lg" class="mx-auto mb-4" />
           <p class="text-muted">Loading your Performance Fuel...</p>
         </div>
 
@@ -114,6 +116,7 @@ import { useCartStore } from '@/store/cartStore';
 import { showSuccess, showError } from '@/services/ui';
 import ProductCard from '@/components/common/ProductCard.vue';
 import DietaryFilterPills from '@/components/common/DietaryFilterPills.vue';
+import LoaderSpinner from '@/components/common/LoaderSpinner.vue'; // Imported
 
 const productStore = useProductStore();
 const cartStore = useCartStore();

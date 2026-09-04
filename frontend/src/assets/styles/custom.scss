@@ -4,6 +4,7 @@
  * Owner: Caleb Asia
  * Created: 2026-08-31
  * Notes: Mobile-first (375px base). Uses STANDARD CSS syntax to prevent compile errors.
+ *        Includes full Dark Mode support via [data-theme="dark"].
  */
 
 /* ============================================
@@ -892,27 +893,36 @@ ul, ol {
    ============================================ */
 
 .navbar {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
+  width: 100%;
+  height: 80px;
   z-index: var(--z-fixed);
   background: var(--color-navy);
   transition: all var(--transition-base);
 }
 
-/* Scrolled state - glassmorphism effect */
+/* Scrolled state - solid background */
 .navbar--scrolled {
-  background: rgba(15, 33, 55, 0.95);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: var(--color-navy);
   box-shadow: var(--shadow-lg);
 }
 
+/* Dark Mode Navbar */
+[data-theme="dark"] .navbar {
+  background: #0B1120;
+}
+
+[data-theme="dark"] .navbar--scrolled {
+  background: #0B1120;
+}
+
 .navbar__container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: var(--spacing-4);
+  padding: 0 var(--spacing-6);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -930,21 +940,17 @@ ul, ol {
   flex-shrink: 0;
 }
 
-.navbar__logo-icon {
-  font-size: 1.5rem;
-}
-
 /* Navigation Links (hidden on mobile) */
 .navbar__links {
   display: none;
   list-style: none;
-  gap: var(--spacing-6);
+  gap: var(--spacing-8);
   margin: 0;
   padding: 0;
 }
 
 .navbar__links a {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--color-white);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
   transition: color var(--transition-fast);
@@ -974,31 +980,11 @@ ul, ol {
   border-radius: var(--radius-full);
 }
 
-/* Mobile menu open state */
-.navbar__links--open {
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 60px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--color-navy);
-  padding: var(--spacing-8) var(--spacing-6);
-  gap: var(--spacing-6);
-  z-index: var(--z-modal);
-}
-
-.navbar__links--open a {
-  font-size: var(--font-size-xl);
-  padding: var(--spacing-3) 0;
-}
-
 /* Right side actions */
 .navbar__actions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: var(--spacing-6);
 }
 
 /* Hide desktop buttons on mobile */
@@ -1045,48 +1031,12 @@ ul, ol {
 
 /* Mobile hamburger menu button */
 .navbar__hamburger {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: var(--spacing-2);
-}
-
-.navbar__hamburger span {
-  display: block;
-  width: 24px;
-  height: 2px;
-  background: var(--color-white);
-  border-radius: var(--radius-full);
-  transition: all var(--transition-base);
-  transform-origin: center;
-}
-
-/* Open state - X shape */
-.navbar__hamburger--open span:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-.navbar__hamburger--open span:nth-child(2) {
-  opacity: 0;
-  transform: scaleX(0);
-}
-
-.navbar__hamburger--open span:nth-child(3) {
-  transform: rotate(-45deg) translate(5px, -5px);
+  display: none;
 }
 
 /* Mobile overlay when menu is open */
 .navbar__overlay {
-  position: fixed;
-  top: 60px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: calc(var(--z-modal) - 1);
+  display: none;
 }
 
 /* ============================================
@@ -1109,17 +1059,6 @@ ul, ol {
   box-shadow: var(--shadow-lg);
 }
 
-/* Inactive/out of stock state */
-.product-card--inactive {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.product-card--inactive:hover {
-  transform: none;
-  box-shadow: var(--shadow-md);
-}
-
 /* Image container with aspect ratio */
 .product-card__image-wrapper {
   position: relative;
@@ -1140,17 +1079,6 @@ ul, ol {
 
 .product-card:hover .product-card__image {
   transform: scale(1.05);
-}
-
-/* Dietary tags overlay on image */
-.product-card__tags {
-  position: absolute;
-  top: var(--spacing-2);
-  left: var(--spacing-2);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-1);
-  z-index: 2;
 }
 
 /* Card body */
@@ -1639,25 +1567,11 @@ ul, ol {
 
   /* Show desktop navigation */
   .navbar__container {
-    padding: var(--spacing-4) var(--spacing-6);
+    padding: var(--spacing-4) var(--spacing-8);
   }
 
   .navbar__links {
     display: flex;
-  }
-
-  .navbar__links--open {
-    display: flex;
-    flex-direction: row;
-    position: static;
-    background: none;
-    padding: 0;
-    gap: var(--spacing-6);
-  }
-
-  .navbar__links--open a {
-    font-size: var(--font-size-base);
-    padding: var(--spacing-2) 0;
   }
 
   .navbar__actions .btn {
@@ -1697,7 +1611,7 @@ ul, ol {
   }
 
   .navbar__container {
-    padding: var(--spacing-5) var(--spacing-8);
+    padding: var(--spacing-5) var(--spacing-10);
   }
 
   .section-header__title {
@@ -1754,4 +1668,219 @@ ul, ol {
 
 .swal2-container {
   z-index: 99999 !important;
+}
+
+/* ============================================
+   26. DARK MODE (Deep Midnight) - FORCE OVERRIDE
+   ============================================ */
+
+[data-theme="dark"] {
+  --color-navy: #0B1120;           /* Main background */
+  --color-navy-light: #1A2436;     /* Card background */
+  --color-navy-dark: #080D1A;      /* Footer / Darker sections */
+
+  --color-cream: #0B1120;          /* Page background */
+  --color-white: #1A2436;          /* Card / Input background */
+
+  --color-gray-50: #1A2436;        /* Lightest container */
+  --color-gray-100: #22304A;       /* Hover states / Chips */
+  --color-gray-200: #2D3748;       /* Borders / Dividers */
+  --color-gray-300: #4B5563;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #9CA3AF;       /* Muted text */
+  --color-gray-600: #D1D5DB;
+  --color-gray-700: #E5E7EB;       /* Main text */
+  --color-gray-800: #F3F4F6;       /* Header text */
+  --color-gray-900: #FFFFFF;       /* Brightest text */
+
+  --color-orange: #F26A1B;
+  --color-orange-hover: #d95a12;
+}
+
+/* FORCE SCHEME (Overrides ALL scoped styles!)*/
+
+/* 1. Backgrounds */
+[data-theme="dark"] body,
+[data-theme="dark"] .catalogue-page,
+[data-theme="dark"] .dashboard-page,
+[data-theme="dark"] .cart-page,
+[data-theme="dark"] .checkout-page,
+[data-theme="dark"] .auth-page,
+[data-theme="dark"] .builder-page,
+[data-theme="dark"] .locator-page,
+[data-theme="dark"] .product-detail-page,
+[data-theme="dark"] .subscriptions-page {
+  background-color: #0B1120 !important;
+}
+
+/* 2. Cards & Containers */
+[data-theme="dark"] .card,
+[data-theme="dark"] .product-card,
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .cart-item-card,
+[data-theme="dark"] .auth-form-side,
+[data-theme="dark"] .detail-card,
+[data-theme="dark"] .pod-card,
+[data-theme="dark"] .subscription-card,
+[data-theme="dark"] .dashboard-card,
+[data-theme="dark"] .action-grid,
+[data-theme="dark"] .box-option {
+  background-color: #1A2436 !important;
+  border-color: #2D3748 !important;
+}
+
+/* 3. All Text - Force White/Grey */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] .text-navy,
+[data-theme="dark"] .product-card__name,
+[data-theme="dark"] .cart-item-name,
+[data-theme="dark"] .auth-title,
+[data-theme="dark"] .detail-title,
+[data-theme="dark"] .summary-title {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] p,
+[data-theme="dark"] span,
+[data-theme="dark"] div,
+[data-theme="dark"] li,
+[data-theme="dark"] label,
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .text-gray,
+[data-theme="dark"] .auth-subtitle,
+[data-theme="dark"] .detail-value {
+  color: #D1D5DB !important;
+}
+
+/* 4. Inputs */
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-textarea,
+[data-theme="dark"] .search-input {
+  color: #FFFFFF !important;
+  background-color: #22304A !important;
+  border-color: #2D3748 !important;
+}
+
+[data-theme="dark"] .form-input::placeholder,
+[data-theme="dark"] .form-select::placeholder,
+[data-theme="dark"] .form-textarea::placeholder,
+[data-theme="dark"] .search-input::placeholder {
+  color: #9CA3AF !important;
+}
+
+/* 5. Pricing / Orange accents */
+[data-theme="dark"] .price,
+[data-theme="dark"] .detail-price,
+[data-theme="dark"] .subscription-price,
+[data-theme="dark"] .summary-total,
+[data-theme="dark"] .cart-item-price,
+[data-theme="dark"] .builder-item-price {
+  color: #F26A1B !important;
+}
+
+/* 6. Buttons */
+[data-theme="dark"] .btn--outline {
+  color: #F26A1B !important;
+  border-color: #F26A1B !important;
+}
+
+[data-theme="dark"] .btn--outline:hover {
+  background-color: #F26A1B !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .btn--ghost {
+  color: #D1D5DB !important;
+}
+
+/* 7. Chips */
+[data-theme="dark"] .chip--filter {
+  background-color: #22304A !important;
+  color: #E5E7EB !important;
+  border-color: #2D3748 !important;
+}
+
+[data-theme="dark"] .chip--filter.active {
+  background-color: #F26A1B !important;
+  color: #FFFFFF !important;
+  border-color: #F26A1B !important;
+}
+
+/* 8. Special Card backgrounds */
+[data-theme="dark"] .referral-card {
+  background-color: #F26A1B !important;
+}
+
+[data-theme="dark"] .referral-card h4,
+[data-theme="dark"] .referral-card p,
+[data-theme="dark"] .referral-card span {
+  color: #FFFFFF !important;
+}
+
+/* 9. Toggle & Switches */
+[data-theme="dark"] .switch {
+  background-color: #2D3748 !important;
+}
+
+/* ============================================
+   27. COMPONENT DARK MODE FIXES
+   ============================================ */
+
+/* 1. BIGGER DIETARY TAGS (Everywhere in Dark Mode) */
+[data-theme="dark"] .chip--dietary {
+  background: var(--color-orange);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+/* 2. NUTRITION BOXES (Dark Mode) */
+[data-theme="dark"] .nutrition-box {
+  background: #0B1120;
+}
+
+[data-theme="dark"] .nutrition-box strong {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .nutrition-box span {
+  color: #9CA3AF;
+}
+
+/* 3. CHECKOUT PODS (Dark Mode) */
+[data-theme="dark"] .pod-card {
+  background: #1A2436;
+  border: 2px solid #2D3748;
+}
+
+[data-theme="dark"] .pod-card:hover {
+  border-color: var(--color-orange);
+}
+
+[data-theme="dark"] .pod-name {
+  color: #FFFFFF;
+}
+
+/* 4. ACTIVE POD STATE (Clear selection) */
+.pod-card--active {
+  border-color: var(--color-orange) !important;
+  background: rgba(242, 106, 27, 0.15) !important;
+  box-shadow: 0 0 0 4px rgba(242, 106, 27, 0.2);
+}
+
+[data-theme="dark"] .pod-card--active {
+  background: rgba(242, 106, 27, 0.3) !important;
+}
+
+/* 5. PRIMARY BUTTONS (Ensure White text in Dark Mode) */
+[data-theme="dark"] .btn--primary {
+  color: #FFFFFF !important;
 }

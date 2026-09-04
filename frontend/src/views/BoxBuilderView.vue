@@ -3,7 +3,7 @@
   Module: Frontend - Views
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: Clicking card navigates to ProductDetailView. Selections restored from sessionStorage.
+  Notes: Smooth card reveal on load and clean hover lift animations.
 -->
 <template>
   <div class="builder-page">
@@ -11,7 +11,7 @@
       
       <!-- Page Header -->
       <div class="header-section mb-8">
-        <h1 class="page-title">Build Your Own Box 🍱</h1>
+        <h1 class="page-title">Build Your Own Box</h1>
         <p class="page-subtitle">Mix and match meals and snacks to create your perfect Performance Fuel box.</p>
       </div>
 
@@ -21,14 +21,12 @@
           :class="['toggle-btn', { 'toggle-btn--active': currentType === 'meal' }]"
           @click="switchType('meal')"
         >
-          <span class="toggle-icon">🍗</span>
           Build a Meal Box
         </button>
         <button 
           :class="['toggle-btn', { 'toggle-btn--active': currentType === 'snack' }]"
           @click="switchType('snack')"
         >
-          <span class="toggle-icon">🥜</span>
           Build a Snack Box
         </button>
       </div>
@@ -39,9 +37,11 @@
         <!-- Items Grid -->
         <div class="items-grid">
           <div 
-            v-for="item in currentItems" 
+            v-for="(item, index) in currentItems" 
             :key="item.id"
-            :class="['builder-item-card', { 'builder-item-card--selected': isSelected(item) }]"
+            class="builder-item-card"
+            :class="{ 'builder-item-card--selected': isSelected(item) }"
+            :style="{ '--card-delay': `${index * 80}ms` }"
             @click="goToDetails(item)"
           >
             <img :src="item.image_url" :alt="item.name" class="builder-item-image" />
@@ -118,9 +118,7 @@ const isSelected = (item) => {
   return selectedItems.value.some(selected => selected.id === item.id);
 };
 
-// Click on card = Navigate to details
 const goToDetails = (item) => {
-  // Set to 'true' so the detail page knows to go back to the Builder
   sessionStorage.setItem('builder_context', 'true');
   router.push(`/product/${item.id}`);
 };
@@ -132,13 +130,15 @@ const removeItem = (item) => {
 
 const addCustomBoxToCart = () => {
   const totalItems = selectedItems.value.length;
+  // Force a unique ID every time
   const customBox = {
     id: `custom-${Date.now()}`,
     name: `Custom Box (${totalItems} items)`,
     description: `${totalItems} meals & snacks customized by you`,
     price: totalPrice.value,
     quantity: 1,
-    image_url: currentType.value === 'meal' ? '/images/builder-meal.png' : '/images/builder-snack.png',
+    // CHANGE: Use placeholder to prevent broken image
+    image_url: '/images/placeholder-product.png',
     dietary_tags: ['Custom']
   };
 
@@ -208,7 +208,6 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-3);
   padding: var(--spacing-5);
   background: var(--color-white);
   border: 2px solid var(--color-gray-200);
@@ -217,15 +216,13 @@ onMounted(async () => {
   font-weight: var(--font-weight-semibold);
   color: var(--color-gray-600);
   cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.toggle-icon {
-  font-size: 2rem;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .toggle-btn:hover {
   border-color: var(--color-orange);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(242, 106, 27, 0.15);
 }
 
 .toggle-btn--active {
@@ -246,6 +243,7 @@ onMounted(async () => {
   }
 }
 
+/* Smooth Card Reveal & Hover Animation */
 .builder-item-card {
   position: relative;
   background: var(--color-white);
@@ -253,12 +251,32 @@ onMounted(async () => {
   border-radius: var(--radius-2xl);
   overflow: hidden;
   cursor: pointer;
-  transition: all var(--transition-fast);
+
+  opacity: 0;
+  transform: translateY(30px);
+  
+  transition: opacity 0.5s ease,
+              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+
+  transition-delay: var(--card-delay, 0ms);
 }
 
+.builder-item-card {
+  animation: showCard 0.01s forwards;
+  animation-delay: var(--card-delay, 0ms);
+}
+
+@keyframes showCard {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* HOVER ANIMATION: Lift up + Glow */
 .builder-item-card:hover {
   border-color: var(--color-orange);
-  transform: translateY(-4px);
+  transform: translateY(-8px); 
+  box-shadow: 0 15px 30px rgba(242, 106, 27, 0.2); 
 }
 
 .builder-item-card--selected {
@@ -271,6 +289,11 @@ onMounted(async () => {
   height: 180px;
   object-fit: cover;
   background: var(--color-gray-100);
+  transition: transform 0.4s ease;
+}
+
+.builder-item-card:hover .builder-item-image {
+  transform: scale(1.07);
 }
 
 .builder-item-info {
@@ -307,7 +330,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   z-index: 10;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
 }
 
 .remove-btn:hover {

@@ -3,7 +3,7 @@
   Module: Frontend - Views
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: Standard, professional side-by-side layout.
+  Notes: Supports "Builder Mode" - saves selected items and returns to BoxBuilderView.
 -->
 <template>
   <div class="product-detail-page">
@@ -180,19 +180,18 @@ onMounted(async () => {
 .product-detail-page {
   background-color: var(--color-cream);
   min-height: 100vh;
-  /* Standard comfortable vertical padding */
-  padding: 100px 0 100px; 
+  /* REDUCED the top padding to 70px */
+  padding: 70px 0 100px; 
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
 .container {
-  /* Standard professional width */
   max-width: 1100px; 
   width: 100%;
   margin: 0 auto;
-  padding: 0 20px; /* Standard padding to keep it away from the edges */
+  padding: 0 20px; 
 }
 
 /* Main Card */

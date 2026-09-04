@@ -1,15 +1,15 @@
+<!-- 
+  Purpose: Register page UI and Logic with Light/Dark support.
+  Module: View - Register
+  Owner: Caleb Asia
+  Created: 2026-08-31
+  Notes: Uses authStore. Validates inputs. Links to Login.
+-->
 <template>
-  <div class="auth-page bg-cream py-8">
+  <div class="auth-page">
     <div class="container">
       <div class="auth-card">
 
-        <!-- Navy header -->
-        <div class="auth-header bg-navy">
-          <div class="auth-logo"><span class="text-orange">Food</span><span class="text-white">Boxx</span></div>
-          <div class="auth-header-icon">🛒</div>
-        </div>
-
-        <!-- Content: split card -->
         <div class="auth-body">
           
           <!-- Form side -->
@@ -102,12 +102,11 @@
             <img src="/images/vegan-box.png" class="auth-visual-bg" alt="Food background" />
             <div class="auth-visual-overlay"></div>
             
-            <div class="auth-offer">
-              🎁 50% off your first box
+            <div class="auth-logo-inner">
+              <span class="auth-logo-food">Food</span><span class="auth-logo-boxx">Boxx</span>
             </div>
-
+            
             <div class="auth-visual-content">
-              <div class="auth-visual-icon">🍱</div>
               <div class="auth-visual-title">
                 Join 30,000+ students<br/>already eating better
               </div>
@@ -217,70 +216,84 @@ async function handleRegister() {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  /* Matches Login page size */
-  padding: 80px 0 20px; 
+  /* LIGHT MODE - Cream Background */
+  background-color: var(--color-cream); 
+  padding: 100px 0 40px; 
+}
+
+/* DARK MODE - Deep Navy Background */
+[data-theme="dark"] .auth-page {
+  background-color: #0B1120;
 }
 
 .auth-card {
-  background: #F7F5EF;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 0.5px solid #E5E3DA;
-  max-width: 900px; 
+  max-width: 950px; 
   width: 100%;
   margin: 0 auto;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-2xl);
+  /* LIGHT MODE - White Card */
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
 }
 
-.auth-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 24px;
-}
-
-.auth-logo {
-  font-size: 18px;
-  font-weight: var(--font-weight-bold);
-}
-
-.auth-header-icon {
-  color: #FFFFFF;
-  font-size: 20px;
+/* DARK MODE - Dark Card */
+[data-theme="dark"] .auth-card {
+  background: #1A2436;
+  border-color: #2D3748;
 }
 
 .auth-body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
-  padding: 20px; 
 }
 
 @media (min-width: 768px) {
   .auth-body {
     grid-template-columns: 1.15fr 1fr;
-    padding: 0;
   }
 }
 
+/* Form Side */
 .auth-form-side {
+  /* LIGHT MODE - White background */
   background: #FFFFFF;
-  border: 0.5px solid #E5E3DA;
-  border-radius: 12px;
-  padding: 32px 40px; 
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* DARK MODE - Dark Card */
+[data-theme="dark"] .auth-form-side {
+  background: #1A2436;
 }
 
 .auth-title {
   font-size: 28px;
   font-weight: var(--font-weight-bold);
+  /* LIGHT MODE - Dark Navy Text */
   color: var(--color-navy);
   margin-bottom: 8px;
 }
 
+/* DARK MODE - White Text */
+[data-theme="dark"] .auth-title {
+  color: #FFFFFF;
+}
+
 .auth-subtitle {
   font-size: 14px;
+  /* LIGHT MODE - Grey Text */
   color: var(--color-gray-500);
   margin-bottom: 24px;
+}
+
+/* DARK MODE - Light Grey Text */
+[data-theme="dark"] .auth-subtitle {
+  color: var(--color-gray-400);
 }
 
 .row-grid {
@@ -297,15 +310,20 @@ async function handleRegister() {
 
 .auth-label {
   font-size: 12px;
-  color: #8A8A85;
+  color: var(--color-gray-600);
   margin-bottom: 6px;
   display: block;
 }
 
+[data-theme="dark"] .auth-label {
+  color: var(--color-gray-400);
+}
+
 .auth-input {
   width: 100%;
-  background: #F7F5EF;
-  border: 1px solid #E5E3DA;
+  /* LIGHT MODE - Input style */
+  background: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
   border-radius: 10px;
   padding: 14px 16px;
   font-size: 15px;
@@ -313,10 +331,21 @@ async function handleRegister() {
   transition: all var(--transition-fast);
 }
 
+/* DARK MODE - Input style */
+[data-theme="dark"] .auth-input {
+  background: #0B1120;
+  border-color: #2D3748;
+  color: #FFFFFF;
+}
+
 .auth-input:focus {
   outline: none;
   border-color: var(--color-orange);
-  background: #FFFFFF;
+  background: var(--color-white);
+}
+
+[data-theme="dark"] .auth-input:focus {
+  background: #0B1120;
 }
 
 .auth-input--error {
@@ -357,14 +386,31 @@ async function handleRegister() {
   background: var(--color-orange-hover);
 }
 
-/* Visual Side with Z-Index Image */
+/* Logo inside Visual Side */
+.auth-logo-inner {
+  position: relative;
+  z-index: 3;
+  font-weight: var(--font-weight-bold);
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.auth-logo-food {
+  color: #FFFFFF !important;
+}
+
+.auth-logo-boxx {
+  color: var(--color-orange) !important;
+}
+
+/* Visual Side */
 .auth-visual-side {
   position: relative;
   padding: 40px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 400px; 
+  justify-content: flex-end;
+  min-height: 500px; 
   overflow: hidden;
   border-radius: 0 12px 12px 0;
 }
@@ -375,46 +421,19 @@ async function handleRegister() {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 1; /* Image behind everything */
+  z-index: 1; 
 }
 
 .auth-visual-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 33, 55, 0.7); /* Semi-transparent navy overlay */
+  background: rgba(15, 33, 55, 0.8); 
   z-index: 2;
 }
 
-.auth-offer {
-  position: relative;
-  z-index: 3;
-  background: var(--color-orange);
-  border-radius: 12px;
-  padding: 16px;
-  align-self: flex-start;
-  font-size: 14px;
-  font-weight: var(--font-weight-bold);
-  color: #FFFFFF;
-}
-
-.auth-visual-content {
-  position: relative;
-  z-index: 3;
-}
-
-.auth-visual-icon {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background: rgba(32, 56, 77, 0.8); /* Slightly transparent circle */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  font-size: 30px;
-}
-
 .auth-visual-title {
+  position: relative;
+  z-index: 3;
   font-size: 24px;
   font-weight: var(--font-weight-bold);
   color: #FFFFFF;
@@ -423,6 +442,8 @@ async function handleRegister() {
 }
 
 .auth-visual-subtext {
+  position: relative;
+  z-index: 3;
   font-size: 14px;
   color: #B8C2CC;
 }

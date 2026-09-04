@@ -34,24 +34,37 @@ export const useProductStore = defineStore('product', () => {
     { id: 26, name: 'Coffee Shop Box', description: 'Grab-and-go fuel for between classes.', price: 69, category: 'box', dietary_tags: ['Vegetarian', 'Vegan'], image_url: '/images/coffee-shop.png' },
 
     // ----- Exam Week Boxes (IDs 27-28) -----
-    { id: 27, name: 'Exam Week Survival: Study Fuel', description: 'Sustained energy for all-nighters.', price: 99, category: 'box', dietary_tags: ['Standard', 'High Protein'], image_url: '/images/exam-box.png' },
-    { id: 28, name: 'Exam Week Survival: Brain Boost', description: 'The ultimate cognitive support.', price: 129, category: 'box', dietary_tags: ['Standard', 'Nut-Free'], image_url: '/images/exam-box.png' },
+    { id: 27, name: 'Exam Week Survival: Study Fuel', description: 'Sustained energy for all-nighters.', price: 99, category: 'box', dietary_tags: ['Standard', 'High Protein'], image_url: '/images/exam-box1.png' },
+    { id: 28, name: 'Exam Week Survival: Brain Boost', description: 'The ultimate cognitive support.', price: 129, category: 'box', dietary_tags: ['Standard', 'Nut-Free'], image_url: '/images/exam-box2.png' },
   ];
 
-  // Mock Builder Items
+  // Mock Builder Items (Includes 3 New Meals & 3 New Snacks)
   const mockBuilderItems = [
-    { id: 10, name: 'Grilled Chicken & Rice', description: 'High Protein', price: 25, category: 'meal', dietary_tags: ['Standard', 'Halal'], image_url: '/images/builder-meal.png' },
-    { id: 11, name: 'Beef Teriyaki Bowl', description: 'High Protein', price: 25, category: 'meal', dietary_tags: ['Standard'], image_url: '/images/builder-meal.png' },
-    { id: 12, name: 'Zesty Lemon Salmon', description: 'High Protein', price: 25, category: 'meal', dietary_tags: ['Keto', 'Gluten-Free'], image_url: '/images/builder-meal.png' },
+    // ----- Meals (R25 each) -----
+    { id: 10, name: 'Grilled Chicken & Rice', description: 'High Protein', price: 25, category: 'meal', dietary_tags: ['Standard', 'Halal'], image_url: '/images/grilled-chicken-rice.png' },
+    { id: 11, name: 'Beef Teriyaki Bowl', description: 'High Protein', price: 25, category: 'meal', dietary_tags: ['Standard'], image_url: '/images/beef-teriyaki-bowl.png' },
+    { id: 12, name: 'Zesty Lemon Salmon', description: 'High Protein', price: 25, category: 'meal', dietary_tags: ['Keto', 'Gluten-Free'], image_url: '/images/zesty-lemon-salmon.png' },
     { id: 13, name: 'Spicy Tofu Stir-fry', description: 'Plant-Based', price: 25, category: 'meal', dietary_tags: ['Vegan', 'Gluten-Free'], image_url: '/images/builder-meal.png' },
-    { id: 14, name: 'Herbed Pasta Primavera', description: 'Plant-Based', price: 25, category: 'meal', dietary_tags: ['Vegan'], image_url: '/images/builder-meal.png' },
-    { id: 15, name: 'BBQ Chicken Wrap', description: 'High Protein', price: 25, category: 'meal', dietary_tags: ['Standard'], image_url: '/images/builder-meal.png' },
-    { id: 16, name: 'Protein Power Balls', description: 'High Protein', price: 12, category: 'snack', dietary_tags: ['Vegan', 'Gluten-Free'], image_url: '/images/builder-snack.png' },
-    { id: 17, name: 'Salted Caramel Popcorn', description: 'Sweet & Salty', price: 12, category: 'snack', dietary_tags: ['Gluten-Free'], image_url: '/images/builder-snack.png' },
-    { id: 18, name: 'Roasted Chickpeas', description: 'Crunchy Snack', price: 12, category: 'snack', dietary_tags: ['Vegan', 'Gluten-Free'], image_url: '/images/builder-snack.png' },
+    { id: 14, name: 'Herbed Pasta Primavera', description: 'Plant-Based', price: 25, category: 'meal', dietary_tags: ['Vegan'], image_url: '/images/herbed-pasta-primavera.png' },
+    { id: 15, name: 'BBQ Chicken Wrap', description: 'High Protein', price: 25, category: 'meal', dietary_tags: ['Standard'], image_url: '/images/bbq-chicken-wrap.png' },
+
+    // ----- 3 NEW MEALS (IDs 29-31) -----
+    { id: 29, name: 'Power Rice Bowl', description: 'Slow-release carbs for endurance.', price: 25, category: 'meal', dietary_tags: ['Vegan', 'Gluten-Free'], image_url: '/images/power-rice-bowl.png' },
+    { id: 30, name: 'Lean Steak & Greens', description: 'Iron-rich and packed with protein.', price: 25, category: 'meal', dietary_tags: ['Keto', 'Halal'], image_url: '/images/lean-steak-greens.png' },
+    { id: 31, name: 'Harvest Veggie Curry', description: 'Warm, spiced, and plant-powered.', price: 25, category: 'meal', dietary_tags: ['Vegan', 'Gluten-Free'], image_url: '/images/harvest-curry.png' },
+
+    // ----- Snacks (R12 each) -----
+    { id: 16, name: 'Protein Power Balls', description: 'High Protein', price: 12, category: 'snack', dietary_tags: ['Vegan', 'Gluten-Free'], image_url: '/images/protein-power-balls.png' },
+    { id: 17, name: 'Salted Caramel Popcorn', description: 'Sweet & Salty', price: 12, category: 'snack', dietary_tags: ['Gluten-Free'], image_url: '/images/salted-caramel-popcorn.png' },
+    { id: 18, name: 'Roasted Chickpeas', description: 'Crunchy Snack', price: 12, category: 'snack', dietary_tags: ['Vegan', 'Gluten-Free'], image_url: '/images/roasted-chickpeas.png' },
     { id: 19, name: 'Fruit & Nut Mix', description: 'Trail Mix', price: 12, category: 'snack', dietary_tags: ['Vegan', 'Nut-Free'], image_url: '/images/builder-snack.png' },
-    { id: 20, name: 'Greek Yogurt Cup', description: 'High Protein', price: 12, category: 'snack', dietary_tags: ['Vegetarian', 'Gluten-Free'], image_url: '/images/builder-snack.png' },
-    { id: 21, name: 'Sea Salt Crisps', description: 'Crunchy Snack', price: 12, category: 'snack', dietary_tags: ['Vegan', 'Gluten-Free'], image_url: '/images/builder-snack.png' },
+    { id: 20, name: 'Greek Yogurt Cup', description: 'High Protein', price: 12, category: 'snack', dietary_tags: ['Vegetarian', 'Gluten-Free'], image_url: '/images/greek-yogurt-cup.png' },
+    { id: 21, name: 'Sea Salt Crisps', description: 'Crunchy Snack', price: 12, category: 'snack', dietary_tags: ['Vegan', 'Gluten-Free'], image_url: '/images/sea-salt-crisps.png' },
+
+    // ----- 3 NEW SNACKS (IDs 32-34) -----
+    { id: 32, name: 'Dark Choc Almonds', description: 'Healthy fats & antioxidants.', price: 12, category: 'snack', dietary_tags: ['Vegan', 'Gluten-Free'], image_url: '/images/dark-choc-almonds.png' },
+    { id: 33, name: 'Apple Cinnamon Bites', description: 'Sweet, crisp, and naturally energizing.', price: 12, category: 'snack', dietary_tags: ['Vegan', 'Nut-Free'], image_url: '/images/apple-cinnamon-bites.png' },
+    { id: 34, name: 'Pretzel Sticks', description: 'The perfect crunchy study break.', price: 12, category: 'snack', dietary_tags: ['Vegan'], image_url: '/images/pretzel-sticks.png' },
   ];
 
   // Actions
