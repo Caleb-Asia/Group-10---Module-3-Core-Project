@@ -196,4 +196,80 @@ onMounted(async () => {
 .text-orange { color: var(--color-orange); }
 .text-muted { color: var(--color-gray-500); }
 .fw-bold { font-weight: var(--font-weight-bold); }
+
+/* Order Status Tracker */
+.order-tracker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-gray-50);
+  padding: var(--spacing-4) var(--spacing-6);
+  border-radius: var(--radius-lg);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-gray-400);
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+}
+
+.step.active {
+  color: var(--color-navy);
+}
+
+.step-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--color-gray-200);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--color-gray-500);
+}
+
+.step.active .step-icon {
+  background: var(--color-orange);
+  color: var(--color-white);
+}
+
+.line {
+  flex: 1;
+  height: 2px;
+  background: var(--color-gray-200);
+  margin: 0 var(--spacing-2);
+  margin-bottom: 20px;
+}
+
+/* Dark Mode Tracker Fixes */
+[data-theme="dark"] .order-tracker {
+  background: #1A2436;
+}
+
+[data-theme="dark"] .step {
+  color: #9CA3AF;
+}
+
+[data-theme="dark"] .step.active {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .step-icon {
+  background: #2D3748;
+  color: #9CA3AF;
+}
+
+[data-theme="dark"] .step.active .step-icon {
+  background: var(--color-orange);
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .line {
+  background: #2D3748;
+}
 </style>

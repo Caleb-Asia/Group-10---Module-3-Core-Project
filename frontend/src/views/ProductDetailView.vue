@@ -28,9 +28,17 @@
             <div class="d-flex justify-between align-start mb-4">
               <div>
                 <h1 class="detail-title">{{ product.name }}</h1>
+                
                 <div class="tag-list mb-3">
-                  <span v-for="tag in getDietaryTags(product)" :key="tag" class="chip chip--dietary">{{ tag }}</span>
+                  <span 
+                    v-for="tag in getDietaryTags(product)" 
+                    :key="tag" 
+                    class="chip chip--dietary"
+                  >
+                    {{ tag }}
+                  </span>
                 </div>
+
                 <div class="satiety-rating">
                   <span class="text-muted">Satiety Rating:</span>
                   <Star :size="16" :fill="'#F59E0B'" :stroke="'#F59E0B'" />
@@ -180,7 +188,6 @@ onMounted(async () => {
 .product-detail-page {
   background-color: var(--color-cream);
   min-height: 100vh;
-  /* REDUCED the top padding to 70px */
   padding: 70px 0 100px; 
   display: flex;
   justify-content: center;
@@ -201,7 +208,6 @@ onMounted(async () => {
   box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
-  /* NO forced height - lets it fit comfortably */
 }
 
 .back-btn {
@@ -243,7 +249,7 @@ onMounted(async () => {
 .detail-image {
   width: 100%;
   height: 100%;
-  min-height: 400px; /* Comfortable height */
+  min-height: 400px; 
   object-fit: cover;
 }
 
@@ -265,10 +271,23 @@ onMounted(async () => {
   margin-bottom: var(--spacing-2);
 }
 
+/* ============================================
+   DIETARY TAGS - FIXED SIZE FOR BOTH MODES
+   ============================================ */
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
+}
+
+.chip--dietary {
+  background: var(--color-orange);
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  text-transform: capitalize;
 }
 
 .satiety-rating {
@@ -333,6 +352,60 @@ onMounted(async () => {
   padding-left: var(--spacing-6);
   color: var(--color-gray-600);
   font-size: var(--font-size-sm);
+}
+
+/* ============================================
+   DARK MODE FIXES
+   ============================================ */
+[data-theme="dark"] .product-detail-page {
+  background-color: #0B1120;
+}
+
+[data-theme="dark"] .detail-card {
+  background: #1A2436;
+}
+
+[data-theme="dark"] .back-btn {
+  background: #1A2436;
+  color: var(--color-orange);
+  border-color: var(--color-orange);
+}
+
+[data-theme="dark"] .detail-title {
+  color: #FFFFFF;
+}
+
+/* Force white text on dark mode category tags */
+[data-theme="dark"] .chip--dietary {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .accordion-header {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .accordion-section {
+  border-top-color: #2D3748;
+}
+
+[data-theme="dark"] .nutrition-box {
+  background: #0B1120;
+}
+
+[data-theme="dark"] .nutrition-box strong {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .nutrition-box span {
+  color: #9CA3AF;
+}
+
+[data-theme="dark"] .ingredients-list {
+  color: #D1D5DB;
+}
+
+[data-theme="dark"] .text-muted {
+  color: #9CA3AF !important;
 }
 
 /* Utility */

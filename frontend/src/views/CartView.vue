@@ -29,11 +29,28 @@
     <!-- 2. FILLED CART STATE -->
     <div v-else class="cart-content">
       <div class="container">
-        <h2 class="mb-4 fw-bold text-dark">Your Cart</h2>
+        <div class="cart-heading">
+          <div>
+            <span class="cart-eyebrow">ALMOST THERE</span>
+            <h1 class="page-title">Your Cart</h1>
+            <p class="cart-intro">A little fuel for the week ahead, all in one place.</p>
+          </div>
+          <div class="cart-count-badge">
+            <span class="cart-count-number">{{ cartStore.itemCount }}</span>
+            <span>{{ cartStore.itemCount === 1 ? 'item' : 'items' }} in your box</span>
+          </div>
+        </div>
+
+        <div class="cart-benefits" aria-label="Checkout benefits">
+          <div class="benefit-item"><span class="benefit-icon">✓</span><span>Freshly packed</span></div>
+          <div class="benefit-item"><span class="benefit-icon">⌖</span><span>Free pickup</span></div>
+          <div class="benefit-item"><span class="benefit-icon">↺</span><span>Flexible plans</span></div>
+        </div>
         
         <div class="cart-layout">
           <!-- Cart Items List -->
           <div class="cart-items">
+            <div class="section-label">YOUR SELECTION</div>
             <div v-for="item in cartStore.items" :key="item.id" class="cart-item-card">
               
               <!-- Product Image -->
@@ -73,7 +90,10 @@
           <!-- Summary Sidebar -->
           <div class="cart-summary">
             <div class="summary-card">
-              <h5 class="summary-title">Order Summary</h5>
+              <div class="summary-heading">
+                <h5 class="summary-title">Order Summary</h5>
+                <span class="summary-spark">✦</span>
+              </div>
               
               <div class="summary-row">
                 <span>Subtotal</span>
@@ -95,6 +115,11 @@
               <!-- Reusable Subscription Toggle -->
               <div class="mb-4">
                 <SubscriptionToggle v-model="cartStore.isSubscription" />
+              </div>
+
+              <div class="summary-note">
+                <span class="summary-note-icon">i</span>
+                <span>Pickup at your selected pod is always free.</span>
               </div>
 
               <button @click="goToCheckout" class="btn-custom-orange w-100 py-2 rounded-pill">
@@ -153,7 +178,8 @@ const confirmRemove = (item) => {
 <style scoped>
 .cart-page {
   min-height: 100vh;
-  padding-top: 40px;
+  /* FIX: Added padding to go under the 90px navbar */
+  padding-top: 110px;
 }
 
 /* Empty Cart State - PERFECTLY CENTERED */
@@ -176,7 +202,6 @@ const confirmRemove = (item) => {
   align-items: center;
   justify-content: center;
   border: 1px solid var(--color-gray-200);
-  /* Dark Mode Background */
   color: var(--color-navy);
 }
 
@@ -194,10 +219,7 @@ const confirmRemove = (item) => {
   margin-bottom: var(--spacing-3);
 }
 
-/* Dark Mode Title */
-[data-theme="dark"] .empty-title {
-  color: #FFFFFF;
-}
+[data-theme="dark"] .empty-title { color: #FFFFFF; }
 
 .empty-text {
   font-size: var(--font-size-lg);
@@ -207,10 +229,7 @@ const confirmRemove = (item) => {
   line-height: 1.6;
 }
 
-/* Dark Mode Text */
-[data-theme="dark"] .empty-text {
-  color: #D1D5DB;
-}
+[data-theme="dark"] .empty-text { color: #D1D5DB; }
 
 .btn-custom-orange {
   background-color: var(--color-orange);
@@ -232,7 +251,87 @@ const confirmRemove = (item) => {
 
 /* Filled Cart State - Layout */
 .cart-content {
-  padding: 0 var(--spacing-8) 80px;
+  padding: 0 var(--spacing-8) 100px;
+}
+
+.cart-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-6);
+}
+
+.cart-eyebrow {
+  display: block;
+  margin-bottom: var(--spacing-2);
+  color: var(--color-orange);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: 0.14em;
+}
+
+.cart-intro {
+  margin: 0;
+  color: var(--color-gray-500);
+  font-size: var(--font-size-lg);
+}
+
+.cart-count-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid rgba(242, 106, 27, 0.2);
+  border-radius: var(--radius-full);
+  background: #fff7ed;
+  color: var(--color-orange);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.cart-count-number {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-orange);
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+}
+
+.cart-benefits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-8);
+  padding: var(--spacing-4) var(--spacing-5);
+  border: 1px solid rgba(15, 33, 55, 0.08);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.benefit-icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffead7;
+  color: var(--color-orange);
+  font-weight: var(--font-weight-bold);
 }
 
 .page-title {
@@ -242,10 +341,19 @@ const confirmRemove = (item) => {
   margin-bottom: var(--spacing-8);
 }
 
-/* Dark Mode Title */
-[data-theme="dark"] .page-title {
-  color: #FFFFFF;
+/* DARK MODE FIXES */
+[data-theme="dark"] .page-title { color: #FFFFFF; }
+[data-theme="dark"] .cart-intro, [data-theme="dark"] .section-label { color: #CBD5E1; }
+
+/* FIX: Make Benefit icons visible in Dark Mode */
+[data-theme="dark"] .cart-count-badge,
+[data-theme="dark"] .cart-benefits {
+  background: #1A2436;
+  border-color: #2D3748;
 }
+
+[data-theme="dark"] .benefit-item { color: #E5E7EB; }
+[data-theme="dark"] .benefit-icon { background: #0B1120; color: var(--color-orange); }
 
 /* Make the container FULL WIDTH */
 .container {
@@ -257,6 +365,14 @@ const confirmRemove = (item) => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-8);
+}
+
+.section-label {
+  margin-bottom: var(--spacing-3);
+  color: var(--color-gray-500);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: 0.1em;
 }
 
 @media (min-width: 992px) {
@@ -281,12 +397,16 @@ const confirmRemove = (item) => {
   align-items: center;
   gap: var(--spacing-6);
   margin-bottom: var(--spacing-4);
+  border: 1px solid rgba(15, 33, 55, 0.06);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-/* Dark Mode Cart Card */
-[data-theme="dark"] .cart-item-card {
-  background: #1A2436;
+.cart-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
+
+[data-theme="dark"] .cart-item-card { background: #1A2436; }
 
 .cart-item-image-wrapper {
   width: 100px;
@@ -297,10 +417,7 @@ const confirmRemove = (item) => {
   flex-shrink: 0;
 }
 
-/* Dark Mode Image Wrapper */
-[data-theme="dark"] .cart-item-image-wrapper {
-  background: #2D3748;
-}
+[data-theme="dark"] .cart-item-image-wrapper { background: #2D3748; }
 
 .cart-item-image {
   width: 100%;
@@ -308,9 +425,7 @@ const confirmRemove = (item) => {
   object-fit: cover;
 }
 
-.cart-item-info {
-  flex: 1;
-}
+.cart-item-info { flex: 1; }
 
 .cart-item-name {
   font-size: var(--font-size-lg);
@@ -319,20 +434,14 @@ const confirmRemove = (item) => {
   margin-bottom: var(--spacing-1);
 }
 
-/* Dark Mode Item Name */
-[data-theme="dark"] .cart-item-name {
-  color: #FFFFFF;
-}
+[data-theme="dark"] .cart-item-name { color: #FFFFFF; }
 
 .cart-item-price {
   font-size: var(--font-size-base);
   color: var(--color-gray-600);
 }
 
-/* Dark Mode Item Price */
-[data-theme="dark"] .cart-item-price {
-  color: #9CA3AF;
-}
+[data-theme="dark"] .cart-item-price { color: #9CA3AF; }
 
 /* Quantity Controls - LARGER */
 .quantity-controls {
@@ -344,10 +453,7 @@ const confirmRemove = (item) => {
   padding: 8px;
 }
 
-/* Dark Mode Quantity */
-[data-theme="dark"] .quantity-controls {
-  background: #0B1120;
-}
+[data-theme="dark"] .quantity-controls { background: #0B1120; }
 
 .qty-btn {
   width: 32px;
@@ -368,7 +474,6 @@ const confirmRemove = (item) => {
   border-color: var(--color-orange);
 }
 
-/* Dark Mode Qty Button */
 [data-theme="dark"] .qty-btn {
   background: #1A2436;
   border-color: #2D3748;
@@ -382,12 +487,8 @@ const confirmRemove = (item) => {
   font-size: var(--font-size-lg);
 }
 
-/* Dark Mode Qty Display */
-[data-theme="dark"] .qty-display {
-  color: #FFFFFF;
-}
+[data-theme="dark"] .qty-display { color: #FFFFFF; }
 
-/* Remove Button - LARGER */
 .remove-btn {
   background: none;
   border: none;
@@ -398,9 +499,7 @@ const confirmRemove = (item) => {
   transition: opacity var(--transition-fast);
 }
 
-.remove-btn:hover {
-  opacity: 0.7;
-}
+.remove-btn:hover { opacity: 0.7; }
 
 /* Summary Card - LARGER */
 .summary-card {
@@ -408,12 +507,24 @@ const confirmRemove = (item) => {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
   padding: var(--spacing-8);
+  border: 1px solid rgba(242, 106, 27, 0.16);
+  position: sticky;
+  top: 110px;
 }
 
-/* Dark Mode Summary */
-[data-theme="dark"] .summary-card {
-  background: #1A2436;
+.summary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
+
+.summary-spark {
+  color: var(--color-orange);
+  font-size: var(--font-size-2xl);
+}
+
+[data-theme="dark"] .summary-card { background: #1A2436; }
+[data-theme="dark"] .summary-note { background: #0B1120; color: #CBD5E1; }
 
 .summary-title {
   font-size: var(--font-size-xl);
@@ -422,10 +533,7 @@ const confirmRemove = (item) => {
   margin-bottom: var(--spacing-6);
 }
 
-/* Dark Mode Summary Title */
-[data-theme="dark"] .summary-title {
-  color: #FFFFFF;
-}
+[data-theme="dark"] .summary-title { color: #FFFFFF; }
 
 .summary-row {
   display: flex;
@@ -435,10 +543,7 @@ const confirmRemove = (item) => {
   color: var(--color-gray-700);
 }
 
-/* Dark Mode Summary Row */
-[data-theme="dark"] .summary-row {
-  color: #D1D5DB;
-}
+[data-theme="dark"] .summary-row { color: #D1D5DB; }
 
 .summary-divider {
   border: none;
@@ -446,22 +551,66 @@ const confirmRemove = (item) => {
   margin: var(--spacing-6) 0;
 }
 
-/* Dark Mode Divider */
-[data-theme="dark"] .summary-divider {
-  border-color: #2D3748;
-}
+[data-theme="dark"] .summary-divider { border-color: #2D3748; }
 
-.total-row {
-  margin-bottom: var(--spacing-6);
-}
+.total-row { margin-bottom: var(--spacing-6); }
 
 .total-price {
   color: var(--color-orange);
   font-size: var(--font-size-xl);
 }
 
+.summary-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-5);
+  padding: var(--spacing-3);
+  border-radius: var(--radius-md);
+  background: var(--color-gray-50);
+  color: var(--color-gray-600);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+.summary-note-icon {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-navy);
+  color: var(--color-white);
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+}
+
 /* Mobile adjustments */
 @media (max-width: 575.98px) {
+  .cart-content {
+    padding: 24px var(--spacing-4) 80px;
+  }
+
+  .cart-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cart-benefits {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+    justify-items: start;
+  }
+
+  .benefit-item {
+    justify-content: flex-start;
+  }
+
+  .summary-card {
+    position: static;
+  }
+
   .cart-item-card {
     flex-wrap: wrap;
   }

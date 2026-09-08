@@ -1884,3 +1884,105 @@ ul, ol {
 [data-theme="dark"] .btn--primary {
   color: #FFFFFF !important;
 }
+
+/* ============================================
+   28. SWEET ALERT - WHITE FORCE OVERRIDE (ALL MODES)
+   ============================================ */
+
+/* Background & Text for ALL SweetAlert Popups */
+.swal2-popup,
+.swal2-toast {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* White text for all titles and content inside toasts */
+.swal2-toast .swal2-title,
+.swal2-popup .swal2-title {
+  color: #000000 !important;
+}
+
+.swal2-toast .swal2-html-container,
+.swal2-popup .swal2-html-container {
+  color: #000000 !important;
+}
+
+/* Orange icon for success/error */
+.swal2-success,
+.swal2-error,
+.swal2-question,
+.swal2-warning {
+  color: #F26A1B !important;
+}
+
+/* White background for Cancel buttons */
+.swal2-cancel {
+  background-color: #0F2137 !important;
+  color: #FFFFFF !important;
+}
+
+/* Dark Mode specific overrides (just in case) */
+[data-theme="dark"] .swal2-popup,
+[data-theme="dark"] .swal2-toast {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+[data-theme="dark"] .swal2-toast .swal2-title,
+[data-theme="dark"] .swal2-popup .swal2-title {
+  color: #000000 !important;
+}
+
+[data-theme="dark"] .swal2-toast .swal2-html-container,
+[data-theme="dark"] .swal2-popup .swal2-html-container {
+  color: #000000 !important;
+}
+
+/* ============================================
+   29. KEYBOARD FOCUS ACCESSIBILITY
+   ============================================ */
+
+/* Navbar Links */
+.nav-link:focus-visible,
+.action-link:focus-visible {
+  outline: 3px solid var(--color-orange);
+  outline-offset: 4px;
+  border-radius: 4px;
+  color: var(--color-orange) !important;
+}
+
+/* Product Cards & Flip Cards */
+.product-card-scene:focus-within,
+.product-card:focus-visible {
+  outline: 3px solid var(--color-orange);
+  outline-offset: 4px;
+  border-radius: var(--radius-xl);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Filter Chips */
+.chip--filter:focus-visible {
+  outline: 3px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+/* Buttons */
+.btn:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+/* Dark Mode Focus */
+[data-theme="dark"] .nav-link:focus-visible,
+[data-theme="dark"] .action-link:focus-visible,
+[data-theme="dark"] .product-card:focus-visible,
+[data-theme="dark"] .chip--filter:focus-visible,
+[data-theme="dark"] .btn:focus-visible,
+[data-theme="dark"] button:focus-visible,
+[data-theme="dark"] a:focus-visible {
+  outline-color: var(--color-orange);
+}

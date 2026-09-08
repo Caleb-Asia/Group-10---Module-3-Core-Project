@@ -58,8 +58,8 @@
       <div class="referral-card p-6 mb-6">
         <div class="d-flex align-center justify-between">
           <div>
-            <h4 class="text-navy mb-1">Share the box!</h4>
-            <p class="text-muted small mb-0">Friends get <strong>50% off</strong>, you get a free box.</p>
+            <h4 class="referral-title">Share the box!</h4>
+            <p class="referral-text">Friends get <strong>50% off</strong>, you get a free box.</p>
           </div>
           <button class="btn btn--primary btn--sm" @click="handleReferral">Refer</button>
         </div>
@@ -68,17 +68,19 @@
       <!-- Quick Links (Only Orders and Profile remain) -->
       <h3 class="quick-links-title mb-4">Quick Links</h3>
       <div class="quick-links-grid">
+        
         <router-link to="/dashboard/orders" class="quick-link-card">
-          <div class="quick-link-icon">📦</div>
+          <ClipboardClock :size="24" :stroke-width="2" class="quick-link-icon" />
           <span class="quick-link-text">Order History</span>
           <span class="chevron">›</span>
         </router-link>
 
         <router-link to="/dashboard/profile" class="quick-link-card">
-          <div class="quick-link-icon">👤</div>
+          <UserPen :size="24" :stroke-width="2" class="quick-link-icon" />
           <span class="quick-link-text">My Profile</span>
           <span class="chevron">›</span>
         </router-link>
+
       </div>
 
     </div>
@@ -86,6 +88,7 @@
 </template>
 
 <script setup>
+import { ClipboardClock, UserPen } from 'lucide-vue-next';
 import { showSuccess } from '@/services/ui';
 
 const handleReferral = () => {
@@ -179,13 +182,31 @@ const handleReferral = () => {
   border-radius: var(--radius-full);
 }
 
-/* Promotional Referral Card - Faster Animation */
+/* Promotional Referral Card - Faster Animation & White Text */
 .referral-card {
   background: var(--color-orange);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
-  /* The Animation - 1.5s instead of 3s */
   animation: float-promo 1.5s ease-in-out infinite; 
+}
+
+/* Force White Text inside the orange card */
+.referral-title {
+  color: #FFFFFF !important;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-1);
+}
+
+.referral-text {
+  color: #FFFFFF !important;
+  font-size: var(--font-size-base);
+  margin-bottom: 0;
+}
+
+/* Ensure the strong tag is also white */
+.referral-text strong {
+  color: #FFFFFF !important;
 }
 
 @keyframes float-promo {
@@ -229,8 +250,9 @@ const handleReferral = () => {
   box-shadow: var(--shadow-lg);
 }
 
+/* Lucide icon styling */
 .quick-link-icon {
-  font-size: 24px;
+  color: var(--color-orange);
 }
 
 .quick-link-text {
@@ -243,6 +265,27 @@ const handleReferral = () => {
   margin-left: auto;
   font-size: 1.5rem;
   color: var(--color-gray-400);
+}
+
+/* Dark Mode */
+[data-theme="dark"] .dashboard-page {
+  background-color: #0B1120;
+}
+
+[data-theme="dark"] .dashboard-card,
+[data-theme="dark"] .quick-link-card {
+  background: #1A2436;
+}
+
+[data-theme="dark"] .page-title,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .quick-links-title,
+[data-theme="dark"] .quick-link-text {
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .quick-link-icon {
+  color: var(--color-orange);
 }
 
 /* Utility */

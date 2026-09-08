@@ -124,7 +124,8 @@
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/authStore';
-import { showError, showSuccess } from '@/services/ui';
+import { showError } from '@/services/ui';
+import Swal from 'sweetalert2';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -198,8 +199,18 @@ async function handleRegister() {
   try {
     const result = await authStore.register(form);
     if (result.success) {
-      showSuccess('Account Created', 'Welcome to FoodBoxx!');
-      router.push('/');
+      // Special SweetAlert Popup
+      Swal.fire({
+        title: 'Welcome to the FoodBoxx family! 🎉',
+        html: `<img src="/images/foodboxx-logo.png" style="width: 120px; margin-bottom: 10px;" /><br/><p>Your account has been created successfully.</p>`,
+        icon: 'success',
+        confirmButtonText: 'Let\'s Eat!',
+        confirmButtonColor: '#F26A1B',
+        background: '#FFFFFF',
+        color: '#0F2137'
+      }).then(() => {
+        router.push('/');
+      });
     } else {
       showError('Registration Failed', result.message);
     }
@@ -216,12 +227,10 @@ async function handleRegister() {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  /* LIGHT MODE - Cream Background */
   background-color: var(--color-cream); 
   padding: 100px 0 40px; 
 }
 
-/* DARK MODE - Deep Navy Background */
 [data-theme="dark"] .auth-page {
   background-color: #0B1120;
 }
@@ -231,14 +240,12 @@ async function handleRegister() {
   width: 100%;
   margin: 0 auto;
   box-shadow: var(--shadow-2xl);
-  /* LIGHT MODE - White Card */
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
   border-radius: var(--radius-2xl);
   overflow: hidden;
 }
 
-/* DARK MODE - Dark Card */
 [data-theme="dark"] .auth-card {
   background: #1A2436;
   border-color: #2D3748;
@@ -256,9 +263,7 @@ async function handleRegister() {
   }
 }
 
-/* Form Side */
 .auth-form-side {
-  /* LIGHT MODE - White background */
   background: #FFFFFF;
   padding: 40px;
   display: flex;
@@ -266,7 +271,6 @@ async function handleRegister() {
   justify-content: center;
 }
 
-/* DARK MODE - Dark Card */
 [data-theme="dark"] .auth-form-side {
   background: #1A2436;
 }
@@ -274,24 +278,20 @@ async function handleRegister() {
 .auth-title {
   font-size: 28px;
   font-weight: var(--font-weight-bold);
-  /* LIGHT MODE - Dark Navy Text */
   color: var(--color-navy);
   margin-bottom: 8px;
 }
 
-/* DARK MODE - White Text */
 [data-theme="dark"] .auth-title {
   color: #FFFFFF;
 }
 
 .auth-subtitle {
   font-size: 14px;
-  /* LIGHT MODE - Grey Text */
   color: var(--color-gray-500);
   margin-bottom: 24px;
 }
 
-/* DARK MODE - Light Grey Text */
 [data-theme="dark"] .auth-subtitle {
   color: var(--color-gray-400);
 }
@@ -321,7 +321,6 @@ async function handleRegister() {
 
 .auth-input {
   width: 100%;
-  /* LIGHT MODE - Input style */
   background: var(--color-gray-50);
   border: 1px solid var(--color-gray-200);
   border-radius: 10px;
@@ -331,7 +330,6 @@ async function handleRegister() {
   transition: all var(--transition-fast);
 }
 
-/* DARK MODE - Input style */
 [data-theme="dark"] .auth-input {
   background: #0B1120;
   border-color: #2D3748;
@@ -386,7 +384,6 @@ async function handleRegister() {
   background: var(--color-orange-hover);
 }
 
-/* Logo inside Visual Side */
 .auth-logo-inner {
   position: relative;
   z-index: 3;
@@ -403,7 +400,6 @@ async function handleRegister() {
   color: var(--color-orange) !important;
 }
 
-/* Visual Side */
 .auth-visual-side {
   position: relative;
   padding: 40px;

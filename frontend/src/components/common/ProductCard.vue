@@ -1,13 +1,11 @@
 <!-- 
-  Purpose: Reusable product card for the catalogue.
+  Purpose: Reusable product card for the catalogue with holographic shine hover effect.
   Module: Frontend - Components
   Owner: Caleb Asia
   Created: 2026-09-01
   Notes: Clicking card routes to ProductDetailView. 
          "Add to Box" button has @click.stop to only add to cart.
-         Features IntersectionObserver scroll-reveal animation.
 -->
-
 <template>
   <div ref="card" class="product-card" :class="{ 'product-card--revealed': isRevealed }" @click="goToDetail">
     
@@ -19,13 +17,15 @@
         class="product-card__image"
         loading="lazy"
       />
+      <!-- Holographic Shine Overlay -->
+      <div class="product-card__shine"></div>
     </div>
 
     <!-- Body Area -->
     <div class="product-card__body">
       <h3 class="product-card__name">{{ product.name }}</h3>
       
-      <!-- Tags placed directly below the name (BIGGER) -->
+      <!-- Tags placed directly below the name -->
       <div class="product-card__tag-list">
         <span 
           v-for="tag in getDietaryTags(product)" 
@@ -93,7 +93,6 @@ onBeforeUnmount(() => observer?.disconnect());
 const getImage = (product) => {
   if (product.image_url) return product.image_url;
   const imageMap = {
-    // Original Boxes
     'Starter Box': '/images/starter-box.png',
     'Standard Box': '/images/standard-box.png',
     'Premium Box': '/images/premium-box.png',
@@ -101,43 +100,29 @@ const getImage = (product) => {
     'Keto Fuel Box': '/images/keto-box.png',
     'Nut-Free Safety Box': '/images/nut-free-box.png',
     'Monthly Snack Box': '/images/snack-box.png',
-
+    'Builder Snack Mix': '/images/builder-snack.png',
+    'Gluten-Free': '/images/gluten-free-box.png',
+    'Builder Meals': '/images/builder-meal.png',
+    'Builder Snacks': '/images/builder-snack.png',
+    'Grilled Chicken Meal': '/images/builder-meal.png',
+    'Protein Balls': '/images/builder-snack.png',
     // New Creative Boxes
     'Campus Grind Box': '/images/campus-grind.png',
     'Freshman 15 (Keto)': '/images/freshman-15.png',
     'Varsity Athlete Box': '/images/varsity-athlete.png',
     'All-Nighter Box': '/images/all-nighter.png',
     'Coffee Shop Box': '/images/coffee-shop.png',
-
     // Exam Week Boxes
     'Exam Week Survival: Study Fuel': '/images/exam-box1.png',
     'Exam Week Survival: Brain Boost': '/images/exam-box2.png',
-
-    // Builder Meals (Original + New)
-    'Grilled Chicken & Rice': '/images/grilled-chicken-rice.png',
-    'Beef Teriyaki Bowl': '/images/beef-teriyaki-bowl.png',
-    'Zesty Lemon Salmon': '/images/zesty-lemon-salmon.png',
-    'Spicy Tofu Stir-fry': '/images/builder-meal.png',
-    'Herbed Pasta Primavera': '/images/herbed-pasta-primavera.png',
-    'BBQ Chicken Wrap': '/images/bbq-chicken-wrap.png',
+    // Builder Meals (New)
     'Power Rice Bowl': '/images/power-rice-bowl.png',
     'Lean Steak & Greens': '/images/lean-steak-greens.png',
     'Harvest Veggie Curry': '/images/harvest-curry.png',
-
-    // Builder Snacks (Original + New)
-    'Protein Power Balls': '/images/protein-power-balls.png',
-    'Salted Caramel Popcorn': '/images/salted-caramel-popcorn.png',
-    'Roasted Chickpeas': '/images/roasted-chickpeas.png',
-    'Fruit & Nut Mix': '/images/builder-snack.png',
-    'Greek Yogurt Cup': '/images/greek-yogurt-cup.png',
-    'Sea Salt Crisps': '/images/sea-salt-crisps.png',
+    // Builder Snacks (New)
     'Dark Choc Almonds': '/images/dark-choc-almonds.png',
     'Apple Cinnamon Bites': '/images/apple-cinnamon-bites.png',
-    'Pretzel Sticks': '/images/pretzel-sticks.png',
-
-    // Common fallbacks
-    'Builder Meals': '/images/builder-meal.png',
-    'Builder Snacks': '/images/builder-snack.png'
+    'Pretzel Sticks': '/images/pretzel-sticks.png'
   };
   return imageMap[product.name] || '/images/placeholder-product.png';
 };
@@ -150,7 +135,6 @@ const getDietaryTags = (product) => {
 
 // Route to full detail page
 const goToDetail = () => {
-  // Set to 'false' so the detail page knows to go back to the Menu
   sessionStorage.setItem('builder_context', 'false'); 
   router.push(`/product/${props.product.id}`);
 };
@@ -165,12 +149,13 @@ const handleAddToCart = () => {
 </script>
 
 <style scoped lang="scss">
+/* Premium Holographic Hover Animation */
 .product-card {
+  position: relative;
   background: var(--color-white);
   border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: var(--shadow-md);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -185,10 +170,31 @@ const handleAddToCart = () => {
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* Holographic Shine */
+  &__shine {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(0deg, transparent, transparent 30%, rgba(242, 106, 27, 0.3));
+    transform: rotate(-45deg);
+    transition: all 0.5s ease;
+    opacity: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
   
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-6px) scale(1.05);
+    box-shadow: 0 0 20px rgba(242, 106, 27, 0.4);
+  }
+
+  &:hover &__shine {
+    opacity: 1;
+    transform: rotate(-45deg) translateY(100%);
   }
 
   &__image-wrapper {
@@ -205,11 +211,11 @@ const handleAddToCart = () => {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform var(--transition-slow);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   &:hover &__image {
-    transform: scale(1.05);
+    transform: scale(1.1) rotate(1deg);
   }
 
   &__body {
@@ -227,7 +233,6 @@ const handleAddToCart = () => {
     line-height: 1.3;
   }
 
-  /* FORCED to be inside the body, under the name */
   &__tag-list {
     position: static !important;
     display: flex;
@@ -255,6 +260,36 @@ const handleAddToCart = () => {
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.product-card:hover :deep(.chip--dietary) {
+  background: #FFFFFF;
+  color: var(--color-orange);
+}
+
+/* DARK MODE FIXES */
+[data-theme="dark"] .product-card {
+  background: var(--color-gray-100);
+}
+
+[data-theme="dark"] .product-card__name {
+  color: var(--color-gray-100);
+}
+
+[data-theme="dark"] .product-card :deep(.chip--dietary) {
+  background: var(--color-gray-200);
+  color: var(--color-white);
+  border-color: var(--color-gray-200);
+}
+
+[data-theme="dark"] .product-card:hover :deep(.chip--dietary) {
+  background: #FFFFFF;
+  color: var(--color-orange);
+}
+
+[data-theme="dark"] .product-card__footer {
+  border-top: 1px solid var(--color-gray-200);
 }
 
 @media (prefers-reduced-motion: reduce) {

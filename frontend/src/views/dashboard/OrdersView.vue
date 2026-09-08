@@ -1,10 +1,9 @@
 <!-- 
-  Purpose: Order history page with reorder functionality.
+  Purpose: Order history page with empty state and reorder functionality.
   Module: Frontend - Views - Dashboard
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: Displays past orders with mock data until backend connects. 
-         Reorder button adds products directly to cartStore.
+  Notes: Reads orders from localStorage. Empty state for new users.
 -->
 <template>
   <div class="orders-page">
@@ -16,16 +15,28 @@
         <router-link to="/menu" class="btn btn--outline btn--sm">+ New Order</router-link>
       </div>
 
-      <!-- Orders List -->
-      <div class="orders-list">
+      <!-- EMPTY STATE (If no orders) -->
+      <div v-if="orders.length === 0" class="empty-state">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--color-navy)" stroke-width="1" class="mb-4 opacity-25">
+          <path d="M20 7h-4.5L15 4h-6L8.5 7H4v11h16V7z"/>
+          <circle cx="9" cy="13" r="1.5" fill="var(--color-navy)"/>
+          <circle cx="15" cy="13" r="1.5" fill="var(--color-navy)"/>
+        </svg>
+        <h3 class="empty-title">No orders yet</h3>
+        <p class="empty-text">Browse our performance fuel boxes and place your first order.</p>
+        <router-link to="/menu" class="btn btn--primary">Browse Menu</router-link>
+      </div>
+
+      <!-- FILLED STATE (If orders exist) -->
+      <div v-else class="orders-list">
         <div v-for="order in orders" :key="order.id" class="order-card">
           
           <div class="d-flex justify-between align-center mb-2">
             <div>
-              <h3 class="order-title mb-1">{{ order.product_name }}</h3>
+              <h3 class="order-title mb-1">{{ order.items[0]?.name || 'Order' }}</h3>
               <p class="text-muted small mb-0">{{ order.date }} · {{ order.order_number }}</p>
             </div>
-            <span class="order-price">R{{ order.total }}</span>
+            <span class="order-price">R{{ order.total.toFixed(2) }}</span>
           </div>
 
           <button class="reorder-btn" @click="handleReorder(order)">
@@ -40,63 +51,40 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
 import { useCartStore } from '@/store/cartStore';
 import { showSuccess } from '@/services/ui';
 
 const cartStore = useCartStore();
 
-// Mock Data (Matches your screenshot exactly)
-const orders = [
-  {
-    id: 1,
-    product_name: 'Standard Box',
-    date: '26 Aug 2026',
-    order_number: 'FB-283741',
-    total: 79,
-    dietary_tags: ['Standard']
-  },
-  {
-    id: 2,
-    product_name: 'Premium Box',
-    date: '19 Aug 2026',
-    order_number: 'FB-274892',
-    total: 99,
-    dietary_tags: ['Standard', 'Keto']
-  },
-  {
-    id: 3,
-    product_name: 'Vegan Boost Box',
-    date: '12 Aug 2026',
-    order_number: 'FB-263018',
-    total: 79,
-    dietary_tags: ['Vegan']
-  },
-  {
-    id: 4,
-    product_name: 'Standard Box',
-    date: '5 Aug 2026',
-    order_number: 'FB-251447',
-    total: 79,
-    dietary_tags: ['Standard']
-  }
-];
+// State
+const orders = ref([]);
+
+// Load orders from localStorage when the page mounts
+onMounted(() => {
+  const storedOrders = localStorage.getItem('foodboxx_orders');
+  orders.value = storedOrders ? JSON.parse(storedOrders) : [];
+});
 
 // Reorder functionality
 const handleReorder = (order) => {
-  // Create a temporary product object based on the order
-  const product = {
-    id: order.id,
-    name: order.product_name,
-    price: order.total, 
-    image_url: '', 
-    dietary_tags: order.dietary_tags
-  };
-
-  // Add to global cart store
-  cartStore.addToCart(product);
+  // For simplicity, recreate a product from the first item in the order
+  // In a real app, you'd loop through all items in the order
+  const firstItem = order.items && order.items.length > 0 ? order.items[0] : null;
   
-  // Show success message
-  showSuccess('Added to Cart', `${order.product_name} has been added to your cart.`);
+  if (firstItem) {
+    const product = {
+      id: order.id,
+      name: firstItem.name,
+      price: firstItem.price, 
+      image_url: '', 
+      dietary_tags: []
+    };
+    cartStore.addToCart(product);
+    showSuccess('Added to Cart', `${firstItem.name} has been added to your cart.`);
+  } else {
+    showSuccess('Added to Cart', 'Your order has been added back to the cart.');
+  }
 };
 </script>
 
@@ -107,13 +95,17 @@ const handleReorder = (order) => {
   padding: var(--spacing-8) 0;
 }
 
-.page-title {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-navy);
-}
+.page-title { font-size: var(--font-size-2xl); font-weight: bold; color: var(--color-navy); }
 
-/* Order Card */
+/* Empty State Styles */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-16) 0;
+}
+.empty-title { font-size: var(--font-size-2xl); font-weight: bold; color: var(--color-navy); margin-bottom: 8px; }
+.empty-text { color: var(--color-gray-500); margin-bottom: 24px; }
+
+/* Existing Order Card Styles */
 .order-card {
   background: var(--color-white);
   border-radius: var(--radius-xl);
@@ -122,24 +114,9 @@ const handleReorder = (order) => {
   margin-bottom: var(--spacing-4);
   transition: all var(--transition-fast);
 }
-
-.order-card:hover {
-  box-shadow: var(--shadow-md);
-}
-
-.order-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-navy);
-}
-
-.order-price {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-orange);
-}
-
-/* Reorder Button */
+.order-card:hover { box-shadow: var(--shadow-md); }
+.order-title { font-size: var(--font-size-lg); font-weight: bold; color: var(--color-navy); }
+.order-price { font-size: var(--font-size-xl); font-weight: bold; color: var(--color-orange); }
 .reorder-btn {
   width: 100%;
   margin-top: var(--spacing-4);
@@ -149,22 +126,15 @@ const handleReorder = (order) => {
   background: transparent;
   color: var(--color-orange);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: bold;
   cursor: pointer;
   transition: all var(--transition-fast);
-  text-align: center;
 }
+.reorder-btn:hover { background: var(--color-orange); color: var(--color-white); }
 
-.reorder-btn:hover {
-  background: var(--color-orange);
-  color: var(--color-white);
-}
-
-/* Utility Classes */
-.text-muted { color: var(--color-gray-500); }
-.mb-0 { margin-bottom: 0; }
-.mb-1 { margin-bottom: var(--spacing-1); }
-.mb-2 { margin-bottom: var(--spacing-2); }
-.mb-6 { margin-bottom: var(--spacing-6); }
-.small { font-size: var(--font-size-sm); }
+/* Dark Mode Fixes */
+[data-theme="dark"] .orders-page { background-color: #0B1120; }
+[data-theme="dark"] .page-title, [data-theme="dark"] .empty-title, [data-theme="dark"] .order-title { color: #FFFFFF; }
+[data-theme="dark"] .empty-text { color: #D1D5DB; }
+[data-theme="dark"] .order-card { background: #1A2436; }
 </style>

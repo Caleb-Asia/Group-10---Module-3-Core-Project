@@ -2,7 +2,7 @@
   Purpose: Shared UI helpers for SweetAlert2.
   Module: Frontend - Core Infrastructure
   Owner: Caleb Asia
-  Notes: Centralizes notification styles to match the brand colors.
+  Notes: Centralizes notification styles. White background for toasts in all themes.
 */
 import Swal from 'sweetalert2';
 
@@ -29,10 +29,12 @@ export const showSuccess = (title, text = '', iconHtml = '') => {
     showConfirmButton: false,
     toast: true,
     position: 'bottom-end',
+    background: '#FFFFFF', // SOLID WHITE Background
+    color: '#000000', // Black Text
+    iconColor: '#F26A1B', // Orange Icon
     customClass: {
       popup: 'swal-toast-fix'
     },
-    // If iconHtml is provided, it overrides the default checkmark
     ...(iconHtml && { iconHtml })
   });
 };
@@ -43,6 +45,8 @@ export const showError = (title, text = '') => {
     icon: 'error',
     title,
     text,
+    background: '#FFFFFF', // SOLID WHITE Background
+    color: '#000000', // Black Text
     confirmButtonColor: '#F26A1B'
   });
 };
@@ -53,6 +57,8 @@ export const showWarning = (title, text = '') => {
     icon: 'warning',
     title,
     text,
+    background: '#FFFFFF', // SOLID WHITE Background
+    color: '#000000', // Black Text
     confirmButtonColor: '#F26A1B'
   });
 };
@@ -63,6 +69,8 @@ export const showConfirm = (title, text, confirmButtonText = 'Yes, proceed') => 
     title,
     text,
     icon: 'question',
+    background: '#FFFFFF', // SOLID WHITE Background
+    color: '#000000', // Black Text
     showCancelButton: true,
     confirmButtonColor: '#F26A1B',
     cancelButtonColor: '#0F2137',

@@ -3,7 +3,7 @@
   Module: Frontend - Views
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: All filtering happens client-side. Uses reusable components: DietaryFilterPills and LoaderSpinner.
+  Notes: All filtering happens client-side. Includes Skeleton Loading and Floating Cart Bar.
 -->
 <template>
   <div class="catalogue-page">
@@ -18,8 +18,6 @@
     <!-- Search & Filters -->
     <section class="filters-section bg-white border-bottom">
       <div class="container">
-        
-        <!-- Search Bar -->
         <div class="search-wrapper mb-4">
           <label for="catalogue-search" class="visually-hidden">Search boxes</label>
           <div class="search-input-group">
@@ -33,13 +31,11 @@
           </div>
         </div>
 
-        <!-- Reusable Filter Pills -->
         <DietaryFilterPills 
           :active-filters="activeFilters" 
           @update:filters="updateFilters"
           @clear="clearFilters"
         />
-
       </div>
     </section>
 
@@ -51,8 +47,8 @@
             <strong>{{ filteredProducts.length }}</strong> boxes found
             <span v-if="activeFilters.length > 0" class="text-muted">(filtered by {{ activeFilters.join(', ') }})</span>
           </span>
-          <!-- Reusable LoaderSpinner -->
-          <LoaderSpinner v-if="isLoading" />
+          <!-- Spinner only shows if backend takes a while -->
+          <span v-if="isLoading" class="spinner spinner--orange"></span>
         </div>
       </div>
     </section>
@@ -60,15 +56,23 @@
     <!-- Product Grid -->
     <section class="products-grid">
       <div class="container">
-        
-        <!-- Loading State -->
-        <div v-if="isLoading" class="empty-state">
-          <!-- Reusable LoaderSpinner -->
-          <LoaderSpinner size="lg" class="mx-auto mb-4" />
-          <p class="text-muted">Loading your Performance Fuel...</p>
+
+        <!-- LOADING STATE: Skeleton Screens -->
+        <div v-if="isLoading" class="product-grid">
+          <div v-for="i in 6" :key="i" class="skeleton-card">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-body">
+              <div class="skeleton-line w-60"></div>
+              <div class="skeleton-line w-40"></div>
+            </div>
+            <div class="skeleton-footer">
+              <div class="skeleton-line w-30"></div>
+              <div class="skeleton-btn"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- Empty State -->
+        <!-- EMPTY STATE -->
         <div v-else-if="filteredProducts.length === 0" class="empty-state">
           <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--color-navy)" stroke-width="1" class="mb-4 opacity-25">
             <path d="M20 7h-4.5L15 4h-6L8.5 7H4v11h16V7z"/>
@@ -80,7 +84,7 @@
           <button class="btn btn--outline mt-4" @click="clearFilters">Clear all filters</button>
         </div>
 
-        <!-- Product Cards -->
+        <!-- FILLED STATE: Product Cards -->
         <div v-else class="product-grid">
           <ProductCard
             v-for="(product, index) in filteredProducts"
@@ -91,21 +95,16 @@
           />
         </div>
 
-        <!-- Build Your Own Box Banner -->
-        <div class="build-banner mt-8">
-          <div class="d-flex align-center justify-between">
-            <div>
-              <h3 class="text-white mb-2">🍱 Build Your Own Box</h3>
-              <p class="text-white opacity-75 mb-0">
-                Mix meals from <strong>R25</strong> + snacks from <strong>R12</strong>.
-                Create your perfect Performance Fuel box.
-              </p>
-            </div>
-            <router-link to="/builder" class="btn btn--primary btn--lg">Build Now →</router-link>
-          </div>
-        </div>
       </div>
     </section>
+
+    <!-- FLOATING CART BAR -->
+    <div v-if="cartStore.itemCount > 0" class="floating-cart-bar">
+      <span>You have {{ cartStore.itemCount }} item(s) in your box.</span>
+      <router-link to="/cart" class="btn btn--primary btn--sm">
+        View Cart →
+      </router-link>
+    </div>
   </div>
 </template>
 
@@ -116,7 +115,6 @@ import { useCartStore } from '@/store/cartStore';
 import { showSuccess, showError } from '@/services/ui';
 import ProductCard from '@/components/common/ProductCard.vue';
 import DietaryFilterPills from '@/components/common/DietaryFilterPills.vue';
-import LoaderSpinner from '@/components/common/LoaderSpinner.vue'; // Imported
 
 const productStore = useProductStore();
 const cartStore = useCartStore();
@@ -146,7 +144,6 @@ const filteredProducts = computed(() => {
   return products;
 });
 
-// Called by the component
 const updateFilters = (newFilters) => {
   activeFilters.value = newFilters;
 };
@@ -159,6 +156,8 @@ const clearFilters = () => {
 const fetchProducts = async () => {
   isLoading.value = true;
   try {
+    // Add a small artificial delay so the skeleton is visible during demo
+    await new Promise(resolve => setTimeout(resolve, 800));
     await productStore.fetchProducts();
   } catch (error) {
     showError('Failed to load products. Please refresh the page.');
@@ -209,14 +208,8 @@ onMounted(() => {
   border-bottom: 1px solid var(--color-gray-200);
 }
 
-.search-wrapper {
-  width: 100%;
-}
-
-.search-input-group {
-  position: relative;
-}
-
+.search-wrapper { width: 100%; }
+.search-input-group { position: relative; }
 .search-icon {
   position: absolute;
   left: var(--spacing-5);
@@ -224,7 +217,6 @@ onMounted(() => {
   transform: translateY(-50%);
   pointer-events: none;
 }
-
 .search-input {
   width: 100%;
   padding: var(--spacing-4) var(--spacing-6) var(--spacing-4) 4rem;
@@ -233,7 +225,6 @@ onMounted(() => {
   background: var(--color-white);
   font-size: var(--font-size-lg);
 }
-
 .search-input:focus {
   outline: none;
   border-color: var(--color-orange);
@@ -241,29 +232,132 @@ onMounted(() => {
 }
 
 .results-bar { padding: var(--spacing-3) 0; border-bottom: 1px solid var(--color-gray-200); }
-.products-grid { padding: var(--spacing-8) 0; }
+.products-grid { padding: var(--spacing-8) 0; padding-bottom: 120px; }
 .product-grid { display: grid; grid-template-columns: 1fr; gap: var(--spacing-6); }
 
 @media (min-width: 768px) {
   .product-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-.build-banner {
-  background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-light) 100%);
+.empty-state { text-align: center; padding: var(--spacing-12) 0; }
+
+/* ============================================
+   SKELETON LOADING STATE
+   ============================================ */
+.skeleton-card {
+  background: var(--color-white);
   border-radius: var(--radius-xl);
-  padding: var(--spacing-8);
-  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
-.empty-state { text-align: center; padding: var(--spacing-12) 0; }
+.skeleton-image {
+  width: 100%;
+  padding-top: 75%;
+  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-200) 50%, var(--color-gray-100) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.skeleton-body {
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-200) 50%, var(--color-gray-100) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.w-60 { width: 60%; }
+.w-40 { width: 40%; }
+.w-30 { width: 30%; }
+
+.skeleton-footer {
+  padding: 0 var(--spacing-4) var(--spacing-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--color-gray-100);
+}
+
+.skeleton-btn {
+  width: 80px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-200) 50%, var(--color-gray-100) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Dark Mode Skeleton */
+[data-theme="dark"] .skeleton-card {
+  background: #1A2436;
+}
+
+/* ============================================
+   FLOATING CART BAR
+   ============================================ */
+.floating-cart-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-navy);
+  color: #FFFFFF;
+  padding: var(--spacing-4) var(--spacing-6);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  z-index: 999;
+  border: 2px solid var(--color-orange);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+[data-theme="dark"] .floating-cart-bar {
+  background: #1A2436;
+}
+
+/* ============================================
+   DARK MODE PAGE FIXES
+   ============================================ */
+[data-theme="dark"] .catalogue-page {
+  background-color: #0B1120;
+}
+
+[data-theme="dark"] .filters-section {
+  background-color: #1A2436 !important;
+  border-color: #2D3748 !important;
+}
+
+[data-theme="dark"] .search-input {
+  background-color: #1A2436;
+  border-color: #2D3748;
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .search-input:focus {
+  background-color: #0B1120;
+}
 
 /* Utility */
 .mb-0 { margin-bottom: 0; }
 .mb-4 { margin-bottom: var(--spacing-4); }
 .mt-4 { margin-top: var(--spacing-4); }
-.mt-8 { margin-top: var(--spacing-8); }
 .small { font-size: var(--font-size-sm); }
-.text-navy { color: var(--color-navy); }
 .text-muted { color: var(--color-gray-500); }
 .opacity-75 { opacity: 0.75; }
 .mx-auto { margin-left: auto; margin-right: auto; }

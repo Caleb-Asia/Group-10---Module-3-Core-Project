@@ -78,7 +78,7 @@
             </div>
           </div>
 
-          <!-- Card Payment Form (Only visible when Card is selected) -->
+          <!-- Card Payment Form -->
           <div v-if="form.payment_method === 'card'" class="card-form">
             <div class="form-group mb-4">
               <label for="cardNumber" class="form-label">Card Number</label>
@@ -118,14 +118,14 @@
             </div>
           </div>
 
-          <!-- SnapScan Instruction (Visible when SnapScan selected) -->
+          <!-- SnapScan Instruction -->
           <div v-if="form.payment_method === 'snapscan'" class="simulated-payment-instruction">
             <div class="simulated-icon">📱</div>
             <p class="text-navy fw-bold mb-1">SnapScan</p>
             <p class="text-muted small mb-4">Open the SnapScan app and scan the QR code at the pickup point.</p>
           </div>
 
-          <!-- EFT Instruction (Visible when EFT selected) -->
+          <!-- EFT Instruction -->
           <div v-if="form.payment_method === 'eft'" class="simulated-payment-instruction">
             <div class="simulated-icon">🏦</div>
             <p class="text-navy fw-bold mb-1">Electronic Funds Transfer</p>
@@ -163,15 +163,12 @@ const router = useRouter();
 const cartStore = useCartStore();
 const authStore = useAuthStore();
 
-// State
 const currentStep = ref(1);
 const isLoading = ref(false);
 const pickupPods = PICKUP_PODS;
 
-// Mock reference for EFT
 const orderRef = computed(() => `FBX-${Math.floor(100000 + Math.random() * 900000)}`);
 
-// Payment Methods List
 const paymentMethods = [
   { id: 'card', name: 'Debit / Credit Card', desc: 'Visa, Mastercard, Amex', icon: '💳' },
   { id: 'snapscan', name: 'SnapScan', desc: 'Scan & pay with your phone', icon: '📱' },
@@ -180,26 +177,18 @@ const paymentMethods = [
 
 const form = reactive({
   pickup_pod: '',
-  payment_method: 'card', // Default to card
+  payment_method: 'card',
   card_number: '',
   expiry: '',
   cvv: ''
 });
 
-// Methods
-const nextStep = () => {
-  currentStep.value++;
-};
+const nextStep = () => { currentStep.value++; };
+const prevStep = () => { currentStep.value--; };
 
-const prevStep = () => {
-  currentStep.value--;
-};
-
-// Payment Processing
 const processPayment = async () => {
   isLoading.value = true;
 
-  // Simulating an API call (Wait 1.5 seconds)
   await new Promise(resolve => setTimeout(resolve, 1500));
 
   // 1. Card Validation
@@ -214,7 +203,6 @@ const processPayment = async () => {
 
   // 2. SnapScan Simulation
   if (form.payment_method === 'snapscan') {
-    // 90% chance of success for demo
     if (Math.random() < 0.1) {
       isLoading.value = false;
       showError('SnapScan Failed', 'QR Code expired. Please try again.');
@@ -224,18 +212,31 @@ const processPayment = async () => {
 
   // 3. EFT Simulation
   if (form.payment_method === 'eft') {
-    // EFT always requires manual approval, but we mark as "Pending" for demo
     showSuccess('EFT Details Sent', 'Your order is pending until payment reflects.');
   }
 
-  // Payment Successful
+  // Create the order object
   const orderData = {
-    order_number: 'FB-702389', // Mock until backend
+    id: Date.now(),
+    order_number: orderRef.value,
     pickup_pod: form.pickup_pod,
     collection_window: 'Mon–Fri, 08:00–17:00',
     dietary_preferences: authStore.user?.dietary_preferences || 'Standard',
-    payment_method: form.payment_method
+    payment_method: form.payment_method,
+    items: cartStore.items.map(item => ({ 
+      name: item.name, 
+      price: item.price, 
+      quantity: item.quantity 
+    })),
+    total: cartStore.subtotal,
+    status: 'Pending',
+    date: new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
   };
+
+  // Save to localStorage
+  const existingOrders = JSON.parse(localStorage.getItem('foodboxx_orders') || '[]');
+  existingOrders.unshift(orderData);
+  localStorage.setItem('foodboxx_orders', JSON.stringify(existingOrders));
 
   // Save to sessionStorage so ConfirmationView can read it
   sessionStorage.setItem('foodboxx_last_order', JSON.stringify(orderData));
@@ -243,7 +244,6 @@ const processPayment = async () => {
   // Clear the cart
   cartStore.clearCart();
 
-  // Redirect to Confirmation page
   showSuccess('Payment Successful', 'Your order has been placed!');
   router.push('/confirmation');
 };
@@ -253,7 +253,13 @@ const processPayment = async () => {
 .checkout-page {
   background-color: var(--color-cream);
   min-height: 100vh;
-  padding: var(--spacing-8) 0;
+  /* FIX: Add padding so content goes below the navbar */
+  padding: 120px 0 80px; 
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* Steps */
@@ -262,7 +268,7 @@ const processPayment = async () => {
   margin: 0 auto;
 }
 
-/* Pods */
+/* Step 1: Pods */
 .pod-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -273,7 +279,7 @@ const processPayment = async () => {
   background: var(--color-white);
   border: 2px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-4);
+  padding: var(--spacing-5);
   text-align: center;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -294,7 +300,7 @@ const processPayment = async () => {
 }
 
 .pod-name {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--color-navy);
 }
@@ -310,7 +316,7 @@ const processPayment = async () => {
   display: flex;
   align-items: center;
   gap: var(--spacing-4);
-  padding: var(--spacing-4);
+  padding: var(--spacing-5);
   background: var(--color-white);
   border: 2px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
@@ -359,7 +365,7 @@ const processPayment = async () => {
 .simulated-payment-instruction {
   background: var(--color-white);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-6);
+  padding: var(--spacing-8);
   text-align: center;
   box-shadow: var(--shadow-sm);
 }
@@ -390,7 +396,42 @@ const processPayment = async () => {
   box-shadow: var(--shadow-sm);
 }
 
+/* DARK MODE SUPPORT */
+[data-theme="dark"] .checkout-page {
+  background-color: #0B1120;
+}
+
+[data-theme="dark"] .pod-card,
+[data-theme="dark"] .payment-method,
+[data-theme="dark"] .order-summary,
+[data-theme="dark"] .simulated-payment-instruction {
+  background: #1A2436;
+  border-color: #2D3748;
+}
+
+[data-theme="dark"] .pod-name,
+[data-theme="dark"] .payment-method-name,
+[data-theme="dark"] .text-navy {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .text-muted {
+  color: #9CA3AF !important;
+}
+
+[data-theme="dark"] .form-input {
+  background: #0B1120;
+  border-color: #2D3748;
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .form-input:focus {
+  background: #0B1120;
+}
+
 /* Utilities */
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--spacing-1); }
 .mb-2 { margin-bottom: var(--spacing-2); }
 .mb-3 { margin-bottom: var(--spacing-3); }
 .mb-4 { margin-bottom: var(--spacing-4); }
@@ -401,7 +442,34 @@ const processPayment = async () => {
 .gap-3 { gap: var(--spacing-3); }
 .flex-grow-1 { flex-grow: 1; }
 .fw-bold { font-weight: var(--font-weight-bold); }
+.small { font-size: var(--font-size-sm); }
 .text-navy { color: var(--color-navy); }
 .text-muted { color: var(--color-gray-500); }
 .text-success { color: var(--color-success); }
+.d-flex { display: flex; }
+.justify-between { justify-content: space-between; }
+
+/* Mobile Step Indicator Fix */
+@media (max-width: 767px) {
+  .steps {
+    flex-wrap: wrap;
+    gap: var(--spacing-4);
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .steps__step {
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+  
+  .steps__connector {
+    width: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .steps__step-label {
+    font-size: var(--font-size-xs);
+  }
+}
 </style>
