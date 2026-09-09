@@ -263,9 +263,11 @@ const handleAddToCart = () => {
   transition: all 0.3s ease;
 }
 
+/* FIX: Do NOT change tag color on hover */
 .product-card:hover :deep(.chip--dietary) {
-  background: #FFFFFF;
-  color: var(--color-orange);
+  background: var(--color-cream);
+  color: var(--color-navy);
+  border-color: var(--color-gray-200);
 }
 
 /* DARK MODE FIXES */
@@ -284,8 +286,9 @@ const handleAddToCart = () => {
 }
 
 [data-theme="dark"] .product-card:hover :deep(.chip--dietary) {
-  background: #FFFFFF;
-  color: var(--color-orange);
+  background: var(--color-gray-200);
+  color: var(--color-white);
+  border-color: var(--color-gray-200);
 }
 
 [data-theme="dark"] .product-card__footer {

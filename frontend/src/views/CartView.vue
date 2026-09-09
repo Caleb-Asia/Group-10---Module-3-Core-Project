@@ -178,8 +178,8 @@ const confirmRemove = (item) => {
 <style scoped>
 .cart-page {
   min-height: 100vh;
-  /* FIX: Added padding to go under the 90px navbar */
-  padding-top: 110px;
+  /* FIX: Reduced from 110px to 100px */
+  padding-top: 100px;
 }
 
 /* Empty Cart State - PERFECTLY CENTERED */
@@ -251,7 +251,7 @@ const confirmRemove = (item) => {
 
 /* Filled Cart State - Layout */
 .cart-content {
-  padding: 0 var(--spacing-8) 100px;
+  padding: 0 var(--spacing-8) 60px; /* FIX: Reduced bottom padding */
 }
 
 .cart-heading {
@@ -259,7 +259,7 @@ const confirmRemove = (item) => {
   align-items: flex-end;
   justify-content: space-between;
   gap: var(--spacing-6);
-  margin-bottom: var(--spacing-6);
+  margin-bottom: var(--spacing-4); /* FIX: Reduced from 6 to 4 */
 }
 
 .cart-eyebrow {
@@ -306,7 +306,7 @@ const confirmRemove = (item) => {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-4);
-  margin-bottom: var(--spacing-8);
+  margin-bottom: var(--spacing-5); /* FIX: Reduced from 8 to 5 */
   padding: var(--spacing-4) var(--spacing-5);
   border: 1px solid rgba(15, 33, 55, 0.08);
   border-radius: var(--radius-lg);
@@ -338,7 +338,7 @@ const confirmRemove = (item) => {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-navy);
-  margin-bottom: var(--spacing-8);
+  margin-bottom: var(--spacing-4); /* FIX: Reduced from 8 to 4 */
 }
 
 /* DARK MODE FIXES */
@@ -364,7 +364,7 @@ const confirmRemove = (item) => {
 .cart-layout {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-8);
+  gap: var(--spacing-6); /* FIX: Reduced from 8 to 6 */
 }
 
 .section-label {
@@ -392,11 +392,11 @@ const confirmRemove = (item) => {
   background: var(--color-white);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
-  padding: var(--spacing-6);
+  padding: var(--spacing-5); /* FIX: Reduced from 6 to 5 */
   display: flex;
   align-items: center;
-  gap: var(--spacing-6);
-  margin-bottom: var(--spacing-4);
+  gap: var(--spacing-5);
+  margin-bottom: var(--spacing-3);
   border: 1px solid rgba(15, 33, 55, 0.06);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -506,10 +506,10 @@ const confirmRemove = (item) => {
   background: var(--color-white);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
-  padding: var(--spacing-8);
+  padding: var(--spacing-6); /* FIX: Reduced from 8 to 6 */
   border: 1px solid rgba(242, 106, 27, 0.16);
   position: sticky;
-  top: 110px;
+  top: 100px;
 }
 
 .summary-heading {
@@ -530,7 +530,7 @@ const confirmRemove = (item) => {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-navy);
-  margin-bottom: var(--spacing-6);
+  margin-bottom: var(--spacing-4);
 }
 
 [data-theme="dark"] .summary-title { color: #FFFFFF; }
@@ -538,7 +538,7 @@ const confirmRemove = (item) => {
 .summary-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-3);
   font-size: var(--font-size-lg);
   color: var(--color-gray-700);
 }
@@ -548,7 +548,7 @@ const confirmRemove = (item) => {
 .summary-divider {
   border: none;
   border-top: 1px solid var(--color-gray-200);
-  margin: var(--spacing-6) 0;
+  margin: var(--spacing-5) 0;
 }
 
 [data-theme="dark"] .summary-divider { border-color: #2D3748; }
@@ -564,7 +564,7 @@ const confirmRemove = (item) => {
   display: flex;
   align-items: flex-start;
   gap: var(--spacing-2);
-  margin-bottom: var(--spacing-5);
+  margin-bottom: var(--spacing-4);
   padding: var(--spacing-3);
   border-radius: var(--radius-md);
   background: var(--color-gray-50);
@@ -589,7 +589,7 @@ const confirmRemove = (item) => {
 /* Mobile adjustments */
 @media (max-width: 575.98px) {
   .cart-content {
-    padding: 24px var(--spacing-4) 80px;
+    padding: 24px var(--spacing-4) 60px;
   }
 
   .cart-heading {
