@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 node_modules/
 .env
 *.log
@@ -6,3 +7,14 @@ Thumbs.db
 dist/
 build/
 !.env.example
+=======
+.env
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Optional: environment example file should NOT be ignored
+# .env.example
+>>>>>>> backend/michaela
