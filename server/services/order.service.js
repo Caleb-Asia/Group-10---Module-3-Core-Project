@@ -11,6 +11,13 @@ const qrService = require('./qr.service');
 const OrderModel = require('../models/Order.model');
 const OrderItemModel = require('../models/OrderItem.model');
 const SubscriptionModel = require('../models/Subscription.model');
+const { APPROVED_PICKUP_PODS, isApprovedPickupPod } = require('../utils/validators');
+
+function validatePickupPod(pickupPod) {
+  if (!isApprovedPickupPod(pickupPod)) {
+    throw new ApiError(400, `pickupPod must be one of: ${APPROVED_PICKUP_PODS.join(', ')}`);
+  }
+}
 
 /**
  * Validates requested items, verifies they exist and are active,
@@ -19,7 +26,7 @@ const SubscriptionModel = require('../models/Subscription.model');
  * @param {Object} conn - MySQL transaction connection
  * @returns {Promise<{ calculatedItems: Array, totalAmount: number }>}
  */
-async function validateAndCalculateOrderItems(items, conn) {
+async function validateAndCalculateOrderItems(items, conn, allowedCategories = null) {
   if (!Array.isArray(items) || items.length === 0) {
     throw new ApiError(400, 'Order must contain at least one item');
   }
@@ -32,7 +39,7 @@ async function validateAndCalculateOrderItems(items, conn) {
 
   // Fetch authoritative products from the database using the transaction connection
   const [dbProducts] = await conn.query(
-    'SELECT id, name, price, is_active FROM products WHERE id IN (?)',
+    'SELECT id, name, price, category, is_active FROM products WHERE id IN (?)',
     [productIds]
   );
 
@@ -60,6 +67,9 @@ async function validateAndCalculateOrderItems(items, conn) {
     if (!product.is_active) {
       throw new ApiError(400, `Product "${product.name}" is currently inactive and cannot be ordered`);
     }
+    if (allowedCategories && !allowedCategories.includes(product.category)) {
+      throw new ApiError(400, `Product "${product.name}" has category "${product.category}" and cannot be used in a custom box`);
+    }
 
     const unitPrice = parseFloat(product.price);
     const itemSubtotal = unitPrice * qty;
@@ -78,12 +88,50 @@ async function validateAndCalculateOrderItems(items, conn) {
   return { calculatedItems, totalAmount };
 }
 
+/**
+ * Resolves the single subscription box from the database. The client never
+ * supplies the subscription line-item price or quantity.
+ */
+async function getSubscriptionBoxItem(productId, conn) {
+  const numericProductId = Number(productId);
+  if (!numericProductId || !Number.isInteger(numericProductId)) {
+    throw new ApiError(400, 'Invalid subscription box product ID');
+  }
+
+  const [products] = await conn.query(
+    'SELECT id, name, price, category, is_active FROM products WHERE id = ?',
+    [numericProductId]
+  );
+  const product = products[0];
+
+  if (!product) {
+    throw new ApiError(404, 'Subscription box product not found');
+  }
+  if (!product.is_active) {
+    throw new ApiError(400, 'Selected subscription box product is inactive');
+  }
+  if (product.category !== 'box') {
+    throw new ApiError(400, 'Subscription products must have category "box"');
+  }
+
+  const unitPrice = Number(product.price);
+  return {
+    calculatedItem: {
+      productId: product.id,
+      quantity: 1,
+      unitPrice: unitPrice.toFixed(2)
+    },
+    totalAmount: Math.round(unitPrice * 100) / 100
+  };
+}
+
 const orderService = {
   /**
    * Create a one-off order (order_type = 'one-off')
    * @param {Object} data - { userId, items, cardNumber, pickupPod }
    */
   createOneOffOrder: async ({ userId, items, cardNumber, pickupPod }) => {
+    validatePickupPod(pickupPod);
     const connection = await pool.getConnection();
     try {
       await connection.beginTransaction();
@@ -130,12 +178,13 @@ const orderService = {
    * @param {Object} data - { userId, items, cardNumber, pickupPod }
    */
   createCustomOrder: async ({ userId, items, cardNumber, pickupPod }) => {
+    validatePickupPod(pickupPod);
     const connection = await pool.getConnection();
     try {
       await connection.beginTransaction();
 
       // 1. Authoritative server-side price calculation & product validation
-      const { calculatedItems, totalAmount } = await validateAndCalculateOrderItems(items, connection);
+      const { calculatedItems, totalAmount } = await validateAndCalculateOrderItems(items, connection, ['meal', 'snack']);
 
       // 2. Process payment (if declined, throws ApiError 402; order is never created)
       const paymentResult = await paymentService.processPayment({ cardNumber, amount: totalAmount });
@@ -173,35 +222,18 @@ const orderService = {
 
   /**
    * Create a subscription order (recurring box)
-   * @param {Object} data - { userId, productId, items, cardNumber, pickupPod }
+   * @param {Object} data - { userId, productId, cardNumber, pickupPod }
    */
-  createSubscriptionOrder: async ({ userId, productId, items, cardNumber, pickupPod }) => {
+  createSubscriptionOrder: async ({ userId, productId, cardNumber, pickupPod }) => {
+    validatePickupPod(pickupPod);
     const connection = await pool.getConnection();
     try {
       await connection.beginTransaction();
 
-      // 1. Authoritative server-side price calculation & product validation
-      const { calculatedItems, totalAmount } = await validateAndCalculateOrderItems(items, connection);
+      // 1. Derive the one subscription line item and price from the database.
+      const { calculatedItem, totalAmount } = await getSubscriptionBoxItem(productId, connection);
 
-      // Validate that the box productId exists and is active
-      const [boxProducts] = await connection.query(
-        'SELECT id, is_active FROM products WHERE id = ?',
-        [productId]
-      );
-      if (!boxProducts || boxProducts.length === 0) {
-        throw new ApiError(404, 'Subscription box product not found');
-      }
-      if (!boxProducts[0].is_active) {
-        throw new ApiError(400, 'Selected subscription box product is inactive');
-      }
-
-      // 2. Process payment before creating any database records
-      const paymentResult = await paymentService.processPayment({ cardNumber, amount: totalAmount });
-
-      // 3. Generate secure QR token
-      const qrToken = qrService.generateToken();
-
-      // 4. Check for existing subscription for this user using transaction connection
+      // 2. Find or create the subscription inside the same transaction.
       let subscriptionId;
       const existingSub = await SubscriptionModel.findByUserId(userId, connection);
 
@@ -214,12 +246,26 @@ const orderService = {
         subscriptionId = existingSub.id;
       }
 
-      // 5. Insert order linked to subscription
+      // 3. Increment first so every eighth completed box receives the loyalty reward.
+      await SubscriptionModel.incrementBoxesCompleted(subscriptionId, connection);
+      const subscription = await SubscriptionModel.findById(subscriptionId, connection);
+      const loyaltyReward = Number(subscription.boxes_completed) % 8 === 0;
+      const chargedAmount = loyaltyReward ? 0 : totalAmount;
+
+      // Free loyalty orders do not invoke the payment simulator.
+      const paymentResult = loyaltyReward
+        ? { txnRef: 'FBX-LOYALTY-FREE' }
+        : await paymentService.processPayment({ cardNumber, amount: chargedAmount });
+
+      // 4. Generate the pickup token after payment/reward determination.
+      const qrToken = qrService.generateToken();
+
+      // 5. Persist the first or recurring subscription order.
       const orderId = await OrderModel.create({
         user_id: userId,
         subscription_id: subscriptionId,
         order_type: 'subscription',
-        total_amount: totalAmount,
+        total_amount: chargedAmount,
         payment_status: 'paid',
         payment_txn_ref: paymentResult.txnRef,
         qr_token: qrToken,
@@ -227,16 +273,24 @@ const orderService = {
         status: 'confirmed'
       }, connection);
 
-      // 6. Insert order items
-      for (const item of calculatedItems) {
-        await OrderItemModel.create(orderId, item.productId, item.quantity, item.unitPrice, connection);
-      }
-
-      // 7. Increment loyalty box count for subscription
-      await SubscriptionModel.incrementBoxesCompleted(subscriptionId, connection);
+      // 6. Persist exactly one server-derived subscription box line item.
+      await OrderItemModel.create(
+        orderId,
+        calculatedItem.productId,
+        calculatedItem.quantity,
+        calculatedItem.unitPrice,
+        connection
+      );
 
       await connection.commit();
-      return { orderId, subscriptionId, qrToken, txnRef: paymentResult.txnRef, totalAmount };
+      return {
+        orderId,
+        subscriptionId,
+        qrToken,
+        txnRef: paymentResult.txnRef,
+        totalAmount: chargedAmount,
+        loyaltyReward
+      };
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -282,6 +336,28 @@ const orderService = {
       withItems.push({ ...order, items });
     }
     return withItems;
+  },
+
+  /**
+   * Validate a QR token for an owned order and mark it as collected.
+   */
+  pickUpOrder: async ({ orderId, userId, qrToken }) => {
+    const order = await OrderModel.findById(orderId);
+    if (!order) {
+      throw new ApiError(404, 'Order not found');
+    }
+    if (Number(order.user_id) !== Number(userId)) {
+      throw new ApiError(403, 'Forbidden: You do not have access to this order');
+    }
+    if (order.qr_token !== qrToken) {
+      throw new ApiError(400, 'Invalid QR token');
+    }
+    if (order.status === 'picked_up') {
+      throw new ApiError(400, 'Order has already been picked up');
+    }
+
+    await OrderModel.updateStatus(orderId, 'picked_up');
+    return { ...order, status: 'picked_up' };
   }
 };
 

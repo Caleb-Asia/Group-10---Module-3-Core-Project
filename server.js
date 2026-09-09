@@ -1,55 +1,50 @@
-<<<<<<< HEAD
-/* 
-  Purpose: Express server entry point for FoodBoxx | Module: root 
-  Owner: Adam | Created: 1 Sep 2026 
-  Notes: Loads env, configures CORS, static serving, mounts owned routers, and handles 404s cleanly.
+/*
+  Purpose: Express server entry point for FoodBoxx | Module: root
+  Owner: Adam | Created: 1 Sep 2026
+  Notes: Loads env, validates the database, serves the built frontend, mounts API routes, and handles errors.
 */
 
-// 1. dotenv loads first before any application configs or database modules
 require('dotenv').config();
 
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
-
-// Centralised configuration (validates JWT_SECRET and provides CORS_ORIGIN)
 const { CORS_ORIGIN } = require('./server/config/app.config');
-
-// Initialise database connection pool
-require('./server/config/db');
+const pool = require('./server/config/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const frontendDistPath = path.join(__dirname, 'frontend', 'dist');
+const frontendIndexPath = path.join(frontendDistPath, 'index.html');
+const frontendBuildExists = fs.existsSync(frontendIndexPath);
 
-// 2. CORS configured using CORS_ORIGIN
-// If CORS_ORIGIN === '*', pass string '*' directly; otherwise split comma-separated origins
 const corsOptions = {
   origin: CORS_ORIGIN === '*' ? '*' : CORS_ORIGIN.split(',').map(item => item.trim()),
   credentials: true
 };
-app.use(cors(corsOptions));
 
-// 3. Body parser middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// 4. Static files served from public directory
-// TODO: INTEGRATION - In development, Vite runs on port 5173. For production builds, Vite outputs to frontend/dist which should be served here.
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve the Vue production build when it is available.
+if (frontendBuildExists) {
+  app.use(express.static(frontendDistPath));
+} else {
+  console.warn(`Frontend build not found at ${frontendDistPath}. Run "npm run build:frontend" to create it.`);
+}
 
-// 5. Health Check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'FoodBoxx API is running' });
 });
 
-// 6. Mount owned API Routes
 app.use('/api/auth', require('./server/routes/auth.routes'));
 app.use('/api/payments', require('./server/routes/payment.routes'));
 app.use('/api/orders', require('./server/routes/order.routes'));
 app.use('/api/subscriptions', require('./server/routes/subscription.routes'));
+app.use('/api/products', require('./server/routes/product.routes'));
 
-// NOTE: /api/products is NOT mounted here yet — pending Michaela's implementation.
-
-// 7. Handle unknown /api/* routes cleanly without Express 5 wildcard router crash
+// Keep unknown API endpoints machine-readable instead of returning the Vue app.
 app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({
@@ -63,45 +58,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// 8. Global Error Handler middleware
-app.use(require('./server/middleware/error.middleware'));
+// Express 5 requires a named wildcard; this is the equivalent of app.get('*', ...).
+app.get('/{*splat}', (req, res) => {
+  if (!frontendBuildExists) {
+    return res.status(404).send('Frontend build not found. Run "npm run build:frontend".');
+  }
 
-// 9. Start Server (single clean startup log)
-app.listen(PORT, () => {
-  console.log(`FoodBoxx API running at http://localhost:${PORT}`);
+  res.sendFile(frontendIndexPath);
 });
 
-module.exports = app;
-=======
-// Sets up the FoodBoxx server and connects the product routes
+app.use(require('./server/middleware/error.middleware'));
 
-const express = require("express");
-require("dotenv").config();
-
-const productRoutes = require("./server/routes/product.routes");
-
-const app = express();
-
-const PORT = process.env.PORT || 3000;
-
-// Middleware
-// Allows the server to receive JSON data
-app.use(express.json());
-
-// Routes
-// Handles all product-related requests
-app.use("/products", productRoutes);
-
-// Test route
-// Checks that the API is running
-app.get("/", (req, res) => {
-  res.json({
-    message: "FoodBoxx API is running!"
+// Do not accept requests until the required database connection has been verified.
+pool.ready.then(() => {
+  app.listen(PORT, () => {
+    console.log(`FoodBoxx API running at http://localhost:${PORT}`);
   });
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`FoodBoxx server running on port ${PORT}`);
-});
->>>>>>> backend/michaela
+module.exports = app;

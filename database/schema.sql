@@ -1,3 +1,7 @@
+-- Purpose: FoodBoxx relational schema | Module: database
+-- Owner: Adam | Created: 9 Sep 2026
+-- Notes: Creates the users, products, subscriptions, orders, and order-items tables with supporting indexes.
+
 CREATE DATABASE IF NOT EXISTS foodboxx;
 USE foodboxx;
 

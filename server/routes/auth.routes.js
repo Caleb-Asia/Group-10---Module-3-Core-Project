@@ -8,10 +8,11 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const authMiddleware = require('../middleware/auth.middleware');
+const { validateEmail, validatePassword } = require('../middleware/validate.middleware');
 
 // Public endpoints
-router.post('/register', authController.register);
-router.post('/login', authController.login);
+router.post('/register', validateEmail, validatePassword, authController.register);
+router.post('/login', validateEmail, validatePassword, authController.login);
 
 // Protected endpoints
 router.get('/me', authMiddleware, authController.getProfile);

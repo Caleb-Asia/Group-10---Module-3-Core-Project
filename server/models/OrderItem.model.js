@@ -35,7 +35,14 @@ const OrderItemModel = {
   findByOrderId: async (orderId, conn = null) => {
     const client = conn || pool;
     const [rows] = await client.query(
-      `SELECT * FROM order_items WHERE order_id = ?`,
+      `SELECT
+         order_items.*,
+         products.name AS product_name,
+         products.image_url,
+         products.category
+       FROM order_items
+       INNER JOIN products ON products.id = order_items.product_id
+       WHERE order_items.order_id = ?`,
       [orderId]
     );
     return rows;

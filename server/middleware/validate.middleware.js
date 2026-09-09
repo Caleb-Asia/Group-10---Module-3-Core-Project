@@ -1,116 +1,110 @@
-// Checks and cleans the data before it gets processed by the API.
+/*
+  Purpose: HTTP request validation middleware | Module: middleware
+  Owner: Michaela | Created: 9 Sep 2026
+  Notes: Validates and sanitises auth, product, and order request payloads before controllers execute.
+*/
 
 const {
+  APPROVED_PICKUP_PODS,
+  isApprovedPickupPod,
   isValidEmail,
   isValidPassword,
   isValidPrice,
   isValidQuantity,
   sanitiseString,
   validateProduct
-} = require("../utils/validators");
+} = require('../utils/validators');
 
-// Checks that the product data is valid before continuing
+const sendValidationError = (res, message, errors = null) => res.status(400).json({
+  success: false,
+  message,
+  ...(errors ? { errors } : {})
+});
+
 const validateProductPayload = (req, res, next) => {
   const errors = validateProduct(req.body);
-
   if (Object.keys(errors).length > 0) {
-    return res.status(400).json({
-      success: false,
-      message: "Validation failed",
-      errors
-    });
+    return sendValidationError(res, 'Validation failed', errors);
   }
 
   req.body.name = sanitiseString(req.body.name);
-
-  if (req.body.description) {
-    req.body.description = sanitiseString(req.body.description);
-  }
-
+  if (req.body.description) req.body.description = sanitiseString(req.body.description);
   next();
 };
 
-// Checks product query parameters such as diet and search
 const validateProductQueryParams = (req, res, next) => {
-  const allowedDiets = [
-    "standard",
-    "vegan",
-    "halal",
-    "keto",
-    "nut-free",
-    "gluten-free"
-  ];
-
-  // Check diet if one was provided
+  const allowedDiets = ['standard', 'vegan', 'halal', 'keto', 'nut-free', 'gluten-free'];
   if (req.query.diet && !allowedDiets.includes(req.query.diet)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid dietary preference"
-    });
+    return sendValidationError(res, 'Invalid dietary preference');
   }
 
-  // Clean the search query if one was provided
-  if (req.query.search) {
-    req.query.search = sanitiseString(req.query.search);
-  }
-
+  if (req.query.search) req.query.search = sanitiseString(req.query.search);
   next();
 };
 
-// Checks if the email address is valid
 const validateEmail = (req, res, next) => {
   if (!isValidEmail(req.body.email)) {
-    return res.status(400).json({
-      success: false,
-      message: "Please provide a valid email address"
-    });
+    return sendValidationError(res, 'Please provide a valid email address');
   }
 
+  req.body.email = sanitiseString(req.body.email).toLowerCase();
   next();
 };
 
-// Checks if the password is at least 8 characters
 const validatePassword = (req, res, next) => {
   if (!isValidPassword(req.body.password)) {
-    return res.status(400).json({
-      success: false,
-      message: "Password must be at least 8 characters"
-    });
+    return sendValidationError(res, 'Password must be at least 8 characters');
   }
 
   next();
 };
 
-// Checks if the price is a valid positive number
 const validatePrice = (req, res, next) => {
-  if (!isValidPrice(req.body.price)) {
-    return res.status(400).json({
-      success: false,
-      message: "Price must be a valid positive number"
-    });
-  }
-
+  if (!isValidPrice(req.body.price)) return sendValidationError(res, 'Price must be a valid positive number');
   next();
 };
 
-// Checks if the quantity is a positive whole number
 const validateQuantity = (req, res, next) => {
-  if (!isValidQuantity(req.body.quantity)) {
-    return res.status(400).json({
-      success: false,
-      message: "Quantity must be a positive whole number"
-    });
-  }
-
+  if (!isValidQuantity(req.body.quantity)) return sendValidationError(res, 'Quantity must be a positive whole number');
   next();
 };
 
-// Export the validation functions
+// Validate one-off/custom item lists and subscription box payloads before service processing.
+const validateOrderPayload = (req, res, next) => {
+  const { items, productId, cardNumber, pickupPod } = req.body;
+  const isSubscriptionOrder = productId !== undefined && items === undefined;
+
+  if (!cardNumber || typeof cardNumber !== 'string' || !cardNumber.trim()) {
+    return sendValidationError(res, 'cardNumber is required');
+  }
+  if (!isApprovedPickupPod(pickupPod)) {
+    return sendValidationError(res, `pickupPod must be one of: ${APPROVED_PICKUP_PODS.join(', ')}`);
+  }
+
+  if (isSubscriptionOrder) {
+    if (!Number.isInteger(Number(productId)) || Number(productId) <= 0) {
+      return sendValidationError(res, 'productId must be a positive integer');
+    }
+  } else {
+    if (!Array.isArray(items) || items.length === 0) {
+      return sendValidationError(res, 'items must contain at least one product');
+    }
+    if (items.some(item => !item || !Number.isInteger(Number(item.productId)) || Number(item.productId) <= 0 || !isValidQuantity(item.quantity))) {
+      return sendValidationError(res, 'Each item requires a positive integer productId and quantity');
+    }
+  }
+
+  req.body.cardNumber = cardNumber.trim();
+  req.body.pickupPod = pickupPod.trim();
+  next();
+};
+
 module.exports = {
   validateProductPayload,
   validateProductQueryParams,
   validateEmail,
   validatePassword,
   validatePrice,
-  validateQuantity
+  validateQuantity,
+  validateOrderPayload
 };

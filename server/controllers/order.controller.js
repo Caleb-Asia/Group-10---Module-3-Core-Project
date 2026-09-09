@@ -71,15 +71,15 @@ const orderController = {
    */
   createSubscriptionOrder: async (req, res, next) => {
     try {
-      const { productId, items, cardNumber, pickupPod } = req.body;
+      const { productId, cardNumber, pickupPod } = req.body;
       const userId = req.userId;
 
-      if (!productId || !items || !cardNumber || !pickupPod) {
-        throw new ApiError(400, 'Missing required fields: productId, items, cardNumber, pickupPod');
+      if (!productId || !cardNumber || !pickupPod) {
+        throw new ApiError(400, 'Missing required fields: productId, cardNumber, pickupPod');
       }
 
       const result = await orderService.createSubscriptionOrder({
-        userId, productId, items, cardNumber, pickupPod
+        userId, productId, cardNumber, pickupPod
       });
 
       res.status(201).json({
@@ -89,8 +89,31 @@ const orderController = {
         subscriptionId: result.subscriptionId,
         totalAmount: result.totalAmount,
         qrToken: result.qrToken,
-        txnRef: result.txnRef
+        txnRef: result.txnRef,
+        ...(result.loyaltyReward ? { loyaltyReward: true } : {})
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * Verify an order QR token and transition the order to picked_up.
+   */
+  pickUpOrder: async (req, res, next) => {
+    try {
+      const orderId = Number(req.params.id);
+      const { qrToken } = req.body;
+
+      if (!orderId || Number.isNaN(orderId)) {
+        throw new ApiError(400, 'Invalid order ID');
+      }
+      if (!qrToken) {
+        throw new ApiError(400, 'qrToken is required');
+      }
+
+      const order = await orderService.pickUpOrder({ orderId, userId: req.userId, qrToken });
+      res.json({ success: true, message: 'Order picked up successfully', order });
     } catch (error) {
       next(error);
     }

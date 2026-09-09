@@ -53,6 +53,39 @@ const SubscriptionModel = {
     return rows[0] || null; // returns the most recent subscription for that user
   },
 
+  /** Find an active box product for a subscription update. */
+  findActiveBoxProduct: async (productId, conn = null) => {
+    const client = conn || pool;
+    const [rows] = await client.query(
+      'SELECT id, category, is_active FROM products WHERE id = ? AND category = ? AND is_active = 1',
+      [productId, 'box']
+    );
+    return rows[0] || null;
+  },
+
+  /** Update mutable subscription fields and return the refreshed row. */
+  updateSubscription: async (id, updates, conn = null) => {
+    const client = conn || pool;
+    const assignments = [];
+    const values = [];
+
+    // Only these fixed column names can be selected; all values are bound parameters.
+    if (updates.product_id !== undefined) {
+      assignments.push('product_id = ?');
+      values.push(updates.product_id);
+    }
+    if (updates.pickup_pod !== undefined) {
+      assignments.push('pickup_pod = ?');
+      values.push(updates.pickup_pod);
+    }
+
+    if (assignments.length === 0) return SubscriptionModel.findById(id, conn);
+
+    values.push(id);
+    await client.query(`UPDATE subscriptions SET ${assignments.join(', ')} WHERE id = ?`, values);
+    return SubscriptionModel.findById(id, conn);
+  },
+
   /**
    * Update subscription status (active, paused, cancelled)
    * @param {number} id - Subscription ID

@@ -6,6 +6,8 @@
 
 const SubscriptionModel = require('../models/Subscription.model');
 const ApiError = require('../utils/apiError');
+const orderService = require('../services/order.service');
+const { APPROVED_PICKUP_PODS, isApprovedPickupPod } = require('../utils/validators');
 
 /**
  * Helper to fetch subscription and verify it belongs to req.userId
@@ -29,6 +31,77 @@ async function getAuthorizedSubscription(subscriptionId, authUserId) {
 }
 
 const subscriptionController = {
+  /**
+   * Create a subscription and its first paid order.
+   */
+  createSubscription: async (req, res, next) => {
+    try {
+      const { productId, pickupPod, cardNumber } = req.body;
+
+      if (!productId || !pickupPod || !cardNumber) {
+        throw new ApiError(400, 'Missing required fields: productId, pickupPod, cardNumber');
+      }
+
+      const result = await orderService.createSubscriptionOrder({
+        userId: req.userId,
+        productId,
+        pickupPod,
+        cardNumber
+      });
+
+      res.status(201).json({
+        success: true,
+        subscriptionId: result.subscriptionId,
+        orderId: result.orderId,
+        qrToken: result.qrToken,
+        txnRef: result.txnRef,
+        totalAmount: result.totalAmount,
+        ...(result.loyaltyReward ? { loyaltyReward: true } : {})
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /** Update the box and/or pickup pod on an owned active or paused subscription. */
+  updateSubscription: async (req, res, next) => {
+    try {
+      const subscription = await getAuthorizedSubscription(req.params.id, req.userId);
+      if (!['active', 'paused'].includes(subscription.status)) {
+        throw new ApiError(400, 'Only active or paused subscriptions can be updated');
+      }
+
+      const { productId, pickupPod } = req.body;
+      if (productId === undefined && pickupPod === undefined) {
+        throw new ApiError(400, 'Provide productId, pickupPod, or both to update the subscription');
+      }
+
+      const updates = {};
+      if (productId !== undefined) {
+        const numericProductId = Number(productId);
+        if (!Number.isInteger(numericProductId) || numericProductId <= 0) {
+          throw new ApiError(400, 'productId must be a positive integer');
+        }
+        if (!await SubscriptionModel.findActiveBoxProduct(numericProductId)) {
+          throw new ApiError(400, 'productId must refer to an active product with category "box"');
+        }
+        updates.product_id = numericProductId;
+      }
+
+      if (pickupPod !== undefined) {
+        if (!isApprovedPickupPod(pickupPod)) {
+          throw new ApiError(400, `pickupPod must be one of: ${APPROVED_PICKUP_PODS.join(', ')}`);
+        }
+        updates.pickup_pod = pickupPod.trim();
+      }
+
+      const updatedSubscription = await SubscriptionModel.updateSubscription(subscription.id, updates);
+      res.json({ success: true, subscription: updatedSubscription });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   /**
    * Get subscription for a user (latest)
    */
