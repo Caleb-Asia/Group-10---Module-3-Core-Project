@@ -190,6 +190,13 @@ const prevStep = () => { currentStep.value--; };
 const processPayment = async () => {
   isLoading.value = true;
 
+  // Prevent unsupported payment methods from reaching the card-only backend flow.
+  if (form.payment_method !== 'card') {
+    showError('Payment method not available', 'Please choose Debit / Credit Card to continue.');
+    isLoading.value = false;
+    return;
+  }
+
   try {
     if (form.payment_method === 'card') {
       const last4 = form.card_number.replace(/\s/g, '').slice(-4);
@@ -199,11 +206,19 @@ const processPayment = async () => {
       }
     }
 
-    const orderPayload = {
-      items: cartStore.items.map(item => ({
+    // Flatten custom-box contents into the same product payload used by standard items.
+    const standardItems = cartStore.items
+      .filter(item => !item.isCustom)
+      .map(item => ({
         productId: Number(item.id),
         quantity: Number(item.quantity)
-      })),
+      }));
+    const customItems = cartStore.items
+      .filter(item => item.isCustom)
+      .flatMap(item => item.customItems || []);
+
+    const orderPayload = {
+      items: [...standardItems, ...customItems],
       cardNumber: form.card_number,
       pickupPod: form.pickup_pod
     };

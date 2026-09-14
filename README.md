@@ -82,6 +82,7 @@ The API is available under `/api`.
 - `/api/products` — products and builder items
 - `/api/orders` — orders and pickup
 - `/api/payments` — payment sandbox
+- `/api/payments/payfast` — Payfast sandbox integration (initiate, confirm, notify)
 - `/api/subscriptions` — subscriptions
 
 Detailed endpoint documentation is in [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md).

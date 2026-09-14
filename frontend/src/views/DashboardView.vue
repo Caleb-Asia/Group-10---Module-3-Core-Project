@@ -19,20 +19,20 @@
           <div class="status-badge">
             <span class="status-dot"></span> ACTIVE SUBSCRIPTION
           </div>
-          <div class="subscription-price">R79/wk</div>
+          <div class="subscription-price">R{{ subscription?.price || 79 }}/wk</div>
         </div>
 
-        <h3 class="text-navy mb-1">Standard Box</h3>
+        <h3 class="text-navy mb-1">{{ subscription?.product_name || 'Standard Box' }}</h3>
         <p class="text-muted small mb-4">Weekly delivery · UCT Library Pod</p>
 
         <div class="info-row mb-4">
           <div class="info-block">
             <span class="info-label">Next Charge</span>
-            <span class="info-value">Mon, 2 Sep 2026</span>
+            <span class="info-value">{{ subscription?.next_charge_date || 'Mon, 2 Sep 2026' }}</span>
           </div>
           <div class="info-block">
             <span class="info-label">Pickup Pod</span>
-            <span class="info-value">UCT Library</span>
+            <span class="info-value">{{ subscription?.pickup_pod || 'UCT Library' }}</span>
           </div>
         </div>
 
@@ -51,7 +51,7 @@
         <div class="progress progress--lg mb-2">
           <div class="progress__bar" style="width: 37.5%;"></div>
         </div>
-        <p class="text-muted small mb-0">3 of 8 boxes completed — 5 more to go!</p>
+        <p class="text-muted small mb-0">{{ subscription?.boxes_completed ?? 3 }} of 8 boxes completed — {{ 8 - (subscription?.boxes_completed ?? 3) }} more to go!</p>
       </div>
 
       <!-- Promotional Referral Card (Animated) -->
@@ -88,8 +88,24 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
 import { ClipboardClock, UserPen } from 'lucide-vue-next';
+import { useAuthStore } from '@/store/authStore';
+import api from '@/services/api';
 import { showSuccess } from '@/services/ui';
+
+const authStore = useAuthStore();
+const subscription = ref(null);
+
+// Load the authenticated user's subscription summary for the dashboard card.
+onMounted(async () => {
+  try {
+    const response = await api.get('/subscriptions/user/' + authStore.user.id);
+    subscription.value = response.data.subscription;
+  } catch (error) {
+    subscription.value = null;
+  }
+});
 
 const handleReferral = () => {
   showSuccess('Link Copied!', 'Send your referral link to a friend.');

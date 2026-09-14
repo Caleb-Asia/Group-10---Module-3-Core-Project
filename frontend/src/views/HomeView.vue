@@ -129,9 +129,10 @@
  * Owner: Sisamila Sigab
  * Notes: Uses local cart state via localStorage. Uses FoodBoxx design tokens.
  */
-import { computed, ref } from "vue";
+import { ref } from "vue";
+import { useCartStore } from '@/store/cartStore';
 
-const CART_KEY = "foodboxx_cart";
+const cartStore = useCartStore();
 
 const featuredBoxes = [
   { id: 1, name: "Starter Box", price: 49, tags: ["Standard"], image: "/images/starter-box.png" },
@@ -152,35 +153,18 @@ const stats = [
   { value: "4.8★", label: "Avg Rating" },
 ];
 
-function readCart() {
-  try {
-    const saved = localStorage.getItem(CART_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-}
-
-const cartItems = ref(readCart());
 const message = ref("");
 
-const cartCount = computed(() =>
-  cartItems.value.reduce((total, item) => total + Number(item.quantity || 1), 0)
-);
-
-function saveCart() {
-  localStorage.setItem(CART_KEY, JSON.stringify(cartItems.value));
-  window.dispatchEvent(new CustomEvent("foodboxx-cart-updated"));
-}
-
 function addToCart(box) {
-  const existing = cartItems.value.find((item) => item.id === box.id);
-  if (existing) {
-    existing.quantity = Number(existing.quantity || 1) + 1;
-  } else {
-    cartItems.value.push({ ...box, quantity: 1 });
-  }
-  saveCart();
+  // Use the shared cart store so home-page additions survive navigation and reloads.
+  cartStore.addToCart({
+    id: box.id,
+    name: box.name,
+    price: box.price,
+    quantity: 1,
+    image_url: box.image,
+    dietary_tags: box.tags
+  });
   message.value = `${box.name} added to your cart`;
   window.clearTimeout(addToCart.timeout);
   addToCart.timeout = window.setTimeout(() => {

@@ -53,17 +53,34 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
+import api from '@/services/api';
 import { showSuccess } from '@/services/ui';
 
 const cartStore = useCartStore();
+const authStore = useAuthStore();
 
 // State
 const orders = ref([]);
 
 // Load orders from localStorage when the page mounts
-onMounted(() => {
-  const storedOrders = localStorage.getItem('foodboxx_orders');
-  orders.value = storedOrders ? JSON.parse(storedOrders) : [];
+onMounted(async () => {
+  try {
+    const response = await api.get('/orders/user/' + authStore.user.id);
+    orders.value = (response.data.orders || []).map(order => ({
+      id: order.id,
+      order_number: `FBX-${String(order.id).padStart(6, '0')}`,
+      date: new Date(order.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }),
+      total: Number(order.total_amount),
+      items: (order.items || []).map(item => ({
+        name: item.product_name || item.name,
+        price: Number(item.unit_price),
+        quantity: item.quantity
+      }))
+    }));
+  } catch (error) {
+    orders.value = [];
+  }
 });
 
 // Reorder functionality

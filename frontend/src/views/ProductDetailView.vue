@@ -113,7 +113,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProductStore } from '@/store/productStore';
 import { useCartStore } from '@/store/cartStore';
@@ -177,6 +177,10 @@ onMounted(async () => {
   } catch (error) {
     showError('Failed to load product details.');
   }
+});
+
+onBeforeUnmount(() => {
+  productStore.selectedProduct = null;
 });
 </script>
 

@@ -19,7 +19,7 @@ DELETE FROM users;
 
 INSERT INTO users (id, name, email, password_hash, dietary_preferences, created_at) 
 VALUES (1, 'Demo User', 'demo@foodboxx.co.za', 
-        '$2b$10$rpER/5X.rQM3kOPaloqL5.9Oa.6ZQIk/1uLZ0Y9QVSh5XEskIhb56', 
+        '$2b$10$KK7dm1HpP6WCiXC8ws.P7eghEtTyfrYdS4XZjwsIBU4Z1aOr2fROy',
         'standard', NOW());
 
 -- Products
@@ -29,18 +29,18 @@ VALUES (1, 'Demo User', 'demo@foodboxx.co.za',
 
 INSERT INTO products (id, name, description, price, category, dietary_tags, image_url, is_active) 
 VALUES 
-(1, 'Starter Box', '3 meals + 3 snacks', 49.00, 'box', JSON_ARRAY('standard'), '/images/boxes/starter.jpg', TRUE),
-(2, 'Standard Box', '5 meals + 5 snacks', 79.00, 'box', JSON_ARRAY('standard'), '/images/boxes/standard.jpg', TRUE),
-(3, 'Premium Box', 'Premium selection', 99.00, 'box', JSON_ARRAY('standard'), '/images/boxes/premium.jpg', TRUE),
-(4, 'Vegan Boost Box', 'Plant-based performance fuel', 79.00, 'box', JSON_ARRAY('vegan'), '/images/boxes/vegan.jpg', TRUE),
-(5, 'Keto Fuel Box', 'Low-carb keto meals', 89.00, 'box', JSON_ARRAY('keto'), '/images/boxes/keto.jpg', TRUE),
-(6, 'Nut-Free Safety Box', 'Safe for nut allergies', 69.00, 'box', JSON_ARRAY('nut-free'), '/images/boxes/nutfree.jpg', TRUE),
-(7, 'Monthly Snack Box', 'Recurring snack subscription', 199.00, 'box', JSON_ARRAY('standard'), '/images/boxes/snack.jpg', TRUE),
-(8, 'Exam Week Survival Box', 'Fuel for exams', 99.00, 'box', JSON_ARRAY('standard'), '/images/boxes/exam.jpg', TRUE),
+(1, 'Starter Box', '3 meals + 3 snacks', 49.00, 'box', JSON_ARRAY('standard'), '/images/starter-box.png', TRUE),
+(2, 'Standard Box', '5 meals + 5 snacks', 79.00, 'box', JSON_ARRAY('standard'), '/images/standard-box.png', TRUE),
+(3, 'Premium Box', 'Premium selection', 99.00, 'box', JSON_ARRAY('standard'), '/images/premium-box.png', TRUE),
+(4, 'Vegan Boost Box', 'Plant-based performance fuel', 79.00, 'box', JSON_ARRAY('vegan'), '/images/vegan-box.png', TRUE),
+(5, 'Keto Fuel Box', 'Low-carb keto meals', 89.00, 'box', JSON_ARRAY('keto'), '/images/keto-box.png', TRUE),
+(6, 'Nut-Free Safety Box', 'Safe for nut allergies', 69.00, 'box', JSON_ARRAY('nut-free'), '/images/nut-free-box.png', TRUE),
+(7, 'Monthly Snack Box', 'Recurring snack subscription', 199.00, 'box', JSON_ARRAY('standard'), '/images/snack-box.png', TRUE),
+(8, 'Exam Week Survival Box', 'Fuel for exams', 99.00, 'box', JSON_ARRAY('standard'), '/images/exam-box1.png', TRUE),
 
 -- added these two so halal and gluten-free actually have something to return
-(11, 'Halal Fuel Box', 'Halal-certified performance fuel', 79.00, 'box', JSON_ARRAY('halal'), '/images/boxes/halal.jpg', TRUE),
-(12, 'Gluten-Free Box', 'Gluten-free performance fuel', 79.00, 'box', JSON_ARRAY('gluten-free'), '/images/boxes/glutenfree.jpg', TRUE),
+(11, 'Halal Fuel Box', 'Halal-certified performance fuel', 79.00, 'box', JSON_ARRAY('halal'), '/images/placeholder-product.png', TRUE),
+(12, 'Gluten-Free Box', 'Gluten-free performance fuel', 79.00, 'box', JSON_ARRAY('gluten-free'), '/images/placeholder-product.png', TRUE),
 
-(9, 'Builder Meal', 'Custom meal item', 25.00, 'meal', JSON_ARRAY('standard'), '/images/items/meal.jpg', TRUE),
-(10, 'Builder Snack', 'Custom snack item', 12.00, 'snack', JSON_ARRAY('standard'), '/images/items/snack.jpg', TRUE);
+(9, 'Builder Meal', 'Custom meal item', 25.00, 'meal', JSON_ARRAY('standard'), '/images/builder-meal.png', TRUE),
+(10, 'Builder Snack', 'Custom snack item', 12.00, 'snack', JSON_ARRAY('standard'), '/images/builder-snack.png', TRUE);

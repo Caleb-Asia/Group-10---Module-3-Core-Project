@@ -75,7 +75,8 @@ onMounted(async () => {
   orderData.value = JSON.parse(storedOrder);
 
   try {
-    qrCodeDataUrl.value = await generateQRCode(orderData.value.order_number);
+    const qrSource = orderData.value.qrToken || orderData.value.order_number;
+    qrCodeDataUrl.value = await generateQRCode(qrSource);
   } catch (error) {
     console.error('Failed to generate QR code:', error);
   }

@@ -168,7 +168,12 @@ const addCustomBoxToCart = () => {
     price: totalPrice.value,
     quantity: 1,
     image_url: '/images/custom-meal-box.png',
-    dietary_tags: ['Custom']
+    dietary_tags: ['Custom'],
+    isCustom: true,
+    customItems: selectedItems.value.map(item => ({
+      productId: Number(item.id),
+      quantity: 1
+    }))
   };
 
   cartStore.addToCart(customBox);

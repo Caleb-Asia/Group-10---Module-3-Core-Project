@@ -14,6 +14,8 @@ export const useCartStore = defineStore('cart', () => {
   // State
   const items = ref([]);
   const isSubscription = ref(false);
+  // Hydrate from localStorage on store initialisation so the cart survives reloads.
+  restore();
   
   // Getters (Used in NavBar and CartView)
   const itemCount = computed(() => {

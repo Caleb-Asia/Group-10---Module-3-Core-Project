@@ -77,6 +77,18 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function updateProfile(updates) {
+    try {
+      const response = await api.patch('/auth/me', updates);
+      const updatedUser = response.data.user || response.data;
+      user.value = updatedUser;
+      localStorage.setItem('foodboxx_user', JSON.stringify(updatedUser));
+      return updatedUser;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   function logout() {
     user.value = null;
     token.value = '';
@@ -92,6 +104,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     fetchMe,
+    updateProfile,
     logout
   };
 });

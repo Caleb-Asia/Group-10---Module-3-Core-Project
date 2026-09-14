@@ -80,7 +80,7 @@ const router = createRouter({
 // GLOBAL GUARD: Forces everyone to /login if not logged in
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  const isPublicPage = ['Login', 'Register'].includes(to.name);
+  const isPublicPage = ['Login', 'Register', 'Home', 'Catalogue', 'ProductDetail', 'Cart', 'BoxBuilder', 'PickupLocator'].includes(to.name);
 
   if (!authStore.isAuthenticated && !isPublicPage) {
     next({ name: 'Login' });

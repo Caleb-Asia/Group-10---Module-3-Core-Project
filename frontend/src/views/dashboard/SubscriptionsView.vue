@@ -165,8 +165,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { showConfirm, showSuccess } from '@/services/ui';
+import { ref, computed, onMounted } from 'vue';
+import { showConfirm, showSuccess, showError } from '@/services/ui';
+import api from '@/services/api';
+import { useAuthStore } from '@/store/authStore';
 
 // Mock available boxes for switching
 const availableBoxes = [
@@ -178,6 +180,7 @@ const availableBoxes = [
 
 // --- REACTIVE STATE ---
 const currentBoxId = ref('standard');
+const subscriptionId = ref(null);
 const showSwitchModal = ref(false);
 const status = ref('active'); // 'active' | 'paused' | 'cancelled'
 const boxesCompleted = ref(3); // Matches the 3/8 loyalty bar
@@ -213,16 +216,62 @@ const confirmSwitch = () => {
   showSuccess('Box Switched!', `You have switched to the ${currentBoxName.value}.`);
 };
 
-const handleAction = (action) => {
+const authStore = useAuthStore();
+
+// Load the current subscription state before enabling lifecycle actions.
+onMounted(async () => {
+  try {
+    const response = await api.get('/subscriptions/user/' + authStore.user.id);
+    const subscription = response.data.subscription;
+    if (!subscription) return;
+    subscriptionId.value = subscription.id;
+    status.value = subscription.status;
+    boxesCompleted.value = subscription.boxes_completed;
+    const productBoxMap = { 2: 'standard', 3: 'premium', 4: 'vegan', 5: 'keto' };
+    if (productBoxMap[subscription.product_id]) currentBoxId.value = productBoxMap[subscription.product_id];
+  } catch (error) {
+    // Preserve the existing defaults when the subscription cannot be loaded.
+  }
+});
+
+const handleAction = async (action) => {
+  if (!subscriptionId.value) {
+    showError('Subscription unavailable', 'Your subscription could not be loaded.');
+    return;
+  }
+  const endpoint = { pause: 'pause', resume: 'resume', cancel: 'cancel' }[action];
   if (action === 'pause') {
     showConfirm('Pause Subscription?', 'We will not charge you next week. Would you like to continue?', 'Yes, pause it')
-      .then((result) => { if (result.isConfirmed) { status.value = 'paused'; showSuccess('Subscription Paused', 'We will not charge you next week.'); } });
+      .then(async (result) => {
+        if (!result.isConfirmed) return;
+        try {
+          await api.patch(`/subscriptions/${subscriptionId.value}/${endpoint}`);
+          status.value = 'paused';
+          showSuccess('Subscription Paused', 'We will not charge you next week.');
+        } catch (error) {
+          showError('Action failed', 'Your subscription could not be updated.');
+        }
+      });
   } else if (action === 'resume') {
-    status.value = 'active';
-    showSuccess('Subscription Resumed', 'Your box is back on track!');
+    try {
+      await api.patch(`/subscriptions/${subscriptionId.value}/${endpoint}`);
+      status.value = 'active';
+      showSuccess('Subscription Resumed', 'Your box is back on track!');
+    } catch (error) {
+      showError('Action failed', 'Your subscription could not be updated.');
+    }
   } else if (action === 'cancel') {
     showConfirm('Cancel Subscription?', 'Are you sure you want to cancel? You will lose your loyalty progress and access to your subscription.', 'Yes, cancel it')
-      .then((result) => { if (result.isConfirmed) { status.value = 'cancelled'; showSuccess('Cancelled', 'Your subscription has been cancelled.'); } });
+      .then(async (result) => {
+        if (!result.isConfirmed) return;
+        try {
+          await api.patch(`/subscriptions/${subscriptionId.value}/${endpoint}`);
+          status.value = 'cancelled';
+          showSuccess('Cancelled', 'Your subscription has been cancelled.');
+        } catch (error) {
+          showError('Action failed', 'Your subscription could not be updated.');
+        }
+      });
   }
 };
 

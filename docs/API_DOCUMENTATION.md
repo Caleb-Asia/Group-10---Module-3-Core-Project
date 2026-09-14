@@ -103,6 +103,41 @@ Cards ending in `0002` return `402 Payment Required`; other cards return:
 }
 ```
 
+### POST /api/payments/payfast/initiate
+
+Protected by JWT. Validates and prices the order, then returns a signed Payfast redirect URL.
+
+Request body:
+
+```json
+{
+  "items": [{ "productId": 2, "quantity": 1 }],
+  "pickupPod": "UCT Library",
+  "orderType": "one-off"
+}
+```
+
+Returns: `{ success, redirectUrl, ref, totalAmount }`
+
+### POST /api/payments/payfast/confirm
+
+Public. Called by the frontend when the browser returns from Payfast. Synchronously verifies the payment with Payfast's validate API, then creates the order.
+
+Request body:
+
+```json
+{
+  "ref": "<pending-ref>",
+  "payfastData": { "payment_status": "COMPLETE", "pf_payment_id": "..." }
+}
+```
+
+Returns: `{ success, orderId, qrToken, totalAmount }`
+
+### POST /api/payments/payfast/notify
+
+Public. ITN webhook (dormant on localhost).
+
 ## 3. Order routes
 
 All order routes require authentication. Prices are always calculated from the `products` table; client-supplied prices and totals are ignored.

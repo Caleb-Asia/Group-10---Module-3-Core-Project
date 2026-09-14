@@ -366,9 +366,19 @@ const orderService = {
     try {
       await connection.beginTransaction();
       const qrToken = qrService.generateToken();
+      let subscriptionId = null;
+      if (orderType === 'subscription') {
+        const existingSub = await SubscriptionModel.findByUserId(userId, connection);
+        if (!existingSub || existingSub.status === 'cancelled') {
+          const nextChargeDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString().slice(0, 10);
+          subscriptionId = await SubscriptionModel.create(userId, items[0].productId, pickupPod, nextChargeDate, connection);
+        } else {
+          subscriptionId = existingSub.id;
+        }
+      }
       const orderId = await OrderModel.create({
         user_id: userId,
-        subscription_id: null,
+        subscription_id: subscriptionId,
         order_type: orderType,
         total_amount: totalAmount,
         payment_status: 'paid',
