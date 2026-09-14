@@ -14,7 +14,7 @@ const APPROVED_PICKUP_PODS = Object.freeze([
   'Virgin Active Woodstock'
 ]);
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;   
 
 const isValidEmail = email => typeof email === 'string' && emailRegex.test(email.trim());
 const isValidPassword = password => typeof password === 'string' && password.length >= 8;
