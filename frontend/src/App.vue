@@ -8,7 +8,7 @@
 <template>
   <div id="app">
     <!-- Global Navigation Bar (Sticky) -->
-    <NavBar />
+    <NavBar v-if="!appRoute.meta.hideLayout" />
 
     <!-- Page Content (Router Outlet) -->
     <main class="main-content">
@@ -20,13 +20,16 @@
     </main>
 
     <!-- Global Footer -->
-    <Footer />
+    <Footer v-if="!appRoute.meta.hideLayout" />
   </div>
 </template>
 
 <script setup>
+import { useRoute } from 'vue-router';
 import NavBar from '@/components/layout/NavBar.vue';
 import Footer from '@/components/layout/Footer.vue';
+
+const appRoute = useRoute();
 </script>
 
 <style>

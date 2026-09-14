@@ -58,8 +58,8 @@ const routes = [
   { path: '/pods', name: 'PickupLocator', component: PickupLocatorView },
 
   // Auth Routes
-  { path: '/login', name: 'Login', component: LoginView, beforeEnter: guestOnly },
-  { path: '/register', name: 'Register', component: RegisterView, beforeEnter: guestOnly },
+  { path: '/login', name: 'Login', component: LoginView, beforeEnter: guestOnly, meta: { hideLayout: true } },
+  { path: '/register', name: 'Register', component: RegisterView, beforeEnter: guestOnly, meta: { hideLayout: true } },
 
   // Protected Transactional Routes
   { path: '/checkout', name: 'Checkout', component: CheckoutView, beforeEnter: requireAuth },

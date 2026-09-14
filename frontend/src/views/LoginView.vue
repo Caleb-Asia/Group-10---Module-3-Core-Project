@@ -153,11 +153,11 @@ async function handleLogin() {
 
 <style scoped>
 .auth-page {
-  min-height: 100vh;
+  min-height: calc(100vh - 80px);
   display: flex;
   align-items: center;
   background-color: var(--color-cream); 
-  padding: 100px 0 40px; 
+  padding: 56px 0 48px; 
 }
 
 [data-theme="dark"] .auth-page {
@@ -165,8 +165,9 @@ async function handleLogin() {
 }
 
 .auth-card {
-  max-width: 950px; 
-  width: 100%;
+  max-width: 1080px; 
+  width: min(1080px, calc(100vw - 48px));
+  min-height: 640px;
   margin: 0 auto;
   box-shadow: var(--shadow-2xl);
   background: #FFFFFF;
@@ -297,7 +298,7 @@ async function handleLogin() {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 500px; 
+  min-height: 640px; 
   overflow: hidden;
   border-radius: 0 12px 12px 0;
 }
