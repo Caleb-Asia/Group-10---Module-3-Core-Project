@@ -3,12 +3,14 @@
   Module: Frontend - Core Infrastructure
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: Renders the NavBar, applies smooth page transitions to the Router-View, 
-         and mounts the app. Uses 80px Navbar offset.
+  Notes: Renders NavBar, RouterView with transitions, and Footer. Handles global layout.
 -->
 <template>
   <div id="app">
+    <!-- Global Navigation Bar (Sticky) -->
     <NavBar />
+
+    <!-- Page Content (Router Outlet) -->
     <main class="main-content">
       <router-view v-slot="{ Component, route }">
         <transition name="page" mode="out-in">
@@ -16,21 +18,73 @@
         </transition>
       </router-view>
     </main>
+
+    <!-- Global Footer -->
+    <Footer />
   </div>
 </template>
 
 <script setup>
 import NavBar from '@/components/layout/NavBar.vue';
+import Footer from '@/components/layout/Footer.vue';
 </script>
 
-<style scoped>
-.main-content {
+<style>
+/* ============================================
+   GLOBAL RESET
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
   min-height: 100vh;
-  /* Updated to match the new 80px navbar */
-  padding-top: 0; 
+  /* NOTE: overflow-x: hidden on html is FINE for sticky */
+  overflow-x: hidden;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  font-family: var(--font-family);
+  background-color: var(--color-cream);
+  color: var(--color-gray-800);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* IMPORTANT: no overflow-x: hidden here — it breaks sticky */
+}
+
+[data-theme="dark"] body {
+  background-color: #0B1120;
+  color: #E5E7EB;
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  /* REMOVED flex — display: flex on the root breaks sticky positioning */
+  display: block;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.main-content {
+  width: 100%;
+  min-height: 100vh;
   background-color: var(--color-cream);
 }
 
+[data-theme="dark"] .main-content {
+  background-color: #0B1120;
+}
+
+/* ============================================
+   PAGE TRANSITIONS
+   ============================================ */
 .page-enter-active,
 .page-leave-active {
   transition: opacity 220ms ease, transform 220ms ease;

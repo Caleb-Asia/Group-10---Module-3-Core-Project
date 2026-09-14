@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /* 
   Purpose: Vue Router configuration.
   Module: Frontend - Core Infrastructure
@@ -10,8 +9,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/authStore';
 
-// Import Placeholder for empty/unfinished pages
-import PlaceholderView from '../views/PlaceholderView.vue';
+// Import Home
+import HomeView from '../views/HomeView.vue';
 
 // Import Caleb's Ready Views
 import CatalogueView from '../views/CatalogueView.vue';
@@ -50,44 +49,32 @@ const guestOnly = (to, from, next) => {
 };
 
 const routes = [
-  // Public Routes (No auth required)
-  { path: '/', name: 'Home', component: PlaceholderView },
+  // Public Routes
+  { path: '/', name: 'Home', component: HomeView },  // <-- Now points to Sisamila's page
   { path: '/menu', name: 'Catalogue', component: CatalogueView },
   { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView },
   { path: '/cart', name: 'Cart', component: CartView },
   { path: '/builder', name: 'BoxBuilder', component: BoxBuilderView },
   { path: '/pods', name: 'PickupLocator', component: PickupLocatorView },
 
-  // Auth Routes (Guest Only - Redirects logged-in users to dashboard)
+  // Auth Routes
   { path: '/login', name: 'Login', component: LoginView, beforeEnter: guestOnly },
   { path: '/register', name: 'Register', component: RegisterView, beforeEnter: guestOnly },
 
-  // Protected Transactional Routes (Requires Auth)
+  // Protected Transactional Routes
   { path: '/checkout', name: 'Checkout', component: CheckoutView, beforeEnter: requireAuth },
   { path: '/confirmation', name: 'Confirmation', component: ConfirmationView, beforeEnter: requireAuth },
 
-  // Dashboard Routes (Protected)
+  // Dashboard Routes
   { path: '/dashboard', name: 'Dashboard', component: DashboardView, beforeEnter: requireAuth },
   { path: '/dashboard/profile', name: 'Profile', component: ProfileView, beforeEnter: requireAuth },
   { path: '/dashboard/subscriptions', name: 'Subscriptions', component: SubscriptionsView, beforeEnter: requireAuth },
   { path: '/dashboard/orders', name: 'Orders', component: OrdersView, beforeEnter: requireAuth },
 ];
-=======
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-
-// TEMPORARY: only the home route is wired up so this can run standalone
-// while the rest of the team's views/scaffolding are still in progress.
-// Swap this back to the full route list once merging with Caleb's work.
-const routes = [
-  { path: '/', name: 'home', component: HomeView }
-]
->>>>>>> 4558d42b0d0eb33e28699c77660dc63a69637930
 
 const router = createRouter({
   history: createWebHistory(),
   routes
-<<<<<<< HEAD
 });
 
 // GLOBAL GUARD: Forces everyone to /login if not logged in
@@ -96,7 +83,6 @@ router.beforeEach((to, from, next) => {
   const isPublicPage = ['Login', 'Register'].includes(to.name);
 
   if (!authStore.isAuthenticated && !isPublicPage) {
-    // Force them to login
     next({ name: 'Login' });
   } else {
     next();
@@ -104,8 +90,3 @@ router.beforeEach((to, from, next) => {
 });
 
 export default router;
-=======
-})
-
-export default router
->>>>>>> 4558d42b0d0eb33e28699c77660dc63a69637930

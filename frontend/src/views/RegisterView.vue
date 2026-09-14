@@ -3,7 +3,7 @@
   Module: View - Register
   Owner: Caleb Asia
   Created: 2026-08-31
-  Notes: Uses authStore. Validates inputs. Links to Login.
+  Notes: Uses authStore. Redirects to /menu after register.
 -->
 <template>
   <div class="auth-page">
@@ -97,7 +97,7 @@
             </form>
           </div>
 
-          <!-- Visual side with Image Background -->
+          <!-- Visual side -->
           <div class="auth-visual-side">
             <img src="/images/vegan-box.png" class="auth-visual-bg" alt="Food background" />
             <div class="auth-visual-overlay"></div>
@@ -204,12 +204,12 @@ async function handleRegister() {
         title: 'Welcome to the FoodBoxx family! 🎉',
         html: `<img src="/images/foodboxx-logo.png" style="width: 120px; margin-bottom: 10px;" /><br/><p>Your account has been created successfully.</p>`,
         icon: 'success',
-        confirmButtonText: 'Let\'s Eat!',
+        confirmButtonText: 'Start Shopping!',
         confirmButtonColor: '#F26A1B',
         background: '#FFFFFF',
         color: '#0F2137'
       }).then(() => {
-        router.push('/');
+        router.push('/menu'); // Redirect to Menu after register
       });
     } else {
       showError('Registration Failed', result.message);

@@ -3,7 +3,7 @@
   Module: View - Login
   Owner: Caleb Asia
   Created: 2026-08-31
-  Notes: Uses authStore. Validates inputs. Links to Register.
+  Notes: Uses authStore. Redirects to /menu after login.
 -->
 <template>
   <div class="auth-page">
@@ -144,7 +144,8 @@ async function handleLogin() {
     const result = await authStore.login(form.email, form.password);
     if (result.success) {
       showSuccess('Login Successful', 'Welcome back!');
-      const redirect = route.query.redirect || '/dashboard';
+      // Redirect to the menu by default, or to the page they were trying to reach
+      const redirect = route.query.redirect || '/menu';
       router.push(redirect);
     } else {
       showError('Login Failed', result.message);
@@ -162,12 +163,10 @@ async function handleLogin() {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  /* LIGHT MODE - Cream Background */
   background-color: var(--color-cream); 
   padding: 100px 0 40px; 
 }
 
-/* DARK MODE - Deep Navy Background */
 [data-theme="dark"] .auth-page {
   background-color: #0B1120;
 }
@@ -177,14 +176,12 @@ async function handleLogin() {
   width: 100%;
   margin: 0 auto;
   box-shadow: var(--shadow-2xl);
-  /* LIGHT MODE - White Card */
   background: #FFFFFF;
   border: 1px solid #E5E7EB;
   border-radius: var(--radius-2xl);
   overflow: hidden;
 }
 
-/* DARK MODE - Dark Card */
 [data-theme="dark"] .auth-card {
   background: #1A2436;
   border-color: #2D3748;
@@ -202,9 +199,7 @@ async function handleLogin() {
   }
 }
 
-/* Form Side */
 .auth-form-side {
-  /* LIGHT MODE - White background */
   background: #FFFFFF;
   padding: 40px;
   display: flex;
@@ -212,7 +207,6 @@ async function handleLogin() {
   justify-content: center;
 }
 
-/* DARK MODE - Dark Card */
 [data-theme="dark"] .auth-form-side {
   background: #1A2436;
 }
@@ -220,25 +214,21 @@ async function handleLogin() {
 .auth-title {
   font-size: 28px;
   font-weight: var(--font-weight-bold);
-  /* LIGHT MODE - Dark Navy Text */
   color: var(--color-navy);
   margin-bottom: 10px;
 }
 
-/* DARK MODE - White Text */
 [data-theme="dark"] .auth-title {
   color: #FFFFFF;
 }
 
 .auth-subtitle {
   font-size: 14px;
-  /* LIGHT MODE - Grey Text */
   color: var(--color-gray-500);
   margin-bottom: 32px;
   line-height: 1.6;
 }
 
-/* DARK MODE - Light Grey Text */
 [data-theme="dark"] .auth-subtitle {
   color: var(--color-gray-400);
 }
@@ -256,7 +246,6 @@ async function handleLogin() {
 
 .auth-input {
   width: 100%;
-  /* LIGHT MODE - Input style */
   background: var(--color-gray-50);
   border: 1px solid var(--color-gray-200);
   border-radius: 10px;
@@ -266,7 +255,6 @@ async function handleLogin() {
   transition: all var(--transition-fast);
 }
 
-/* DARK MODE - Input style */
 [data-theme="dark"] .auth-input {
   background: #0B1120;
   border-color: #2D3748;
@@ -295,7 +283,6 @@ async function handleLogin() {
 }
 
 .demo-box {
-  /* LIGHT MODE - Orange tint box */
   background: #FFF7ED;
   border: 1px dashed var(--color-orange);
   border-radius: 10px;
@@ -306,7 +293,6 @@ async function handleLogin() {
   line-height: 1.8;
 }
 
-/* DARK MODE - Dark Orange tint box */
 [data-theme="dark"] .demo-box {
   background: rgba(242, 106, 27, 0.1);
   color: var(--color-gray-200);
@@ -320,7 +306,6 @@ async function handleLogin() {
   font-weight: bold;
 }
 
-/* Logo inside Visual Side */
 .auth-logo-inner {
   position: relative;
   z-index: 3;
@@ -337,7 +322,6 @@ async function handleLogin() {
   color: var(--color-orange) !important;
 }
 
-/* Visual Side */
 .auth-visual-side {
   position: relative;
   padding: 40px;
