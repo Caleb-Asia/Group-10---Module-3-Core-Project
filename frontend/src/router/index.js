@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* 
   Purpose: Vue Router configuration.
   Module: Frontend - Core Infrastructure
@@ -71,10 +72,22 @@ const routes = [
   { path: '/dashboard/subscriptions', name: 'Subscriptions', component: SubscriptionsView, beforeEnter: requireAuth },
   { path: '/dashboard/orders', name: 'Orders', component: OrdersView, beforeEnter: requireAuth },
 ];
+=======
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+
+// TEMPORARY: only the home route is wired up so this can run standalone
+// while the rest of the team's views/scaffolding are still in progress.
+// Swap this back to the full route list once merging with Caleb's work.
+const routes = [
+  { path: '/', name: 'home', component: HomeView }
+]
+>>>>>>> 4558d42b0d0eb33e28699c77660dc63a69637930
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+<<<<<<< HEAD
 });
 
 // GLOBAL GUARD: Forces everyone to /login if not logged in
@@ -91,3 +104,8 @@ router.beforeEach((to, from, next) => {
 });
 
 export default router;
+=======
+})
+
+export default router
+>>>>>>> 4558d42b0d0eb33e28699c77660dc63a69637930
