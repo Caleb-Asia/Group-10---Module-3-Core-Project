@@ -44,7 +44,7 @@ const validateProduct = (product) => {
 
   // Check the price if one was provided
   if (product.price !== undefined && !isValidPrice(product.price)) {
-    errors.price = "Price must be a valid positive number";
+    errors.price = "Price must be a valid number greater than or equal to 0";
   }
 
   // Check that the category is one of the allowed options

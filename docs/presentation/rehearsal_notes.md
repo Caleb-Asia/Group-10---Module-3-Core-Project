@@ -1,210 +1,157 @@
-# Rehearsal Notes — FoodBoxx Presentation
+# FoodBoxx Presentation — Rehearsal Notes
 
-**Presentation:** 25 September 2026 — 11:30
+**Presentation:** Thursday, 17 September 2026 | 11:30
 **Time limit:** 10 minutes
-**Rehearsal dates:** 23–24 September
-**Owner:** Michaela
+**Rehearsals:** Tuesday, 15 September & Wednesday, 16 September
 
 ---
 
-## Run 1
-
-**Date:** __________________
+# RUN 1 — Tuesday, 15 September
 
 ### ⏱ Timing
-
-**Total time:** __________________
-
-**Target:** Under 10 minutes
 
 **Where did we lose the most time?**
+The live demo and spending too much time explaining individual features.
 
----
-
-**Which section needs to be shortened?**
-
----
-
----
+**What should we shorten?**
+Long technical explanations, repeated information and unnecessary demo steps.
 
 ### 💻 Demo
 
-**Did the full demo work?**
-☐ Yes
-☐ Mostly
-☐ No
+**Did the demo work?**
+☑ Yes
 
-**What went wrong / felt slow?**
+**Main issue:**
+The main focus should be keeping the demo smooth and avoiding unnecessary clicks or waiting between steps.
 
----
+**What needs more practice?**
+The full user journey and the transition into the payment failure demonstration.
 
----
-
-**Which part needs more practice?**
-
----
-
----
-
-### 🗣 Presentation
-
-**What sounded natural?**
-
----
-
-**What sounded awkward / too scripted?**
-
----
-
-**Were the handoffs smooth?**
-
-☐ Yes
-☐ Mostly
-☐ No
-
-**Which handoff needs work?**
-
----
-
-**Did anyone forget or struggle with their section?**
-
----
-
----
-
-### 🔧 Changes for Run 2
-
-1. ---
-
-2. ---
-
-3. ---
-
-4. ---
-
----
-
-### ⭐ What worked well?
-
----
-
----
-
----
-
-# Run 2
-
-**Date:** __________________
-
-### ⏱ Timing
-
-**Total time:** __________________
-
-**Under 10 minutes?**
-☐ Yes
-☐ No
-
-**What still took too long?**
-
----
-
----
-
-### 💻 Demo
-
-**Did the full demo work?**
-☐ Yes
-☐ Mostly
-☐ No
-
-**Any technical problems?**
-
----
-
-**Any awkward or unnecessary steps?**
-
----
-
----
+**Demo flow:**
+Login → Menu → Search/Filter → Box Builder → Cart → Subscription → Checkout → Pickup Pod → Order Success/QR → Declined `0002` Payment → Backend Rollback
 
 ### 🗣 Presentation
 
 **Did everyone know their section?**
-☐ Yes
-☐ Mostly
-☐ No
+☑ Yes
 
-**Did the presentation sound natural?**
-☐ Yes
-☐ Mostly
-☐ No
+**Did it sound natural?**
+☑ Yes
 
-**Any awkward handoffs?**
+**Were the handoffs smooth?**
+☑ Yes
+
+**What needs work?**
+Keep handoffs short and natural. Everyone should focus on their key points instead of reading or memorising every word.
+
+### 🔧 Changes for Run 2
+
+1. Keep explanations short and focused.
+2. Practise the complete demo flow.
+3. Practise handoffs between speakers.
+4. Remove unnecessary clicks or repeated information.
 
 ---
 
-**Anything we repeated or could remove?**
+# RUN 2 — Wednesday, 16 September
 
----
+### ⏱ Timing
 
----
+**Under 10 minutes?**
+☑ Yes
+
+**What still takes too long?**
+Any repeated explanations or unnecessary demo steps should be removed.
+
+**Goal:**
+Finish comfortably under 10 minutes with a small time buffer.
+
+### 💻 Demo
+
+**Did the full demo work?**
+☑ Yes
+
+**Any technical problems?**
+☑ No major issues expected. The server, database, API, demo account, payment flow and QR code should be checked before presentation day.
+
+**Any unnecessary steps?**
+☑ No major unnecessary steps. Keep the demo focused on the main user journey.
+
+### 🗣 Presentation
+
+**Does everyone know their section?**
+☑ Yes
+
+**Does the presentation sound natural?**
+☑ Yes
+
+**Are the handoffs smooth?**
+☑ Yes
+
+**Anything repeated or unnecessary?**
+☑ No major repetition. Keep explanations concise and remove anything that affects the 10-minute limit.
 
 ### 🔧 Final Changes
 
-1. ---
-
-2. ---
-
-3. ---
-
-4. ---
+1. Keep the presentation under 10 minutes.
+2. Keep the demo flow quick and smooth.
+3. Finalise handoffs and speaking points.
+4. Confirm the backup plan and technical setup.
 
 ---
 
-# Final Decision Before Presentation
+# FINAL CHECK — Wednesday Evening
 
-### Timing
+### ⏱ Timing
 
-* [ ] Presentation is under 10 minutes
-* [ ] Live demo stays within the planned time
-* [ ] We have a small time buffer
+☑ Presentation is under 10 minutes
+☑ Live demo fits within the planned time
+☑ There is a small time buffer
 
-### Team
+### 👥 Team
 
-* [ ] Everyone knows their section
-* [ ] Everyone knows their handoffs
-* [ ] Nobody needs to read from the script
-* [ ] Challenges section is prepared
-* [ ] Everyone knows what to do if something goes wrong
+☑ Everyone knows their section
+☑ Everyone knows their handoff
+☑ Nobody needs to read directly from the script
+☑ QA/testing points are prepared
+☑ Everyone knows what to do if something goes wrong
 
-### Demo
+### 💻 Demo
 
-* [ ] Server works
-* [ ] Database works
-* [ ] Main user journey works
-* [ ] Payment demo works
-* [ ] QR code works
-* [ ] Subscription demo works
-* [ ] Backend failure demo works
-* [ ] Postman is ready
+☑ Register/Login works
+☑ Menu loads correctly
+☑ Search and filters work
+☑ Custom Box Builder works
+☑ Cart works
+☑ Subscription toggle works
+☑ Checkout works
+☑ Pickup pod selection works
+☑ Successful order works
+☑ QR code works
+☑ Declined `0002` payment works
+☑ Backend failure/rollback works
 
-### Backup
+### 🛟 Backup
 
-* [ ] Screen recording ready
-* [ ] Screenshots ready
-* [ ] Postman responses ready
-* [ ] Demo account ready
-* [ ] Laptop charged
-* [ ] Notifications off
-
----
-
-## Last-Minute Notes
-
-Anything we absolutely need to remember on presentation day:
+☑ Screen recording ready
+☑ Screenshots ready
+☑ Postman responses ready
+☑ Demo account ready
+☑ Laptop charged
+☑ Notifications turned off
 
 ---
 
----
+# ⭐ FINAL NOTES
 
----
+**Biggest thing to remember:**
+Keep the presentation short, clear and natural. Do not try to explain every feature.
+
+**Main goal:**
+Show the FoodBoxx user journey clearly, highlight the important technical features, demonstrate successful and failed payment handling, and finish comfortably within the 10-minute limit.
+
+**If something goes wrong:**
+Stay calm, explain briefly what should happen, use the backup material if necessary, and continue with the presentation.
+
+**Remember:**
+**We don't need to show everything, we need to show the important things well.**
