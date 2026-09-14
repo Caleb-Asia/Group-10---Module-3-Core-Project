@@ -158,6 +158,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { showError, showSuccess } from '@/services/ui';
 import { PICKUP_PODS } from '@/services/config';
+import api from '@/services/api';
 
 const router = useRouter();
 const cartStore = useCartStore();
@@ -189,63 +190,61 @@ const prevStep = () => { currentStep.value--; };
 const processPayment = async () => {
   isLoading.value = true;
 
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  // 1. Card Validation
-  if (form.payment_method === 'card') {
-    const last4 = form.card_number.replace(/\s/g, '').slice(-4);
-    if (last4 === '0002') {
-      isLoading.value = false;
-      showError('Payment Declined', 'This test card was declined. Please try another card.');
-      return;
+  try {
+    if (form.payment_method === 'card') {
+      const last4 = form.card_number.replace(/\s/g, '').slice(-4);
+      if (last4 === '0002') {
+        showError('Payment Declined', 'This test card was declined. Please try another card.');
+        return;
+      }
     }
+
+    const orderPayload = {
+      items: cartStore.items.map(item => ({
+        productId: Number(item.id),
+        quantity: Number(item.quantity)
+      })),
+      cardNumber: form.card_number,
+      pickupPod: form.pickup_pod
+    };
+
+    const response = await api.post('/orders', orderPayload);
+    const orderData = {
+      id: response.data.orderId,
+      order_number: orderRef.value,
+      pickup_pod: form.pickup_pod,
+      collection_window: 'Mon–Fri, 08:00–17:00',
+      dietary_preferences: authStore.user?.dietary_preferences || 'standard',
+      payment_method: form.payment_method,
+      items: cartStore.items.map(item => ({
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity
+      })),
+      total: cartStore.subtotal,
+      status: 'confirmed',
+      date: new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }),
+      txnRef: response.data.txnRef,
+      qrToken: response.data.qrToken
+    };
+
+    localStorage.setItem('foodboxx_orders', JSON.stringify([
+      orderData,
+      ...JSON.parse(localStorage.getItem('foodboxx_orders') || '[]')
+    ]));
+
+    sessionStorage.setItem('foodboxx_last_order', JSON.stringify(orderData));
+
+    cartStore.clearCart();
+
+    showSuccess('Payment Successful', 'Your order has been placed!');
+    router.push('/confirmation');
+  } catch (error) {
+    const message = error?.response?.data?.error?.message || 'Payment could not be processed.';
+    showError('Checkout Failed', message);
+  } finally {
+    isLoading.value = false;
   }
-
-  // 2. SnapScan Simulation
-  if (form.payment_method === 'snapscan') {
-    if (Math.random() < 0.1) {
-      isLoading.value = false;
-      showError('SnapScan Failed', 'QR Code expired. Please try again.');
-      return;
-    }
-  }
-
-  // 3. EFT Simulation
-  if (form.payment_method === 'eft') {
-    showSuccess('EFT Details Sent', 'Your order is pending until payment reflects.');
-  }
-
-  // Create the order object
-  const orderData = {
-    id: Date.now(),
-    order_number: orderRef.value,
-    pickup_pod: form.pickup_pod,
-    collection_window: 'Mon–Fri, 08:00–17:00',
-    dietary_preferences: authStore.user?.dietary_preferences || 'Standard',
-    payment_method: form.payment_method,
-    items: cartStore.items.map(item => ({ 
-      name: item.name, 
-      price: item.price, 
-      quantity: item.quantity 
-    })),
-    total: cartStore.subtotal,
-    status: 'Pending',
-    date: new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })
-  };
-
-  // Save to localStorage
-  const existingOrders = JSON.parse(localStorage.getItem('foodboxx_orders') || '[]');
-  existingOrders.unshift(orderData);
-  localStorage.setItem('foodboxx_orders', JSON.stringify(existingOrders));
-
-  // Save to sessionStorage so ConfirmationView can read it
-  sessionStorage.setItem('foodboxx_last_order', JSON.stringify(orderData));
-
-  // Clear the cart
-  cartStore.clearCart();
-
-  showSuccess('Payment Successful', 'Your order has been placed!');
-  router.push('/confirmation');
 };
 </script>
 

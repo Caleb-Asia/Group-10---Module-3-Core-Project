@@ -117,7 +117,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProductStore } from '@/store/productStore';
 import { useCartStore } from '@/store/cartStore';
-import { showSuccess } from '@/services/ui';
+import { showError, showSuccess } from '@/services/ui';
 import { Star } from 'lucide-vue-next';
 
 const route = useRoute();
@@ -128,10 +128,7 @@ const cartStore = useCartStore();
 const openAccordion = ref('nutrition');
 const isBuilderMode = ref(false);
 
-const product = computed(() => {
-  return productStore.products.find(p => p.id === Number(route.params.id)) || 
-         productStore.builderItems.find(p => p.id === Number(route.params.id));
-});
+const product = computed(() => productStore.selectedProduct);
 
 const getDietaryTags = (product) => {
   if (Array.isArray(product.dietary_tags)) return product.dietary_tags;
@@ -175,11 +172,10 @@ const handleItemAction = () => {
 onMounted(async () => {
   isBuilderMode.value = sessionStorage.getItem('builder_context') === 'true';
 
-  if (productStore.products.length === 0) {
-    await productStore.fetchProducts();
-  }
-  if (productStore.builderItems.length === 0) {
-    await productStore.fetchBuilderItems();
+  try {
+    await productStore.fetchProductById(route.params.id);
+  } catch (error) {
+    showError('Failed to load product details.');
   }
 });
 </script>

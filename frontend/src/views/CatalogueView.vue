@@ -156,8 +156,6 @@ const clearFilters = () => {
 const fetchProducts = async () => {
   isLoading.value = true;
   try {
-    // Add a small artificial delay so the skeleton is visible during demo
-    await new Promise(resolve => setTimeout(resolve, 800));
     await productStore.fetchProducts();
   } catch (error) {
     showError('Failed to load products. Please refresh the page.');

@@ -28,7 +28,7 @@
                   type="email" 
                   v-model="form.email" 
                   class="auth-input" 
-                  placeholder="demo@uni.ac.za"
+                  placeholder="you@example.com"
                   :class="{ 'auth-input--error': errors.email }"
                 />
                 <span v-if="errors.email" class="form-error">{{ errors.email }}</span>
@@ -54,13 +54,6 @@
                   <label for="remember">Remember me</label>
                 </div>
                 <span class="auth-link">Forgot password?</span>
-              </div>
-
-              <!-- Demo Credentials Box -->
-              <div class="demo-box mb-6">
-                <strong>Demo Credentials:</strong><br>
-                Email: <code>demo@uni.ac.za</code><br>
-                Password: <code>12345678!</code>
               </div>
 
               <!-- Submit -->
@@ -280,30 +273,6 @@ async function handleLogin() {
   color: var(--color-orange);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-}
-
-.demo-box {
-  background: #FFF7ED;
-  border: 1px dashed var(--color-orange);
-  border-radius: 10px;
-  padding: 14px; 
-  font-size: 14px;
-  color: var(--color-gray-700);
-  text-align: center;
-  line-height: 1.8;
-}
-
-[data-theme="dark"] .demo-box {
-  background: rgba(242, 106, 27, 0.1);
-  color: var(--color-gray-200);
-}
-
-.demo-box code {
-  background: rgba(242, 106, 27, 0.1);
-  color: var(--color-orange);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: bold;
 }
 
 .auth-logo-inner {

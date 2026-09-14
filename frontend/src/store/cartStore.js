@@ -74,21 +74,23 @@ export const useCartStore = defineStore('cart', () => {
     localStorage.removeItem('foodboxx_cart');
   }
 
-  // API Integration (Hits Adam's backend once ready)
   async function checkout(payload) {
     try {
       const orderData = {
-        items: items.value,
-        is_subscription: isSubscription.value,
-        pickup_pod: payload.pickup_pod,
-        dietary_preferences: payload.dietary_preferences
+        items: items.value.map(item => ({
+          productId: Number(item.id),
+          quantity: Number(item.quantity)
+        })),
+        cardNumber: payload.cardNumber,
+        pickupPod: payload.pickup_pod,
+        is_subscription: isSubscription.value
       };
 
       const response = await api.post('/orders', orderData);
-      clearCart(); 
-      return response.data; 
+      clearCart();
+      return response.data;
     } catch (error) {
-      throw error; 
+      throw error;
     }
   }
 

@@ -3,59 +3,58 @@
   Module: Frontend - Views
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: Renders QR code using qr.js. Handles mock order data until backend is ready.
+  Notes: Reads the confirmed order from session storage, then renders the QR code from that order.
 -->
 <template>
   <div class="confirmation-page">
     <div class="container">
-      
-      <!-- Success Icon -->
-      <div class="success-icon mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-
-      <!-- Headline -->
-      <h1 class="text-navy mb-2">Order Placed!</h1>
-      <p class="text-muted mb-6">Your box will be ready for pickup from Monday</p>
-
-      <!-- QR Code Section -->
-      <div class="qr-card mb-6">
-        <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="Pickup QR Code" class="qr-image mb-4" />
-        <div class="qr-placeholder" v-else>QR Code</div>
-        
-        <p class="qr-label mb-1">Pickup QR Code</p>
-        <p class="qr-order-number">{{ orderData.order_number }}</p>
-      </div>
-
-      <!-- Pickup Details Card -->
-      <div class="details-card p-6 mb-6">
-        <div class="detail-row mb-4">
-          <span class="detail-label">Pickup Pod</span>
-          <span class="detail-value text-navy">{{ orderData.pickup_pod }}</span>
+      <div v-if="orderData">
+        <div class="success-icon mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
         </div>
-        <div class="detail-row mb-4">
-          <span class="detail-label">Collection Window</span>
-          <span class="detail-value text-navy">{{ orderData.collection_window }}</span>
+
+        <h1 class="text-navy mb-2">Order Placed!</h1>
+        <p class="text-muted mb-6">Your box will be ready for pickup from Monday</p>
+
+        <div class="qr-card mb-6">
+          <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="Pickup QR Code" class="qr-image mb-4" />
+          <div class="qr-placeholder" v-else>QR Code</div>
+          
+          <p class="qr-label mb-1">Pickup QR Code</p>
+          <p class="qr-order-number">{{ orderData.order_number }}</p>
         </div>
-        <div class="detail-row">
-          <span class="detail-label">Order #</span>
-          <span class="detail-value text-orange fw-bold">{{ orderData.order_number }}</span>
+
+        <div class="details-card p-6 mb-6">
+          <div class="detail-row mb-4">
+            <span class="detail-label">Pickup Pod</span>
+            <span class="detail-value text-navy">{{ orderData.pickup_pod }}</span>
+          </div>
+          <div class="detail-row mb-4">
+            <span class="detail-label">Collection Window</span>
+            <span class="detail-value text-navy">{{ orderData.collection_window }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Order #</span>
+            <span class="detail-value text-orange fw-bold">{{ orderData.order_number }}</span>
+          </div>
+        </div>
+
+        <div class="d-flex flex-column gap-3">
+          <router-link to="/dashboard/orders" class="btn btn--primary btn--full btn--lg">
+            View My Orders
+          </router-link>
+
+          <router-link to="/" class="btn btn--outline btn--full btn--lg">
+            Back to Home
+          </router-link>
         </div>
       </div>
 
-      <!-- Buttons -->
-      <div class="d-flex flex-column gap-3">
-        <router-link to="/dashboard/orders" class="btn btn--primary btn--full btn--lg">
-          View My Orders
-        </router-link>
-
-        <router-link to="/" class="btn btn--outline btn--full btn--lg">
-          Back to Home
-        </router-link>
+      <div v-else class="empty-state">
+        <p class="text-muted">No confirmed order found. Please complete checkout first.</p>
       </div>
-      
     </div>
   </div>
 </template>
@@ -64,23 +63,17 @@
 import { ref, onMounted } from 'vue';
 import { generateQRCode } from '@/services/qr';
 
-// Order Data (Mock, will come from CheckoutView later)
-const orderData = ref({
-  order_number: 'FB-702389',
-  pickup_pod: 'UCT Library',
-  collection_window: 'Mon–Fri, 08:00–17:00'
-});
-
+const orderData = ref(null);
 const qrCodeDataUrl = ref('');
 
 onMounted(async () => {
-  // Attempt to get real order data from sessionStorage (set by Checkout later)
   const storedOrder = sessionStorage.getItem('foodboxx_last_order');
-  if (storedOrder) {
-    orderData.value = JSON.parse(storedOrder);
+  if (!storedOrder) {
+    return;
   }
 
-  // Generate the QR code using the order number
+  orderData.value = JSON.parse(storedOrder);
+
   try {
     qrCodeDataUrl.value = await generateQRCode(orderData.value.order_number);
   } catch (error) {
