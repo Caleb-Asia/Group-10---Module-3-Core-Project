@@ -42,6 +42,7 @@ app.use('/api/auth', require('./server/routes/auth.routes'));
 app.use('/api/payments', require('./server/routes/payment.routes'));
 app.use('/api/orders', require('./server/routes/order.routes'));
 app.use('/api/subscriptions', require('./server/routes/subscription.routes'));
+app.use('/api/payments/payfast', require('./server/routes/payfast.routes'));
 app.use('/api/products', require('./server/routes/product.routes'));
 
 // Keep unknown API endpoints machine-readable instead of returning the Vue app.
@@ -61,7 +62,13 @@ app.use((req, res, next) => {
 // Express 5 requires a named wildcard; this is the equivalent of app.get('*', ...).
 app.get('/{*splat}', (req, res) => {
   if (!frontendBuildExists) {
-    return res.status(404).send('Frontend build not found. Run "npm run build:frontend".');
+    return res.status(404).json({
+      success: false,
+      error: {
+        message: 'Frontend build not found. Run "npm run build:frontend".',
+        details: null
+      }
+    });
   }
 
   res.sendFile(frontendIndexPath);
@@ -75,5 +82,19 @@ pool.ready.then(() => {
     console.log(`FoodBoxx API running at http://localhost:${PORT}`);
   });
 });
+
+async function shutdown(signal) {
+  console.log(`Received ${signal}, shutting down gracefully...`);
+  try {
+    await pool.end();
+    console.log('MySQL pool closed.');
+  } catch (err) {
+    console.error('Error closing MySQL pool:', err);
+  }
+  process.exit(0);
+}
+
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 module.exports = app;

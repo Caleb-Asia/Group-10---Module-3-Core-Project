@@ -18,7 +18,7 @@ const SubscriptionModel = {
    */
   create: async (userId, productId, pickupPod, nextChargeDate, conn = null) => {
     const client = conn || pool;
-    const [result] = await client.query(
+    const [result] = await client.execute(
       `INSERT INTO subscriptions (user_id, product_id, pickup_pod, next_charge_date) 
        VALUES (?, ?, ?, ?)`,
       [userId, productId, pickupPod, nextChargeDate]
@@ -34,7 +34,7 @@ const SubscriptionModel = {
    */
   findById: async (id, conn = null) => {
     const client = conn || pool;
-    const [rows] = await client.query('SELECT * FROM subscriptions WHERE id = ?', [id]);
+    const [rows] = await client.execute('SELECT * FROM subscriptions WHERE id = ?', [id]);
     return rows[0] || null;
   },
 
@@ -46,7 +46,7 @@ const SubscriptionModel = {
    */
   findByUserId: async (userId, conn = null) => {
     const client = conn || pool;
-    const [rows] = await client.query(
+    const [rows] = await client.execute(
       'SELECT * FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC',
       [userId]
     );
@@ -56,7 +56,7 @@ const SubscriptionModel = {
   /** Find an active box product for a subscription update. */
   findActiveBoxProduct: async (productId, conn = null) => {
     const client = conn || pool;
-    const [rows] = await client.query(
+    const [rows] = await client.execute(
       'SELECT id, category, is_active FROM products WHERE id = ? AND category = ? AND is_active = 1',
       [productId, 'box']
     );
@@ -78,11 +78,15 @@ const SubscriptionModel = {
       assignments.push('pickup_pod = ?');
       values.push(updates.pickup_pod);
     }
+    if (updates.next_charge_date !== undefined) {
+      assignments.push('next_charge_date = ?');
+      values.push(updates.next_charge_date);
+    }
 
     if (assignments.length === 0) return SubscriptionModel.findById(id, conn);
 
     values.push(id);
-    await client.query(`UPDATE subscriptions SET ${assignments.join(', ')} WHERE id = ?`, values);
+    await client.execute(`UPDATE subscriptions SET ${assignments.join(', ')} WHERE id = ?`, values);
     return SubscriptionModel.findById(id, conn);
   },
 
@@ -95,7 +99,7 @@ const SubscriptionModel = {
    */
   updateStatus: async (id, status, conn = null) => {
     const client = conn || pool;
-    const [result] = await client.query('UPDATE subscriptions SET status = ? WHERE id = ?', [status, id]);
+    const [result] = await client.execute('UPDATE subscriptions SET status = ? WHERE id = ?', [status, id]);
     return result.affectedRows;
   },
 
@@ -107,7 +111,7 @@ const SubscriptionModel = {
    */
   incrementBoxesCompleted: async (id, conn = null) => {
     const client = conn || pool;
-    const [result] = await client.query(
+    const [result] = await client.execute(
       'UPDATE subscriptions SET boxes_completed = boxes_completed + 1 WHERE id = ?',
       [id]
     );
@@ -122,7 +126,7 @@ const SubscriptionModel = {
    */
   skipNextCharge: async (id, conn = null) => {
     const client = conn || pool;
-    const [result] = await client.query(
+    const [result] = await client.execute(
       'UPDATE subscriptions SET next_charge_date = DATE_ADD(next_charge_date, INTERVAL 7 DAY) WHERE id = ?',
       [id]
     );

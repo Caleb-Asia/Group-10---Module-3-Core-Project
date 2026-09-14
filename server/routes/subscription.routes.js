@@ -8,7 +8,7 @@ const express = require('express');
 const router = express.Router();
 const subscriptionController = require('../controllers/subscription.controller');
 const authMiddleware = require('../middleware/auth.middleware');
-const { validateOrderPayload } = require('../middleware/validate.middleware');
+const { validateOrderPayload, validateSubscriptionUpdatePayload } = require('../middleware/validate.middleware');
 
 // All subscription operations require JWT authentication
 router.use(authMiddleware);
@@ -17,7 +17,7 @@ router.use(authMiddleware);
 router.post('/', validateOrderPayload, subscriptionController.createSubscription);
 
 // Update the selected box and/or pickup pod for an owned active or paused subscription.
-router.patch('/:id', subscriptionController.updateSubscription);
+router.patch('/:id', validateSubscriptionUpdatePayload, subscriptionController.updateSubscription);
 
 // Retrieve active/latest subscription for a user
 router.get('/user/:userId', subscriptionController.getSubscriptionByUser);

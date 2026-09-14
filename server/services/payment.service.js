@@ -5,6 +5,8 @@
 */
 
 const ApiError = require('../utils/apiError');
+const crypto = require('crypto');
+const { PAYMENT_SIMULATED_DELAY_MS } = require('../config/app.config');
 
 const paymentService = {
   /**
@@ -27,8 +29,8 @@ const paymentService = {
     const cleanedCard = String(cardNumber).replace(/\s/g, '');
     const lastFour = cleanedCard.slice(-4);
 
-    // Step 3: Simulate a fake gateway network delay (1500ms)
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Step 3: Simulate a fake gateway network delay
+    await new Promise(resolve => setTimeout(resolve, PAYMENT_SIMULATED_DELAY_MS));
 
     // Step 4: Apply simulated rule - card ending in '0002' triggers a 402 Payment Required
     if (lastFour === '0002') {
@@ -36,7 +38,7 @@ const paymentService = {
     }
 
     // Step 5: Generate unique transaction reference (using substring instead of deprecated substr)
-    const randomHex = Math.random().toString(36).substring(2, 10);
+    const randomHex = crypto.randomBytes(4).toString('hex');
     const txnRef = `FBX-${Date.now()}-${randomHex}`;
 
     // Step 6: Return payment confirmation object

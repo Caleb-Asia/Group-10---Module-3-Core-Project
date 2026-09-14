@@ -8,7 +8,7 @@ const pool = require('../config/db');
 
 const UserModel = {
   create: async (name, email, password_hash, dietary_preferences = 'standard') => {
-    const [result] = await pool.query(
+    const [result] = await pool.execute(
       'INSERT INTO users (name, email, password_hash, dietary_preferences) VALUES (?, ?, ?, ?)',
       [name, email, password_hash, dietary_preferences]
     );
@@ -16,12 +16,12 @@ const UserModel = {
   },
 
   findByEmail: async (email) => {
-    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
     return rows[0] || null;
   },
 
   findById: async (id) => {
-    const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+    const [rows] = await pool.execute('SELECT * FROM users WHERE id = ?', [id]);
     return rows[0] || null;
   },
 
@@ -36,7 +36,7 @@ const UserModel = {
     if (fields.length === 0) return;
 
     values.push(id);
-    await pool.query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
+    await pool.execute(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
   }
 };
 

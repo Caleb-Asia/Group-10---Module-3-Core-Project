@@ -14,7 +14,7 @@ const APPROVED_PICKUP_PODS = Object.freeze([
   'Virgin Active Woodstock'
 ]);
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;   
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const isValidEmail = email => typeof email === 'string' && emailRegex.test(email.trim());
 const isValidPassword = password => typeof password === 'string' && password.length >= 8;
@@ -25,22 +25,6 @@ const isApprovedPickupPod = pickupPod => typeof pickupPod === 'string' && APPROV
 // Trim user-entered strings without altering non-string values.
 const sanitiseString = value => (typeof value === 'string' ? value.trim() : value);
 
-const validateProduct = product => {
-  const errors = {};
-
-  if (!product.name || typeof product.name !== 'string') {
-    errors.name = 'Product name is required';
-  }
-  if (product.price !== undefined && !isValidPrice(product.price)) {
-    errors.price = 'Price must be a valid positive number';
-  }
-  if (product.category && !['box', 'meal', 'snack'].includes(product.category)) {
-    errors.category = 'Category must be box, meal, or snack';
-  }
-
-  return errors;
-};
-
 module.exports = {
   APPROVED_PICKUP_PODS,
   isApprovedPickupPod,
@@ -48,6 +32,5 @@ module.exports = {
   isValidPassword,
   isValidPrice,
   isValidQuantity,
-  sanitiseString,
-  validateProduct
+  sanitiseString
 };

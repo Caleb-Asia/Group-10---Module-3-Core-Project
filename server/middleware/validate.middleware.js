@@ -11,26 +11,16 @@ const {
   isValidPassword,
   isValidPrice,
   isValidQuantity,
-  sanitiseString,
-  validateProduct
+  sanitiseString
 } = require('../utils/validators');
 
 const sendValidationError = (res, message, errors = null) => res.status(400).json({
   success: false,
-  message,
-  ...(errors ? { errors } : {})
-});
-
-const validateProductPayload = (req, res, next) => {
-  const errors = validateProduct(req.body);
-  if (Object.keys(errors).length > 0) {
-    return sendValidationError(res, 'Validation failed', errors);
+  error: {
+    message,
+    details: errors || null
   }
-
-  req.body.name = sanitiseString(req.body.name);
-  if (req.body.description) req.body.description = sanitiseString(req.body.description);
-  next();
-};
+});
 
 const validateProductQueryParams = (req, res, next) => {
   const allowedDiets = ['standard', 'vegan', 'halal', 'keto', 'nut-free', 'gluten-free'];
@@ -99,12 +89,37 @@ const validateOrderPayload = (req, res, next) => {
   next();
 };
 
+const validateSubscriptionUpdatePayload = (req, res, next) => {
+  const { productId, pickupPod } = req.body;
+
+  if (productId === undefined && pickupPod === undefined) {
+    return sendValidationError(res, 'Provide productId, pickupPod, or both to update the subscription');
+  }
+
+  if (productId !== undefined) {
+    const numericProductId = Number(productId);
+    if (!Number.isInteger(numericProductId) || numericProductId <= 0) {
+      return sendValidationError(res, 'productId must be a positive integer');
+    }
+    req.body.productId = numericProductId;
+  }
+
+  if (pickupPod !== undefined) {
+    if (!isApprovedPickupPod(pickupPod)) {
+      return sendValidationError(res, `pickupPod must be one of: ${APPROVED_PICKUP_PODS.join(', ')}`);
+    }
+    req.body.pickupPod = pickupPod.trim();
+  }
+
+  next();
+};
+
 module.exports = {
-  validateProductPayload,
   validateProductQueryParams,
   validateEmail,
   validatePassword,
   validatePrice,
   validateQuantity,
-  validateOrderPayload
+  validateOrderPayload,
+  validateSubscriptionUpdatePayload
 };

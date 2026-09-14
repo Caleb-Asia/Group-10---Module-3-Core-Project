@@ -80,8 +80,12 @@ const authController = {
     try {
       const { email, password } = req.body;
 
-      if (!email || !password) {
+      if (!email) {
         throw new ApiError(400, 'Email and password are required');
+      }
+
+      if (typeof password !== 'string' || password.trim() === '') {
+        throw new ApiError(401, 'Invalid email or password');
       }
 
       const cleanEmail = String(email).trim().toLowerCase();

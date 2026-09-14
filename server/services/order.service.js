@@ -7,6 +7,7 @@
 const pool = require('../config/db');
 const ApiError = require('../utils/apiError');
 const paymentService = require('./payment.service');
+const payfastService = require('./payfast.service');
 const qrService = require('./qr.service');
 const OrderModel = require('../models/Order.model');
 const OrderItemModel = require('../models/OrderItem.model');
@@ -98,7 +99,7 @@ async function getSubscriptionBoxItem(productId, conn) {
     throw new ApiError(400, 'Invalid subscription box product ID');
   }
 
-  const [products] = await conn.query(
+  const [products] = await conn.execute(
     'SELECT id, name, price, category, is_active FROM products WHERE id = ?',
     [numericProductId]
   );
@@ -240,10 +241,22 @@ const orderService = {
       // CRITICAL FIX: If no existing subscription OR if existing subscription is cancelled,
       // create a brand new subscription. Never resurrect a cancelled subscription!
       if (!existingSub || existingSub.status === 'cancelled') {
-        const nextChargeDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        const nextChargeDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString().slice(0, 10);
         subscriptionId = await SubscriptionModel.create(userId, productId, pickupPod, nextChargeDate, connection);
       } else {
+        if (existingSub.status === 'paused') {
+          throw new ApiError(400, 'Resume your subscription before placing a new order');
+        }
+
         subscriptionId = existingSub.id;
+        if (existingSub.product_id !== productId || existingSub.pickup_pod !== pickupPod) {
+          await SubscriptionModel.updateSubscription(subscriptionId, {
+            product_id: productId,
+            pickup_pod: pickupPod
+          }, connection);
+        }
+        const nextChargeDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        await SubscriptionModel.updateSubscription(subscriptionId, { next_charge_date: nextChargeDate }, connection);
       }
 
       // 3. Increment first so every eighth completed box receives the loyalty reward.
@@ -300,6 +313,86 @@ const orderService = {
   },
 
   /**
+   * Validate and price an order before initiating a Payfast payment.
+   * @param {Object} data - Payfast order initiation data.
+   * @returns {Promise<Object>} Payfast redirect details and validated total.
+   */
+  initiatePayfastOrder: async ({ userId, items, pickupPod, orderType, nameFirst, email, itemName }) => {
+    validatePickupPod(pickupPod);
+    const connection = await pool.getConnection();
+    let calculatedItems;
+    let totalAmount;
+    try {
+      await connection.beginTransaction();
+      const result = await validateAndCalculateOrderItems(
+        items,
+        connection,
+        orderType === 'custom' ? ['meal', 'snack'] : null
+      );
+      calculatedItems = result.calculatedItems;
+      totalAmount = result.totalAmount;
+      await connection.rollback();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+
+    const { redirectUrl, ref } = await payfastService.initiatePayment({
+      amount: totalAmount,
+      itemName: itemName || 'FoodBoxx Order',
+      orderData: {
+        userId,
+        items: calculatedItems,
+        pickupPod,
+        orderType,
+        totalAmount,
+        nameFirst: nameFirst || 'Customer',
+        email: email || 'test@test.com'
+      }
+    });
+
+    return { redirectUrl, ref, totalAmount };
+  },
+
+  /**
+   * Create an order after Payfast confirms payment via ITN.
+   * @param {Object} data - Validated pending Payfast order data.
+   * @returns {Promise<Object>} Created order details.
+   */
+  createOrderFromPayfast: async ({ userId, items, pickupPod, orderType, totalAmount, txnRef }) => {
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      const qrToken = qrService.generateToken();
+      const orderId = await OrderModel.create({
+        user_id: userId,
+        subscription_id: null,
+        order_type: orderType,
+        total_amount: totalAmount,
+        payment_status: 'paid',
+        payment_txn_ref: txnRef,
+        qr_token: qrToken,
+        pickup_pod: pickupPod,
+        status: 'confirmed'
+      }, connection);
+
+      for (const item of items) {
+        await OrderItemModel.create(orderId, item.productId, item.quantity, item.unitPrice, connection);
+      }
+
+      await connection.commit();
+      return { orderId, qrToken, txnRef, totalAmount };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  },
+
+  /**
    * Get a single order with its items, verifying ownership
    * @param {number} orderId - Order ID
    * @param {number} userId - Authenticated User ID
@@ -330,12 +423,19 @@ const orderService = {
     }
 
     const orders = await OrderModel.findByUserId(requestedUserId);
-    const withItems = [];
-    for (const order of orders) {
-      const items = await OrderItemModel.findByOrderId(order.id);
-      withItems.push({ ...order, items });
+    const orderIds = orders.map(order => order.id);
+    const items = await OrderItemModel.findByOrderIds(orderIds);
+    const itemsByOrderId = new Map();
+    for (const item of items) {
+      const key = String(item.order_id);
+      if (!itemsByOrderId.has(key)) itemsByOrderId.set(key, []);
+      itemsByOrderId.get(key).push(item);
     }
-    return withItems;
+
+    return orders.map(order => ({
+      ...order,
+      items: itemsByOrderId.get(String(order.id)) || []
+    }));
   },
 
   /**

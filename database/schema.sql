@@ -83,8 +83,46 @@ CREATE TABLE IF NOT EXISTS order_items (
 -- ============================================
 -- INDEXES for performance
 -- ============================================
-CREATE INDEX idx_orders_user_id ON orders(user_id);
-CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);
-CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+SET @idx_exists := (
+  SELECT COUNT(*) FROM information_schema.statistics
+  WHERE table_schema = DATABASE()
+    AND table_name = 'orders'
+    AND index_name = 'idx_orders_user_id'
+);
+SET @sql := IF(@idx_exists = 0,
+  'CREATE INDEX idx_orders_user_id ON orders(user_id)',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @idx_exists := (
+  SELECT COUNT(*) FROM information_schema.statistics
+  WHERE table_schema = DATABASE()
+    AND table_name = 'subscriptions'
+    AND index_name = 'idx_subscriptions_user_id'
+);
+SET @sql := IF(@idx_exists = 0,
+  'CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id)',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @idx_exists := (
+  SELECT COUNT(*) FROM information_schema.statistics
+  WHERE table_schema = DATABASE()
+    AND table_name = 'order_items'
+    AND index_name = 'idx_order_items_order_id'
+);
+SET @sql := IF(@idx_exists = 0,
+  'CREATE INDEX idx_order_items_order_id ON order_items(order_id)',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 SHOW TABLES;

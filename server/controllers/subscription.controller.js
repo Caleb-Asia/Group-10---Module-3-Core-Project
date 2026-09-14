@@ -7,7 +7,6 @@
 const SubscriptionModel = require('../models/Subscription.model');
 const ApiError = require('../utils/apiError');
 const orderService = require('../services/order.service');
-const { APPROVED_PICKUP_PODS, isApprovedPickupPod } = require('../utils/validators');
 
 /**
  * Helper to fetch subscription and verify it belongs to req.userId
@@ -72,27 +71,16 @@ const subscriptionController = {
       }
 
       const { productId, pickupPod } = req.body;
-      if (productId === undefined && pickupPod === undefined) {
-        throw new ApiError(400, 'Provide productId, pickupPod, or both to update the subscription');
-      }
-
       const updates = {};
       if (productId !== undefined) {
-        const numericProductId = Number(productId);
-        if (!Number.isInteger(numericProductId) || numericProductId <= 0) {
-          throw new ApiError(400, 'productId must be a positive integer');
-        }
-        if (!await SubscriptionModel.findActiveBoxProduct(numericProductId)) {
+        if (!await SubscriptionModel.findActiveBoxProduct(productId)) {
           throw new ApiError(400, 'productId must refer to an active product with category "box"');
         }
-        updates.product_id = numericProductId;
+        updates.product_id = productId;
       }
 
       if (pickupPod !== undefined) {
-        if (!isApprovedPickupPod(pickupPod)) {
-          throw new ApiError(400, `pickupPod must be one of: ${APPROVED_PICKUP_PODS.join(', ')}`);
-        }
-        updates.pickup_pod = pickupPod.trim();
+        updates.pickup_pod = pickupPod;
       }
 
       const updatedSubscription = await SubscriptionModel.updateSubscription(subscription.id, updates);

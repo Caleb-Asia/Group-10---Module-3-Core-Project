@@ -18,7 +18,7 @@ const OrderItemModel = {
    */
   create: async (orderId, productId, quantity, unitPrice, conn = null) => {
     const client = conn || pool;
-    const [result] = await client.query(
+    const [result] = await client.execute(
       `INSERT INTO order_items (order_id, product_id, quantity, unit_price) 
        VALUES (?, ?, ?, ?)`,
       [orderId, productId, quantity, unitPrice]
@@ -34,7 +34,7 @@ const OrderItemModel = {
    */
   findByOrderId: async (orderId, conn = null) => {
     const client = conn || pool;
-    const [rows] = await client.query(
+    const [rows] = await client.execute(
       `SELECT
          order_items.*,
          products.name AS product_name,
@@ -48,6 +48,25 @@ const OrderItemModel = {
     return rows;
   },
 
+  /** Find all items for a set of order IDs. */
+  findByOrderIds: async (orderIds, conn = null) => {
+    if (orderIds.length === 0) return [];
+
+    const client = conn || pool;
+    const [rows] = await client.query(
+      `SELECT
+         order_items.*,
+         products.name AS product_name,
+         products.image_url,
+         products.category
+       FROM order_items
+       INNER JOIN products ON products.id = order_items.product_id
+       WHERE order_items.order_id IN (?)`,
+      [orderIds]
+    );
+    return rows;
+  },
+
   /**
    * Delete all items for a given order ID
    * @param {number} orderId - Order ID
@@ -55,7 +74,7 @@ const OrderItemModel = {
    */
   deleteByOrderId: async (orderId, conn = null) => {
     const client = conn || pool;
-    await client.query('DELETE FROM order_items WHERE order_id = ?', [orderId]);
+    await client.execute('DELETE FROM order_items WHERE order_id = ?', [orderId]);
   }
 };
 

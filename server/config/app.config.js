@@ -10,10 +10,17 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET.trim() === '') {
   process.exit(1);
 }
 
+let CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
+if (CORS_ORIGIN.trim() === '*') {
+  console.warn('CORS_ORIGIN cannot be "*" when credentials are required; falling back to http://localhost:3000');
+  CORS_ORIGIN = 'http://localhost:3000';
+}
+
 module.exports = {
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRY: '2h',
   QR_TOKEN_LENGTH: 32,
-  CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
-  BCRYPT_ROUNDS: 10
+  CORS_ORIGIN,
+  PAYMENT_SIMULATED_DELAY_MS: Number(process.env.PAYMENT_SIMULATED_DELAY_MS) || 1500,
+  BCRYPT_ROUNDS: Number(process.env.BCRYPT_ROUNDS) || 10
 };

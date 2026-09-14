@@ -250,6 +250,28 @@ Returns `201 Created`:
 
 Returns the authenticated user's latest subscription.
 
+### PATCH /api/subscriptions/:id
+
+Updates the selected box and/or pickup pod for an owned active or paused subscription. Authentication is required. Provide at least one of `productId` or `pickupPod`:
+
+```json
+{
+  "productId": 2,
+  "pickupPod": "CPUT Woodstock"
+}
+```
+
+`productId` must be a positive integer that references an active product with category `box`. `pickupPod` must be one of the approved pickup pods.
+
+Returns:
+
+```json
+{
+  "success": true,
+  "subscription": {}
+}
+```
+
 ### PATCH /api/subscriptions/:id/pause
 
 Pauses an active subscription.

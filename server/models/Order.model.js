@@ -28,7 +28,7 @@ const OrderModel = {
     } = orderData;
 
     // Parameterised INSERT statement preserving 5-table schema integrity
-    const [result] = await client.query(
+    const [result] = await client.execute(
       `INSERT INTO orders 
        (user_id, subscription_id, order_type, total_amount, payment_status, payment_txn_ref, qr_token, pickup_pod, status) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -45,7 +45,7 @@ const OrderModel = {
    */
   findById: async (id, conn = null) => {
     const client = conn || pool;
-    const [rows] = await client.query('SELECT * FROM orders WHERE id = ?', [id]);
+    const [rows] = await client.execute('SELECT * FROM orders WHERE id = ?', [id]);
     return rows[0] || null;
   },
 
@@ -57,7 +57,7 @@ const OrderModel = {
    */
   findByUserId: async (userId, conn = null) => {
     const client = conn || pool;
-    const [rows] = await client.query('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC', [userId]);
+    const [rows] = await client.execute('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC', [userId]);
     return rows;
   },
 
@@ -69,7 +69,7 @@ const OrderModel = {
    */
   updatePaymentStatus: async (id, payment_status, conn = null) => {
     const client = conn || pool;
-    await client.query('UPDATE orders SET payment_status = ? WHERE id = ?', [payment_status, id]);
+    await client.execute('UPDATE orders SET payment_status = ? WHERE id = ?', [payment_status, id]);
   },
 
   /**
@@ -80,7 +80,7 @@ const OrderModel = {
    */
   updateStatus: async (id, status, conn = null) => {
     const client = conn || pool;
-    await client.query('UPDATE orders SET status = ? WHERE id = ?', [status, id]);
+    await client.execute('UPDATE orders SET status = ? WHERE id = ?', [status, id]);
   },
 
   /**
@@ -91,7 +91,7 @@ const OrderModel = {
    */
   updateQrToken: async (id, qr_token, conn = null) => {
     const client = conn || pool;
-    await client.query('UPDATE orders SET qr_token = ? WHERE id = ?', [qr_token, id]);
+    await client.execute('UPDATE orders SET qr_token = ? WHERE id = ?', [qr_token, id]);
   }
 };
 
