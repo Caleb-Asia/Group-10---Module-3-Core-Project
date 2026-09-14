@@ -1,0 +1,25 @@
+{
+  "name": "group-10---module-3-core-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Caleb-Asia/Group-10---Module-3-Core-Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Caleb-Asia/Group-10---Module-3-Core-Project/issues"
+  },
+  "homepage": "https://github.com/Caleb-Asia/Group-10---Module-3-Core-Project#readme"
+}
