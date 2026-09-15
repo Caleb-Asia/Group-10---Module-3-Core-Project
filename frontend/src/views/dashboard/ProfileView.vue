@@ -96,7 +96,7 @@
                   v-model="form.pickup_pod"
                   class="form-input form-select"
                 >
-                  <option v-for="pod in pickupPods" :key="pod" :value="pod">
+                  <option v-for="pod in PICKUP_PODS" :key="pod" :value="pod">
                     {{ pod }}
                   </option>
                 </select>
@@ -123,18 +123,9 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import { Mail, MapPin, SlidersHorizontal, Sparkles, UserRound, Utensils } from 'lucide-vue-next';
 import { useAuthStore } from '@/store/authStore';
 import { showSuccess, showError } from '@/services/ui';
+import { PICKUP_PODS } from '@/services/config';
 
 const authStore = useAuthStore();
-
-// Static Pickup Pods
-const pickupPods = [
-  "UCT Library",
-  "Res Hall A",
-  "Stellenbosch Neelsie",
-  "CPUT Woodstock",
-  "Workshop17 Woodstock",
-  "Virgin Active Woodstock"
-];
 
 // State
 const isLoading = ref(false);

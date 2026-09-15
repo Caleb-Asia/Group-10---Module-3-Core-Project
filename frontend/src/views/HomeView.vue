@@ -97,7 +97,7 @@
               <strong>Skip the campus queue.</strong>
             </h2>
             <p class="promo-subtitle">
-              Subscribe and save 10% on every box. Pause, skip or switch anytime.
+              Subscribe and manage every box on your schedule. Pause, skip or switch anytime.
             </p>
             <div class="promo-actions">
               <router-link to="/menu" class="btn btn--primary btn--lg">Order Now</router-link>
@@ -116,13 +116,6 @@
       </section>
     </main>
 
-    <!-- TOAST -->
-    <transition name="toast">
-      <div v-if="message" class="toast" role="status">
-        <span class="toast-check">✓</span>
-        {{ message }}
-      </div>
-    </transition>
   </div>
 </template>
 
@@ -135,6 +128,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useCartStore } from '@/store/cartStore';
 import { useProductStore } from '@/store/productStore';
+import { showSuccess } from '@/services/ui';
 
 const cartStore = useCartStore();
 const productStore = useProductStore();
@@ -154,8 +148,6 @@ const stats = [
   { value: "4.8★", label: "Avg Rating" },
 ];
 
-const message = ref("");
-
 function addToCart(box) {
   // Use the shared cart store so home-page additions survive navigation and reloads.
   cartStore.addToCart({
@@ -166,11 +158,7 @@ function addToCart(box) {
     image_url: box.image_url || '',
     dietary_tags: box.dietary_tags || []
   });
-  message.value = `${box.name} added to your cart`;
-  window.clearTimeout(addToCart.timeout);
-  addToCart.timeout = window.setTimeout(() => {
-    message.value = "";
-  }, 2200);
+  showSuccess(`${box.name} added to your cart`);
 }
 
 function getDietaryTags(product) {
@@ -557,45 +545,6 @@ onMounted(async () => {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.05em;
-}
-
-/* TOAST */
-.toast {
-  position: fixed;
-  right: 22px;
-  bottom: 22px;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-3) var(--spacing-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-navy);
-  color: #FFFFFF;
-  box-shadow: var(--shadow-xl);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-}
-
-.toast-check {
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--color-orange);
-  color: #FFFFFF;
-}
-
-.toast-enter-active,
-.toast-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateY(8px);
 }
 
 /* DARK MODE */

@@ -9,7 +9,6 @@
   <div class="subscription-toggle">
     <div class="toggle-header">
       <span class="toggle-label">Make this a recurring subscription</span>
-      <span v-if="isSubscription" class="toggle-badge">SAVE 10%</span>
     </div>
     
     <button 
@@ -62,16 +61,6 @@ const toggle = () => {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-gray-700);
-}
-
-.toggle-badge {
-  background: rgba(242, 106, 27, 0.1);
-  color: var(--color-orange);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  width: fit-content;
 }
 
 .switch {

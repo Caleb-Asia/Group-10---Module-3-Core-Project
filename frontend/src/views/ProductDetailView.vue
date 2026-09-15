@@ -41,11 +41,8 @@
 
                 <div class="satiety-rating">
                   <span class="text-muted">Satiety Rating:</span>
-                  <Star :size="16" :fill="'#F59E0B'" :stroke="'#F59E0B'" />
-                  <Star :size="16" :fill="'#F59E0B'" :stroke="'#F59E0B'" />
-                  <Star :size="16" :fill="'#F59E0B'" :stroke="'#F59E0B'" />
-                  <Star :size="16" :fill="'#F59E0B'" :stroke="'#F59E0B'" />
-                  <span class="text-muted">4/5</span>
+                  <Star v-for="star in 5" :key="star" :size="16" :fill="star <= details.satiety ? '#F59E0B' : 'none'" :stroke="'#F59E0B'" />
+                  <span class="text-muted">{{ details.satiety }}/5</span>
                 </div>
               </div>
               <span class="detail-price">R{{ Number(product.price).toFixed(2) }}</span>
@@ -59,11 +56,11 @@
               </div>
               <div v-if="openAccordion === 'nutrition'" class="accordion-content">
                 <div class="nutrition-grid">
-                  <div class="nutrition-box"><span>Protein</span><strong>22g</strong></div>
-                  <div class="nutrition-box"><span>Carbs</span><strong>62g</strong></div>
-                  <div class="nutrition-box"><span>Fat</span><strong>14g</strong></div>
-                  <div class="nutrition-box"><span>Fibre</span><strong>14g</strong></div>
-                  <div class="nutrition-box"><span>Calories</span><strong>490kcal</strong></div>
+                  <div class="nutrition-box"><span>Protein</span><strong>{{ details.protein }}</strong></div>
+                  <div class="nutrition-box"><span>Carbs</span><strong>{{ details.carbs }}</strong></div>
+                  <div class="nutrition-box"><span>Fat</span><strong>{{ details.fat }}</strong></div>
+                  <div class="nutrition-box"><span>Fibre</span><strong>{{ details.fibre }}</strong></div>
+                  <div class="nutrition-box"><span>Calories</span><strong>{{ details.calories }}</strong></div>
                 </div>
               </div>
             </div>
@@ -75,7 +72,7 @@
                 <span>{{ openAccordion === 'allergen' ? '−' : '+' }}</span>
               </div>
               <div v-if="openAccordion === 'allergen'" class="accordion-content">
-                <p class="text-muted mb-0">Contains: Gluten, Soy. <strong class="text-navy">Nut-Free</strong> (Safe for allergies).</p>
+                <p class="text-muted mb-0">{{ details.allergens }}</p>
               </div>
             </div>
 
@@ -87,10 +84,7 @@
               </div>
               <div v-if="openAccordion === 'inside'" class="accordion-content">
                 <ul class="ingredients-list mb-0">
-                  <li>Grilled chicken breast</li>
-                  <li>Steamed broccoli & carrots</li>
-                  <li>Fluffy white rice</li>
-                  <li>Herb butter sauce</li>
+                  <li v-for="item in details.ingredients" :key="item">{{ item }}</li>
                 </ul>
               </div>
             </div>
@@ -119,6 +113,7 @@ import { useProductStore } from '@/store/productStore';
 import { useCartStore } from '@/store/cartStore';
 import { showError, showSuccess } from '@/services/ui';
 import { Star } from 'lucide-vue-next';
+import { getProductDetails } from '@/services/productDetails';
 
 const route = useRoute();
 const router = useRouter();
@@ -129,6 +124,7 @@ const openAccordion = ref('nutrition');
 const isBuilderMode = ref(false);
 
 const product = computed(() => productStore.selectedProduct);
+const details = computed(() => getProductDetails(product.value?.id));
 
 const getDietaryTags = (product) => {
   if (Array.isArray(product.dietary_tags)) return product.dietary_tags;

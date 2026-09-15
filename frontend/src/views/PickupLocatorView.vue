@@ -122,6 +122,7 @@
 <script setup>
 import { ref } from 'vue';
 import { showSuccess } from '@/services/ui';
+import { PICKUP_PODS } from '@/services/config';
 
 // State
 const activePodId = ref(null);
@@ -163,14 +164,23 @@ const endDrag = () => {
 };
 
 // Static data for the 6 pods
-const pickupPods = [
+/*
   { id: 1, name: 'UCT Library', address: 'University of Cape Town, Rondebosch', hours: 'Mon–Fri, 08:00–17:00' },
   { id: 2, name: 'Res Hall A', address: 'Upper Campus, Rondebosch', hours: 'Mon–Fri, 08:00–17:00' },
   { id: 3, name: 'Stellenbosch Neelsie', address: 'Neelsie Student Centre, Stellenbosch', hours: 'Mon–Fri, 08:00–17:00' },
   { id: 4, name: 'CPUT Woodstock', address: 'Cape Peninsula University of Tech, Woodstock', hours: 'Mon–Fri, 08:00–17:00' },
   { id: 5, name: 'Workshop17 Woodstock', address: '17 Dysseldorp Rd, Woodstock', hours: 'Mon–Fri, 08:00–17:00' },
   { id: 6, name: 'Virgin Active Woodstock', address: 'The Woodstock Exchange, Woodstock', hours: 'Mon–Fri, 06:00–20:00' },
-];
+*/
+const POD_DETAILS = {
+  'UCT Library': { address: 'University of Cape Town, Rondebosch', hours: 'Mon–Fri, 08:00–17:00' },
+  'Res Hall A': { address: 'Upper Campus, Rondebosch', hours: 'Mon–Fri, 08:00–17:00' },
+  'Stellenbosch Neelsie': { address: 'Neelsie Student Centre, Stellenbosch', hours: 'Mon–Fri, 08:00–17:00' },
+  'CPUT Woodstock': { address: 'Cape Peninsula University of Tech, Woodstock', hours: 'Mon–Fri, 08:00–17:00' },
+  'Workshop17 Woodstock': { address: '17 Dysseldorp Rd, Woodstock', hours: 'Mon–Fri, 08:00–17:00' },
+  'Virgin Active Woodstock': { address: 'The Woodstock Exchange, Woodstock', hours: 'Mon–Fri, 06:00–20:00' }
+};
+const pickupPods = PICKUP_PODS.map((name, index) => ({ id: index + 1, name, address: POD_DETAILS[name]?.address || '', hours: POD_DETAILS[name]?.hours || '' }));
 
 // Mock pin positions on the SVG map
 const pinPosition = (index) => {

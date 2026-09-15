@@ -28,7 +28,7 @@
           <span class="stat-icon">↗</span>
           <div>
             <span class="stat-label">MEMBER SINCE</span>
-            <strong>Sep 2026</strong>
+            <strong>{{ memberSince }}</strong>
           </div>
         </div>
         <div class="stat-card">
@@ -58,16 +58,16 @@
           </div>
 
           <h3 class="subscription-box-name">{{ productName || currentBoxName }}</h3>
-          <p class="text-muted small mb-5">Weekly delivery · UCT Library Pod</p>
+          <p class="text-muted small mb-5">Weekly delivery · {{ subscription?.pickup_pod || '—' }}</p>
 
           <div class="info-row mb-6">
             <div class="info-block">
               <span class="info-label">NEXT CHARGE</span>
-              <span class="info-value">{{ status === 'paused' ? 'Paused' : 'Mon, 2 Sep 2026' }}</span>
+                <span class="info-value">{{ status === 'paused' ? 'Paused' : (nextChargeDate || '—') }}</span>
             </div>
             <div class="info-block">
               <span class="info-label">PICKUP POD</span>
-              <span class="info-value">UCT Library</span>
+                <span class="info-value">{{ subscription?.pickup_pod || '—' }}</span>
             </div>
           </div>
 
@@ -181,28 +181,33 @@ const productStore = useProductStore();
 const currentBoxId = ref(null);
 const subscriptionId = ref(null);
 const showSwitchModal = ref(false);
-const status = ref('active'); // 'active' | 'paused' | 'cancelled'
-const boxesCompleted = ref(3); // Matches the 3/8 loyalty bar
+const status = ref(null); // 'active' | 'paused' | 'cancelled'
+const boxesCompleted = ref(0);
 const productName = ref(null);
 const productPrice = ref(null);
 const productLoading = ref(false);
 const productError = ref('');
+const subscription = ref(null);
 
 // --- COMPUTED VALUES (Dynamic!) ---
 const availableBoxes = computed(() => productStore.products.filter(product => product.category === 'box'));
 const currentBox = computed(() => availableBoxes.value.find(box => Number(box.id) === Number(currentBoxId.value)));
 const currentBoxName = computed(() => productName.value || currentBox.value?.name || 'No box selected');
 const currentBoxPrice = computed(() => productPrice.value || currentBox.value?.price || 0);
+const memberSince = computed(() => subscription.value?.created_at ? new Date(subscription.value.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—');
+const nextChargeDate = computed(() => subscription.value?.next_charge_date ? new Date(subscription.value.next_charge_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '');
 
 const statusText = computed(() => {
   if (status.value === 'paused') return 'SUBSCRIPTION PAUSED';
   if (status.value === 'cancelled') return 'SUBSCRIPTION CANCELLED';
+  if (!status.value) return 'NO ACTIVE SUBSCRIPTION';
   return 'ACTIVE SUBSCRIPTION';
 });
 
 const statusBadgeText = computed(() => {
   if (status.value === 'paused') return 'Paused';
   if (status.value === 'cancelled') return 'Cancelled';
+  if (!status.value) return 'No subscription';
   return 'All systems go';
 });
 
@@ -212,14 +217,14 @@ const closeSwitchBoxModal = () => { showSwitchModal.value = false; };
 
 const selectBox = (box) => {
   currentBoxId.value = box.id;
-  showSuccess('Price Updated', `New price: R${currentBoxPrice.value}/wk`);
+  showSuccess('Price Updated', `New price: R${box.price}/wk`);
 };
 
 const confirmSwitch = async () => {
   const previous = currentBoxId.value;
   try {
     if (!currentBoxId.value) throw new Error('No product selected');
-    await api.patch(`/subscriptions/${subscriptionId.value}`, { productId: currentBoxId.value, pickupPod: 'UCT Library' });
+    await api.patch(`/subscriptions/${subscriptionId.value}`, { productId: currentBoxId.value, pickupPod: subscription.value?.pickup_pod || 'UCT Library' });
     showSwitchModal.value = false;
     showSuccess('Box Switched!', `You have switched to the ${currentBoxName.value}.`);
   } catch (error) {
@@ -243,14 +248,15 @@ onMounted(async () => {
 
   try {
     const response = await api.get('/subscriptions/user/' + authStore.user.id);
-    const subscription = response.data.subscription;
-    if (!subscription) return;
-    subscriptionId.value = subscription.id;
-    status.value = subscription.status;
-    boxesCompleted.value = subscription.boxes_completed;
-    productName.value = subscription.product_name;
-    productPrice.value = subscription.product_price;
-    currentBoxId.value = subscription.product_id;
+    const loadedSubscription = response.data.subscription;
+    if (!loadedSubscription) return;
+    subscription.value = loadedSubscription;
+    subscriptionId.value = loadedSubscription.id;
+    status.value = loadedSubscription.status;
+    boxesCompleted.value = loadedSubscription.boxes_completed;
+    productName.value = loadedSubscription.product_name;
+    productPrice.value = loadedSubscription.product_price;
+    currentBoxId.value = loadedSubscription.product_id;
   } catch (error) {
     // Preserve the existing defaults when the subscription cannot be loaded.
   }
@@ -302,7 +308,7 @@ const restartSubscription = async () => {
   const previousBoxes = boxesCompleted.value;
   try {
     if (!currentBoxId.value) throw new Error('No product selected');
-    const response = await api.post('/subscriptions', { productId: currentBoxId.value, cardNumber: '4242424242424242', pickupPod: 'UCT Library' });
+    const response = await api.post('/subscriptions', { productId: currentBoxId.value, cardNumber: '4242424242424242', pickupPod: subscription.value?.pickup_pod || 'UCT Library' });
     status.value = 'active';
     boxesCompleted.value = 0;
     if (response.data.subscriptionId) subscriptionId.value = response.data.subscriptionId;

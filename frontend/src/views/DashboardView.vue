@@ -17,22 +17,22 @@
       <div class="dashboard-card p-6 mb-6">
         <div class="d-flex justify-between align-center mb-4">
           <div class="status-badge">
-            <span class="status-dot"></span> ACTIVE SUBSCRIPTION
+            <span class="status-dot"></span> {{ subscription ? 'ACTIVE SUBSCRIPTION' : 'NO ACTIVE SUBSCRIPTION' }}
           </div>
-          <div class="subscription-price">R{{ subscription?.product_price || 79 }}/wk</div>
+          <div class="subscription-price">R{{ subscription?.product_price || '0.00' }}/wk</div>
         </div>
 
-        <h3 class="text-navy mb-1">{{ subscription?.product_name || 'Standard Box' }}</h3>
-        <p class="text-muted small mb-4">Weekly delivery · UCT Library Pod</p>
+        <h3 class="text-navy mb-1">{{ subscription?.product_name || 'Start your first subscription' }}</h3>
+        <p class="text-muted small mb-4">{{ subscription ? 'Weekly delivery · ' + subscription.pickup_pod : 'Pick a box from the menu to begin.' }}</p>
 
         <div class="info-row mb-4">
           <div class="info-block">
             <span class="info-label">Next Charge</span>
-            <span class="info-value">{{ subscription?.next_charge_date || 'Mon, 2 Sep 2026' }}</span>
+            <span class="info-value">{{ subscription?.next_charge_date || '—' }}</span>
           </div>
           <div class="info-block">
             <span class="info-label">Pickup Pod</span>
-            <span class="info-value">{{ subscription?.pickup_pod || 'UCT Library' }}</span>
+            <span class="info-value">{{ subscription?.pickup_pod || '—' }}</span>
           </div>
         </div>
 
@@ -49,9 +49,9 @@
           <span class="reward-badge">🎁 Every 8th box free</span>
         </div>
         <div class="progress progress--lg mb-2">
-          <div class="progress__bar" style="width: 37.5%;"></div>
+          <div class="progress__bar" :style="{ width: loyaltyPercent + '%' }"></div>
         </div>
-        <p class="text-muted small mb-0">{{ subscription?.boxes_completed ?? 3 }} of 8 boxes completed — {{ 8 - (subscription?.boxes_completed ?? 3) }} more to go!</p>
+        <p class="text-muted small mb-0">{{ subscription?.boxes_completed ?? 0 }} of 8 boxes completed — {{ 8 - (subscription?.boxes_completed ?? 0) }} more to go!</p>
       </div>
 
       <!-- Promotional Referral Card (Animated) -->
@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { ClipboardClock, UserPen } from 'lucide-vue-next';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/services/api';
@@ -96,6 +96,7 @@ import { showSuccess } from '@/services/ui';
 
 const authStore = useAuthStore();
 const subscription = ref(null);
+const loyaltyPercent = computed(() => ((subscription.value?.boxes_completed ?? 0) / 8) * 100);
 
 // Load the authenticated user's subscription summary for the dashboard card.
 onMounted(async () => {

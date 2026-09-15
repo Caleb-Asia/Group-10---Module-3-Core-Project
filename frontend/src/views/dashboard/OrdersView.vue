@@ -15,8 +15,14 @@
         <router-link to="/menu" class="btn btn--outline btn--sm">+ New Order</router-link>
       </div>
 
+      <div v-if="loadError" class="empty-state">
+        <h3 class="empty-title">Could not load your orders</h3>
+        <p class="empty-text">Please check your connection and try again.</p>
+        <button class="btn btn--primary" @click="$router.go(0)">Retry</button>
+      </div>
+
       <!-- EMPTY STATE (If no orders) -->
-      <div v-if="orders.length === 0" class="empty-state">
+      <div v-else-if="orders.length === 0" class="empty-state">
         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--color-navy)" stroke-width="1" class="mb-4 opacity-25">
           <path d="M20 7h-4.5L15 4h-6L8.5 7H4v11h16V7z"/>
           <circle cx="9" cy="13" r="1.5" fill="var(--color-navy)"/>
@@ -62,6 +68,7 @@ const authStore = useAuthStore();
 
 // State
 const orders = ref([]);
+const loadError = ref(false);
 
 // Load orders from localStorage when the page mounts
 onMounted(async () => {
@@ -80,7 +87,7 @@ onMounted(async () => {
       }))
     }));
   } catch (error) {
-    orders.value = [];
+    loadError.value = true;
   }
 });
 

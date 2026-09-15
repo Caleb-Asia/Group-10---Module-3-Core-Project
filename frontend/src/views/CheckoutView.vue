@@ -3,7 +3,7 @@
   Module: Frontend - Views
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: Simulates Card, SnapScan, and EFT payment methods.
+  Notes: Simulates Card and SnapScan payment methods.
 -->
 <template>
   <div class="checkout-page">
@@ -125,18 +125,6 @@
             <p class="text-muted small mb-4">Open the SnapScan app and scan the QR code at the pickup point.</p>
           </div>
 
-          <!-- EFT Instruction -->
-          <div v-if="form.payment_method === 'eft'" class="simulated-payment-instruction">
-            <div class="simulated-icon">🏦</div>
-            <p class="text-navy fw-bold mb-1">Electronic Funds Transfer</p>
-            <p class="text-muted small mb-4">Use the provided bank details to complete your transfer within 24 hours.</p>
-            <div class="eft-details">
-              <span class="eft-label">Bank: <strong>FNB</strong></span>
-              <span class="eft-label">Account: <strong>62012345678</strong></span>
-              <span class="eft-label">Ref: <strong>{{ orderRef }}</strong></span>
-            </div>
-          </div>
-
           <div class="d-flex justify-between">
             <button type="button" class="btn btn--outline" @click="prevStep">← Back</button>
             <button type="submit" class="btn btn--primary" :disabled="isLoading">
@@ -173,7 +161,6 @@ const orderRef = computed(() => `FBX-${Math.floor(100000 + Math.random() * 90000
 const paymentMethods = [
   { id: 'card', name: 'Debit / Credit Card', desc: 'Visa, Mastercard, Amex', icon: '💳' },
   { id: 'snapscan', name: 'SnapScan', desc: 'Scan & pay with your phone', icon: '📱' },
-  { id: 'eft', name: 'EFT', desc: 'Bank transfer', icon: '🏦' },
 ];
 
 const form = reactive({
@@ -217,9 +204,14 @@ const processPayment = async () => {
       pickupPod: form.pickup_pod
     };
 
+    const firstBoxItem = cartStore.items.find(item => !item.isCustom);
     let response;
     if (cartStore.isSubscription) {
-      response = await api.post('/subscriptions', { productId: Number(cartStore.items[0]?.id), cardNumber: paymentCardNumber, pickupPod: form.pickup_pod });
+      if (!firstBoxItem) {
+        showError('Subscription unavailable', 'Add a box to your cart before subscribing.');
+        return;
+      }
+      response = await api.post('/subscriptions', { productId: Number(firstBoxItem.id), cardNumber: paymentCardNumber, pickupPod: form.pickup_pod });
     } else if (cartStore.items.some(item => item.isCustom)) {
       response = await api.post('/orders/custom', orderPayload);
     } else {

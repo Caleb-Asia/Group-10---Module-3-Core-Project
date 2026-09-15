@@ -12,8 +12,8 @@ const ApiError = require('../utils/apiError');
 
 // Valid dietary preferences corresponding to MySQL SET
 const VALID_DIETARY_OPTIONS = new Set(['standard', 'vegan', 'halal', 'keto', 'nut-free', 'gluten-free']);
+const { APPROVED_PICKUP_PODS } = require('../utils/validators');
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const APPROVED_PICKUP_PODS = require('../utils/validators').APPROVED_PICKUP_PODS;
 
 /**
  * Validates and cleans dietary preference string against the whitelist

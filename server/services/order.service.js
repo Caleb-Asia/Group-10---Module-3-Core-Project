@@ -174,6 +174,55 @@ const orderService = {
     }
   },
 
+  initiatePayfastOrder: async ({ userId, items, pickupPod, orderType, nameFirst, email, itemName }) => {
+    validatePickupPod(pickupPod);
+    const connection = await pool.getConnection();
+    let calculatedItems;
+    let totalAmount;
+    try {
+      await connection.beginTransaction();
+      const result = await validateAndCalculateOrderItems(items, connection, orderType === 'custom' ? ['meal', 'snack'] : null);
+      calculatedItems = result.calculatedItems;
+      totalAmount = result.totalAmount;
+      await connection.rollback();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+    const { redirectUrl, ref } = await payfastService.initiatePayment({ amount: totalAmount, itemName: itemName || 'FoodBoxx Order', orderData: { userId, items: calculatedItems, pickupPod, orderType, totalAmount, nameFirst: nameFirst || 'Customer', email: email || 'test@test.com' } });
+    return { redirectUrl, ref, totalAmount };
+  },
+
+  createOrderFromPayfast: async ({ userId, items, pickupPod, orderType, totalAmount, txnRef }) => {
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      const qrToken = qrService.generateToken();
+      let subscriptionId = null;
+      if (orderType === 'subscription') {
+        const existingSub = await SubscriptionModel.findByUserId(userId, connection);
+        if (!existingSub || existingSub.status === 'cancelled') {
+          const nextChargeDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString().slice(0, 10);
+          subscriptionId = await SubscriptionModel.create(userId, items[0].productId, pickupPod, nextChargeDate, connection);
+        } else subscriptionId = existingSub.id;
+        await SubscriptionModel.incrementBoxesCompleted(subscriptionId, connection);
+        const subscription = await SubscriptionModel.findById(subscriptionId, connection);
+        if (Number(subscription.boxes_completed) % 8 === 0) totalAmount = 0;
+      }
+      const orderId = await OrderModel.create({ user_id: userId, subscription_id: subscriptionId, order_type: orderType, total_amount: totalAmount, payment_status: 'paid', payment_txn_ref: txnRef, qr_token: qrToken, pickup_pod: pickupPod, status: 'confirmed' }, connection);
+      for (const item of items) await OrderItemModel.create(orderId, item.productId, item.quantity, item.unitPrice, connection);
+      await connection.commit();
+      return { orderId, qrToken, txnRef, totalAmount };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  },
+
   /**
    * Create a custom box builder order (order_type = 'custom')
    * @param {Object} data - { userId, items, cardNumber, pickupPod }
@@ -304,99 +353,6 @@ const orderService = {
         totalAmount: chargedAmount,
         loyaltyReward
       };
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
-  },
-
-  /**
-   * Validate and price an order before initiating a Payfast payment.
-   * @param {Object} data - Payfast order initiation data.
-   * @returns {Promise<Object>} Payfast redirect details and validated total.
-   */
-  initiatePayfastOrder: async ({ userId, items, pickupPod, orderType, nameFirst, email, itemName }) => {
-    validatePickupPod(pickupPod);
-    const connection = await pool.getConnection();
-    let calculatedItems;
-    let totalAmount;
-    try {
-      await connection.beginTransaction();
-      const result = await validateAndCalculateOrderItems(
-        items,
-        connection,
-        orderType === 'custom' ? ['meal', 'snack'] : null
-      );
-      calculatedItems = result.calculatedItems;
-      totalAmount = result.totalAmount;
-      await connection.rollback();
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
-
-    const { redirectUrl, ref } = await payfastService.initiatePayment({
-      amount: totalAmount,
-      itemName: itemName || 'FoodBoxx Order',
-      orderData: {
-        userId,
-        items: calculatedItems,
-        pickupPod,
-        orderType,
-        totalAmount,
-        nameFirst: nameFirst || 'Customer',
-        email: email || 'test@test.com'
-      }
-    });
-
-    return { redirectUrl, ref, totalAmount };
-  },
-
-  /**
-   * Create an order after Payfast confirms payment via ITN.
-   * @param {Object} data - Validated pending Payfast order data.
-   * @returns {Promise<Object>} Created order details.
-   */
-  createOrderFromPayfast: async ({ userId, items, pickupPod, orderType, totalAmount, txnRef }) => {
-    const connection = await pool.getConnection();
-    try {
-      await connection.beginTransaction();
-      const qrToken = qrService.generateToken();
-      let subscriptionId = null;
-      if (orderType === 'subscription') {
-        const existingSub = await SubscriptionModel.findByUserId(userId, connection);
-        if (!existingSub || existingSub.status === 'cancelled') {
-          const nextChargeDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000).toISOString().slice(0, 10);
-          subscriptionId = await SubscriptionModel.create(userId, items[0].productId, pickupPod, nextChargeDate, connection);
-        } else {
-          subscriptionId = existingSub.id;
-        }
-        await SubscriptionModel.incrementBoxesCompleted(subscriptionId, connection);
-        const subscription = await SubscriptionModel.findById(subscriptionId, connection);
-        if (Number(subscription.boxes_completed) % 8 === 0) totalAmount = 0;
-      }
-      const orderId = await OrderModel.create({
-        user_id: userId,
-        subscription_id: subscriptionId,
-        order_type: orderType,
-        total_amount: totalAmount,
-        payment_status: 'paid',
-        payment_txn_ref: txnRef,
-        qr_token: qrToken,
-        pickup_pod: pickupPod,
-        status: 'confirmed'
-      }, connection);
-
-      for (const item of items) {
-        await OrderItemModel.create(orderId, item.productId, item.quantity, item.unitPrice, connection);
-      }
-
-      await connection.commit();
-      return { orderId, qrToken, txnRef, totalAmount };
     } catch (error) {
       await connection.rollback();
       throw error;

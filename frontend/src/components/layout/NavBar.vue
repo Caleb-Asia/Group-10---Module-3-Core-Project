@@ -68,8 +68,8 @@
           {{ isDarkMode ? '☀️' : '🌙' }}
         </button>
 
-        <button v-if="authStore.isAuthenticated" class="logout-btn logout-desktop" @click="handleLogout">
-          Logout
+        <button class="logout-btn logout-desktop" @click="authStore.isAuthenticated ? handleLogout() : router.push('/login')">
+          {{ authStore.isAuthenticated ? 'Logout' : 'Log In' }}
         </button>
 
         <!-- Hamburger -->
@@ -92,8 +92,8 @@
         <router-link to="/cart" class="mobile-link" @click="closeMobileMenu">Cart</router-link>
         <router-link to="/dashboard" class="mobile-link" @click="closeMobileMenu">Account</router-link>
         
-        <button v-if="authStore.isAuthenticated" class="mobile-logout" @click="handleLogout">
-          Logout
+        <button class="mobile-logout" @click="authStore.isAuthenticated ? handleLogout() : router.push('/login')">
+          {{ authStore.isAuthenticated ? 'Logout' : 'Log In' }}
         </button>
       </div>
     </transition>
@@ -117,6 +117,9 @@ const isDarkMode = ref(false);
 const isMobileMenuOpen = ref(false);
 
 onMounted(() => {
+  const savedTheme = localStorage.getItem('foodboxx_theme');
+  isDarkMode.value = savedTheme === 'dark';
+  document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dark' : 'light');
   window.addEventListener('scroll', () => {
     isScrolled.value = window.scrollY > 50;
   });
@@ -125,6 +128,7 @@ onMounted(() => {
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value;
   document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dark' : 'light');
+  localStorage.setItem('foodboxx_theme', isDarkMode.value ? 'dark' : 'light');
 };
 
 const toggleMobileMenu = () => {
