@@ -613,50 +613,14 @@ onMounted(async () => {
 }
 
 /* DARK MODE */
-[data-theme="dark"] .builder-page {
-  background: #0B1120;
-}
 
-[data-theme="dark"] .builder-item-card {
-  background: #1A2436;
-  border-color: #2D3748;
-}
 
-[data-theme="dark"] .builder-item-card:hover {
-  border-color: var(--color-orange);
-}
 
-[data-theme="dark"] .builder-item-name {
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .builder-item-card:hover .builder-item-name {
-  color: var(--color-orange);
-}
 
-[data-theme="dark"] .toggle-btn {
-  background: #1A2436;
-  border-color: #2D3748;
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .build-guide,
-[data-theme="dark"] .builder-status {
-  background: #1A2436;
-  border-color: #2D3748;
-}
 
-[data-theme="dark"] .guide-step--active,
-[data-theme="dark"] .builder-status strong {
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .page-subtitle,
-[data-theme="dark"] .guide-step,
-[data-theme="dark"] .guide-step span:not(.guide-number),
-[data-theme="dark"] .status-tip {
-  color: #CBD5E1;
-}
 
 /* Utility */
 .mb-2 { margin-bottom: var(--spacing-2); }

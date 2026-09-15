@@ -10,6 +10,15 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
 export const useCartStore = defineStore('cart', () => {
+  const cartStorageKey = () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('foodboxx_user') || 'null');
+      return user?.id ? `foodboxx_cart_user_${user.id}` : 'foodboxx_cart_guest';
+    } catch (error) {
+      return 'foodboxx_cart_guest';
+    }
+  };
+
   // State
   const items = ref([]);
   const isSubscription = ref(false);
@@ -28,17 +37,19 @@ export const useCartStore = defineStore('cart', () => {
   // Actions
   function restore() {
     // NavBar calls this on mount
-    const savedCart = localStorage.getItem('foodboxx_cart');
+    const storageKey = cartStorageKey();
+    const savedCart = localStorage.getItem(storageKey);
     try {
       if (savedCart) items.value = JSON.parse(savedCart);
     } catch (error) {
-      localStorage.removeItem('foodboxx_cart');
+      localStorage.removeItem(storageKey);
       items.value = [];
     }
+    isSubscription.value = false;
   }
 
   function save() {
-    localStorage.setItem('foodboxx_cart', JSON.stringify(items.value));
+    localStorage.setItem(cartStorageKey(), JSON.stringify(items.value));
   }
 
   function addToCart(product) {
@@ -75,8 +86,10 @@ export const useCartStore = defineStore('cart', () => {
   function clearCart() {
     items.value = [];
     isSubscription.value = false;
-    localStorage.removeItem('foodboxx_cart');
+    localStorage.removeItem(cartStorageKey());
   }
+
+  window.addEventListener('foodboxx-auth-changed', restore);
 
   return {
     items,

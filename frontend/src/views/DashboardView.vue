@@ -28,11 +28,11 @@
         <div class="info-row mb-4">
           <div class="info-block">
             <span class="info-label">Next Charge</span>
-            <span class="info-value">{{ subscription?.next_charge_date || '—' }}</span>
+            <span class="info-value">{{ subscription?.next_charge_date || '—' }}</span>
           </div>
           <div class="info-block">
             <span class="info-label">Pickup Pod</span>
-            <span class="info-value">{{ subscription?.pickup_pod || '—' }}</span>
+            <span class="info-value">{{ subscription?.pickup_pod || '—' }}</span>
           </div>
         </div>
 
@@ -51,18 +51,7 @@
         <div class="progress progress--lg mb-2">
           <div class="progress__bar" :style="{ width: loyaltyPercent + '%' }"></div>
         </div>
-        <p class="text-muted small mb-0">{{ subscription?.boxes_completed ?? 0 }} of 8 boxes completed — {{ 8 - (subscription?.boxes_completed ?? 0) }} more to go!</p>
-      </div>
-
-      <!-- Promotional Referral Card (Animated) -->
-      <div class="referral-card p-6 mb-6">
-        <div class="d-flex align-center justify-between">
-          <div>
-            <h4 class="referral-title">Share the box!</h4>
-            <p class="referral-text">Friends get <strong>50% off</strong>, you get a free box.</p>
-          </div>
-          <button class="btn btn--primary btn--sm" @click="handleReferral">Refer</button>
-        </div>
+        <p class="text-muted small mb-0">{{ subscription?.boxes_completed ?? 0 }} of 8 boxes completed — {{ 8 - (subscription?.boxes_completed ?? 0) }} more to go!</p>
       </div>
 
       <!-- Quick Links (Only Orders and Profile remain) -->
@@ -92,7 +81,6 @@ import { ref, computed, onMounted } from 'vue';
 import { ClipboardClock, UserPen } from 'lucide-vue-next';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/services/api';
-import { showSuccess } from '@/services/ui';
 
 const authStore = useAuthStore();
 const subscription = ref(null);
@@ -108,9 +96,6 @@ onMounted(async () => {
   }
 });
 
-const handleReferral = () => {
-  showSuccess('Link Copied!', 'Send your referral link to a friend.');
-};
 </script>
 
 <style scoped>
@@ -200,37 +185,12 @@ const handleReferral = () => {
 }
 
 /* Promotional Referral Card - Faster Animation & White Text */
-.referral-card {
-  background: var(--color-orange);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
-  animation: float-promo 1.5s ease-in-out infinite; 
-}
 
 /* Force White Text inside the orange card */
-.referral-title {
-  color: #FFFFFF !important;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--spacing-1);
-}
 
-.referral-text {
-  color: #FFFFFF !important;
-  font-size: var(--font-size-base);
-  margin-bottom: 0;
-}
 
 /* Ensure the strong tag is also white */
-.referral-text strong {
-  color: #FFFFFF !important;
-}
 
-@keyframes float-promo {
-  0% { transform: translateX(0); }
-  50% { transform: translateX(8px); } 
-  100% { transform: translateX(0); } 
-}
 
 .quick-links-title {
   font-size: var(--font-size-lg);
@@ -285,25 +245,9 @@ const handleReferral = () => {
 }
 
 /* Dark Mode */
-[data-theme="dark"] .dashboard-page {
-  background-color: #0B1120;
-}
 
-[data-theme="dark"] .dashboard-card,
-[data-theme="dark"] .quick-link-card {
-  background: #1A2436;
-}
 
-[data-theme="dark"] .page-title,
-[data-theme="dark"] .card-title,
-[data-theme="dark"] .quick-links-title,
-[data-theme="dark"] .quick-link-text {
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .quick-link-icon {
-  color: var(--color-orange);
-}
 
 /* Utility */
 .mb-0 { margin-bottom: 0; }

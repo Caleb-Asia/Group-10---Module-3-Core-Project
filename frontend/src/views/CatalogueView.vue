@@ -299,9 +299,6 @@ onMounted(() => {
 }
 
 /* Dark Mode Skeleton */
-[data-theme="dark"] .skeleton-card {
-  background: #1A2436;
-}
 
 /* ============================================
    FLOATING CART BAR
@@ -325,31 +322,13 @@ onMounted(() => {
   font-weight: var(--font-weight-semibold);
 }
 
-[data-theme="dark"] .floating-cart-bar {
-  background: #1A2436;
-}
 
 /* ============================================
    DARK MODE PAGE FIXES
    ============================================ */
-[data-theme="dark"] .catalogue-page {
-  background-color: #0B1120;
-}
 
-[data-theme="dark"] .filters-section {
-  background-color: #1A2436 !important;
-  border-color: #2D3748 !important;
-}
 
-[data-theme="dark"] .search-input {
-  background-color: #1A2436;
-  border-color: #2D3748;
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .search-input:focus {
-  background-color: #0B1120;
-}
 
 /* Utility */
 .mb-0 { margin-bottom: 0; }

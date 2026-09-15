@@ -64,10 +64,6 @@ body {
   /* IMPORTANT: no overflow-x: hidden here — it breaks sticky */
 }
 
-[data-theme="dark"] body {
-  background-color: #0B1120;
-  color: #E5E7EB;
-}
 
 #app {
   width: 100%;
@@ -85,9 +81,6 @@ body {
   background-color: var(--color-cream);
 }
 
-[data-theme="dark"] .main-content {
-  background-color: #0B1120;
-}
 
 /* ============================================
    PAGE TRANSITIONS

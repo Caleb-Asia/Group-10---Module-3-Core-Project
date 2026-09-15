@@ -39,8 +39,8 @@ VALUES
 (8, 'Exam Week Survival Box', 'Fuel for exams', 99.00, 'box', JSON_ARRAY('standard'), '/images/exam-box1.png', TRUE),
 
 -- added these two so halal and gluten-free actually have something to return
-(11, 'Halal Fuel Box', 'Halal-certified performance fuel', 79.00, 'box', JSON_ARRAY('halal'), '/images/placeholder-product.png', TRUE),
-(12, 'Gluten-Free Box', 'Gluten-free performance fuel', 79.00, 'box', JSON_ARRAY('gluten-free'), '/images/placeholder-product.png', TRUE),
+(11, 'Halal Fuel Box', 'Halal-certified performance fuel', 79.00, 'box', JSON_ARRAY('halal'), '/images/halaal-box.png', TRUE),
+(12, 'Gluten-Free Box', 'Gluten-free performance fuel', 79.00, 'box', JSON_ARRAY('gluten-free'), '/images/gluten-free.png', TRUE),
 
 (9, 'Builder Meal', 'Custom meal item', 25.00, 'meal', JSON_ARRAY('standard'), '/images/builder-meal.png', TRUE),
 (10, 'Builder Snack', 'Custom snack item', 12.00, 'snack', JSON_ARRAY('standard'), '/images/builder-snack.png', TRUE),

@@ -468,16 +468,6 @@ const restartSubscription = async () => {
 .selected-check { color: var(--color-orange); font-weight: bold; font-size: 1.5rem; }
 
 /* DARK MODE */
-[data-theme="dark"] .subscriptions-page { background: #0B1120; }
-[data-theme="dark"] .page-title, [data-theme="dark"] .subscription-box-name, [data-theme="dark"] .stat-card strong, [data-theme="dark"] .info-value, [data-theme="dark"] .modal-title { color: #FFFFFF !important; }
-[data-theme="dark"] .page-intro, [data-theme="dark"] .stat-label, [data-theme="dark"] .progress-days { color: #CBD5E1; }
-[data-theme="dark"] .heading-badge, [data-theme="dark"] .stat-card { background: #1A2436; border-color: #2D3748; }
-[data-theme="dark"] .subscription-card { background: #1A2436; border-color: #2D3748; }
-[data-theme="dark"] .info-row { background: #0B1120; }
-[data-theme="dark"] .action-btn { background: #1A2436; border-color: #2D3748; color: #FFFFFF; }
-[data-theme="dark"] .switch-modal { background: #1A2436; }
-[data-theme="dark"] .box-option { background: #0B1120; border-color: #2D3748; }
-[data-theme="dark"] .box-name { color: #FFFFFF; }
 
 /* RESPONSIVE */
 @media (max-width: 760px) {

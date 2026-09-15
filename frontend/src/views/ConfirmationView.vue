@@ -241,29 +241,9 @@ onMounted(async () => {
 }
 
 /* Dark Mode Tracker Fixes */
-[data-theme="dark"] .order-tracker {
-  background: #1A2436;
-}
 
-[data-theme="dark"] .step {
-  color: #9CA3AF;
-}
 
-[data-theme="dark"] .step.active {
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .step-icon {
-  background: #2D3748;
-  color: #9CA3AF;
-}
 
-[data-theme="dark"] .step.active .step-icon {
-  background: var(--color-orange);
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .line {
-  background: #2D3748;
-}
 </style>

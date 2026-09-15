@@ -160,9 +160,6 @@ async function handleLogin() {
   padding: 56px 0 48px; 
 }
 
-[data-theme="dark"] .auth-page {
-  background-color: #0B1120;
-}
 
 .auth-card {
   max-width: 1080px; 
@@ -176,10 +173,6 @@ async function handleLogin() {
   overflow: hidden;
 }
 
-[data-theme="dark"] .auth-card {
-  background: #1A2436;
-  border-color: #2D3748;
-}
 
 .auth-body {
   display: grid;
@@ -201,9 +194,6 @@ async function handleLogin() {
   justify-content: center;
 }
 
-[data-theme="dark"] .auth-form-side {
-  background: #1A2436;
-}
 
 .auth-title {
   font-size: 28px;
@@ -212,9 +202,6 @@ async function handleLogin() {
   margin-bottom: 10px;
 }
 
-[data-theme="dark"] .auth-title {
-  color: #FFFFFF;
-}
 
 .auth-subtitle {
   font-size: 14px;
@@ -223,9 +210,6 @@ async function handleLogin() {
   line-height: 1.6;
 }
 
-[data-theme="dark"] .auth-subtitle {
-  color: var(--color-gray-400);
-}
 
 .auth-label {
   font-size: 12px;
@@ -234,9 +218,6 @@ async function handleLogin() {
   display: block;
 }
 
-[data-theme="dark"] .auth-label {
-  color: var(--color-gray-400);
-}
 
 .auth-input {
   width: 100%;
@@ -249,11 +230,6 @@ async function handleLogin() {
   transition: all var(--transition-fast);
 }
 
-[data-theme="dark"] .auth-input {
-  background: #0B1120;
-  border-color: #2D3748;
-  color: #FFFFFF;
-}
 
 .auth-input:focus {
   outline: none;
@@ -261,9 +237,6 @@ async function handleLogin() {
   background: var(--color-white);
 }
 
-[data-theme="dark"] .auth-input:focus {
-  background: #0B1120;
-}
 
 .auth-input--error {
   border-color: var(--color-error);

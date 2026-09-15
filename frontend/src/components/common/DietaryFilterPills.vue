@@ -149,9 +149,6 @@ const toggleFilter = (filterValue) => {
 }
 
 /* Dark mode icon fix */
-[data-theme="dark"] .filter-icon {
-  color: #E5E7EB;
-}
 
 .chip--filter:hover .filter-icon {
   transform: scale(0);
@@ -175,9 +172,6 @@ const toggleFilter = (filterValue) => {
 }
 
 /* Dark mode label fix */
-[data-theme="dark"] .filter-label {
-  color: #E5E7EB;
-}
 
 .chip--filter:hover .filter-label {
   transform: scale(1);
@@ -227,13 +221,5 @@ const toggleFilter = (filterValue) => {
 }
 
 /* Dark Mode Support */
-[data-theme="dark"] .chip--filter {
-  background: #1A2436;
-  border-color: #2D3748;
-}
 
-[data-theme="dark"] .chip--filter.active {
-  background: var(--color-orange);
-  border-color: var(--color-orange);
-}
 </style>

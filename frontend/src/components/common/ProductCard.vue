@@ -10,7 +10,7 @@
   <div ref="card" class="product-card" :class="{ 'product-card--revealed': isRevealed }" @click="goToDetail">
     
     <!-- Image Area -->
-    <div class="product-card__image-wrapper">
+    <div v-if="product.id === 11 || product.id === 12" class="product-card__image-wrapper">
       <img 
         :src="getImage(product)" 
         :alt="product.name" 
@@ -91,6 +91,13 @@ onMounted(() => {
 onBeforeUnmount(() => observer?.disconnect());
 
 const getImage = (product) => {
+  const imageMap = {
+    'Halal Fuel Box': '/images/halaal-box.png',
+    'Gluten-Free Box': '/images/gluten-free.png'
+  };
+  if (imageMap[product.name] && (!product.image_url || product.image_url.includes('placeholder-product'))) {
+    return imageMap[product.name];
+  }
   return product.image_url || '/images/placeholder-product.png';
 };
 
@@ -238,29 +245,10 @@ const handleAddToCart = () => {
 }
 
 /* DARK MODE FIXES */
-[data-theme="dark"] .product-card {
-  background: var(--color-gray-100);
-}
 
-[data-theme="dark"] .product-card__name {
-  color: var(--color-gray-100);
-}
 
-[data-theme="dark"] .product-card :deep(.chip--dietary) {
-  background: var(--color-gray-200);
-  color: var(--color-white);
-  border-color: var(--color-gray-200);
-}
 
-[data-theme="dark"] .product-card:hover :deep(.chip--dietary) {
-  background: var(--color-gray-200);
-  color: var(--color-white);
-  border-color: var(--color-gray-200);
-}
 
-[data-theme="dark"] .product-card__footer {
-  border-top: 1px solid var(--color-gray-200);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .product-card {

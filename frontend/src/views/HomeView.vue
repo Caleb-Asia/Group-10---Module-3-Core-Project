@@ -30,7 +30,7 @@
       </section>
 
       <!-- BOXES SECTION -->
-      <section class="content-section boxes-section">
+      <section v-if="false" class="content-section boxes-section">
         <div class="section-heading">
           <div>
             <span class="section-eyebrow">OUR BOXES</span>
@@ -548,14 +548,6 @@ onMounted(async () => {
 }
 
 /* DARK MODE */
-[data-theme="dark"] .home-page { background: #0B1120; }
-[data-theme="dark"] .box-card,
-[data-theme="dark"] .step { background: #1A2436; border-color: #2D3748; }
-[data-theme="dark"] .box-name,
-[data-theme="dark"] .section-title,
-[data-theme="dark"] .step h3 { color: #FFFFFF; }
-[data-theme="dark"] .step p { color: #CBD5E1; }
-[data-theme="dark"] .tag { background: #0B1120; border-color: #2D3748; color: #FFFFFF; }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {

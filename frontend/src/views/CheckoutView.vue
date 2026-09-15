@@ -411,37 +411,11 @@ onMounted(() => {
 }
 
 /* DARK MODE SUPPORT */
-[data-theme="dark"] .checkout-page {
-  background-color: #0B1120;
-}
 
-[data-theme="dark"] .pod-card,
-[data-theme="dark"] .payment-method,
-[data-theme="dark"] .order-summary,
-[data-theme="dark"] .simulated-payment-instruction {
-  background: #1A2436;
-  border-color: #2D3748;
-}
 
-[data-theme="dark"] .pod-name,
-[data-theme="dark"] .payment-method-name,
-[data-theme="dark"] .text-navy {
-  color: #FFFFFF !important;
-}
 
-[data-theme="dark"] .text-muted {
-  color: #9CA3AF !important;
-}
 
-[data-theme="dark"] .form-input {
-  background: #0B1120;
-  border-color: #2D3748;
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .form-input:focus {
-  background: #0B1120;
-}
 
 /* Utilities */
 .mb-0 { margin-bottom: 0; }

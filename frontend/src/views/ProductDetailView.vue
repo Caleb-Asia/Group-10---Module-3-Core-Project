@@ -353,56 +353,18 @@ onBeforeUnmount(() => {
 /* ============================================
    DARK MODE FIXES
    ============================================ */
-[data-theme="dark"] .product-detail-page {
-  background-color: #0B1120;
-}
 
-[data-theme="dark"] .detail-card {
-  background: #1A2436;
-}
 
-[data-theme="dark"] .back-btn {
-  background: #1A2436;
-  color: var(--color-orange);
-  border-color: var(--color-orange);
-}
 
-[data-theme="dark"] .detail-title {
-  color: #FFFFFF;
-}
 
 /* Force white text on dark mode category tags */
-[data-theme="dark"] .chip--dietary {
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .accordion-header {
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .accordion-section {
-  border-top-color: #2D3748;
-}
 
-[data-theme="dark"] .nutrition-box {
-  background: #0B1120;
-}
 
-[data-theme="dark"] .nutrition-box strong {
-  color: #FFFFFF;
-}
 
-[data-theme="dark"] .nutrition-box span {
-  color: #9CA3AF;
-}
 
-[data-theme="dark"] .ingredients-list {
-  color: #D1D5DB;
-}
 
-[data-theme="dark"] .text-muted {
-  color: #9CA3AF !important;
-}
 
 /* Utility */
 .mb-0 { margin-bottom: 0; }

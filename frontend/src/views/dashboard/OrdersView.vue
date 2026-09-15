@@ -147,8 +147,4 @@ const handleReorder = (order) => {
 .reorder-btn:hover { background: var(--color-orange); color: var(--color-white); }
 
 /* Dark Mode Fixes */
-[data-theme="dark"] .orders-page { background-color: #0B1120; }
-[data-theme="dark"] .page-title, [data-theme="dark"] .empty-title, [data-theme="dark"] .order-title { color: #FFFFFF; }
-[data-theme="dark"] .empty-text { color: #D1D5DB; }
-[data-theme="dark"] .order-card { background: #1A2436; }
 </style>

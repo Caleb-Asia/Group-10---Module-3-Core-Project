@@ -106,12 +106,9 @@
           </div>
           
           <div class="pod-info">
-            <span class="pod-hours">🕒 {{ pod.hours }}</span>
+            <span class="pod-hours">🕐 {{ pod.hours }}</span>
           </div>
 
-          <button class="btn btn--outline btn--sm" @click="openDirections(pod.name)">
-            Get Directions →
-          </button>
         </div>
       </div>
       
@@ -121,7 +118,6 @@
 
 <script setup>
 import { ref } from 'vue';
-import { showSuccess } from '@/services/ui';
 import { PICKUP_PODS } from '@/services/config';
 
 // State
@@ -134,7 +130,7 @@ const startX = ref(0);
 const startY = ref(0);
 
 // Limit zoom
-const MIN_ZOOM = 0.8;
+const MIN_ZOOM = 1;
 const MAX_ZOOM = 2.5;
 
 // Zoom functions
@@ -200,9 +196,6 @@ const focusPod = (id) => {
   activePodId.value = id;
 };
 
-const openDirections = (name) => {
-  showSuccess('Opening Maps', `Directions to ${name} would open here in the real app.`);
-};
 </script>
 
 <style scoped>

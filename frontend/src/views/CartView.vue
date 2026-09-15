@@ -206,11 +206,6 @@ const confirmRemove = (item) => {
 }
 
 /* Dark Mode icon background and color */
-[data-theme="dark"] .empty-icon-circle {
-  background-color: #1A2436;
-  border-color: #2D3748;
-  color: #FFFFFF;
-}
 
 .empty-title {
   font-size: var(--font-size-3xl);
@@ -219,7 +214,6 @@ const confirmRemove = (item) => {
   margin-bottom: var(--spacing-3);
 }
 
-[data-theme="dark"] .empty-title { color: #FFFFFF; }
 
 .empty-text {
   font-size: var(--font-size-lg);
@@ -229,7 +223,6 @@ const confirmRemove = (item) => {
   line-height: 1.6;
 }
 
-[data-theme="dark"] .empty-text { color: #D1D5DB; }
 
 .btn-custom-orange {
   background-color: var(--color-orange);
@@ -342,18 +335,9 @@ const confirmRemove = (item) => {
 }
 
 /* DARK MODE FIXES */
-[data-theme="dark"] .page-title { color: #FFFFFF; }
-[data-theme="dark"] .cart-intro, [data-theme="dark"] .section-label { color: #CBD5E1; }
 
 /* FIX: Make Benefit icons visible in Dark Mode */
-[data-theme="dark"] .cart-count-badge,
-[data-theme="dark"] .cart-benefits {
-  background: #1A2436;
-  border-color: #2D3748;
-}
 
-[data-theme="dark"] .benefit-item { color: #E5E7EB; }
-[data-theme="dark"] .benefit-icon { background: #0B1120; color: var(--color-orange); }
 
 /* Make the container FULL WIDTH */
 .container {
@@ -406,7 +390,6 @@ const confirmRemove = (item) => {
   box-shadow: var(--shadow-md);
 }
 
-[data-theme="dark"] .cart-item-card { background: #1A2436; }
 
 .cart-item-image-wrapper {
   width: 100px;
@@ -417,7 +400,6 @@ const confirmRemove = (item) => {
   flex-shrink: 0;
 }
 
-[data-theme="dark"] .cart-item-image-wrapper { background: #2D3748; }
 
 .cart-item-image {
   width: 100%;
@@ -434,14 +416,12 @@ const confirmRemove = (item) => {
   margin-bottom: var(--spacing-1);
 }
 
-[data-theme="dark"] .cart-item-name { color: #FFFFFF; }
 
 .cart-item-price {
   font-size: var(--font-size-base);
   color: var(--color-gray-600);
 }
 
-[data-theme="dark"] .cart-item-price { color: #9CA3AF; }
 
 /* Quantity Controls - LARGER */
 .quantity-controls {
@@ -453,7 +433,6 @@ const confirmRemove = (item) => {
   padding: 8px;
 }
 
-[data-theme="dark"] .quantity-controls { background: #0B1120; }
 
 .qty-btn {
   width: 32px;
@@ -474,11 +453,6 @@ const confirmRemove = (item) => {
   border-color: var(--color-orange);
 }
 
-[data-theme="dark"] .qty-btn {
-  background: #1A2436;
-  border-color: #2D3748;
-  color: #FFFFFF;
-}
 
 .qty-display {
   min-width: 32px;
@@ -487,7 +461,6 @@ const confirmRemove = (item) => {
   font-size: var(--font-size-lg);
 }
 
-[data-theme="dark"] .qty-display { color: #FFFFFF; }
 
 .remove-btn {
   background: none;
@@ -523,8 +496,6 @@ const confirmRemove = (item) => {
   font-size: var(--font-size-2xl);
 }
 
-[data-theme="dark"] .summary-card { background: #1A2436; }
-[data-theme="dark"] .summary-note { background: #0B1120; color: #CBD5E1; }
 
 .summary-title {
   font-size: var(--font-size-xl);
@@ -533,7 +504,6 @@ const confirmRemove = (item) => {
   margin-bottom: var(--spacing-4);
 }
 
-[data-theme="dark"] .summary-title { color: #FFFFFF; }
 
 .summary-row {
   display: flex;
@@ -543,7 +513,6 @@ const confirmRemove = (item) => {
   color: var(--color-gray-700);
 }
 
-[data-theme="dark"] .summary-row { color: #D1D5DB; }
 
 .summary-divider {
   border: none;
@@ -551,7 +520,6 @@ const confirmRemove = (item) => {
   margin: var(--spacing-5) 0;
 }
 
-[data-theme="dark"] .summary-divider { border-color: #2D3748; }
 
 .total-row { margin-bottom: var(--spacing-6); }
 

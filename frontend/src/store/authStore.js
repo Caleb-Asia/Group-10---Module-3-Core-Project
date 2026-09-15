@@ -21,6 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     localStorage.setItem('foodboxx_token', nextToken);
     localStorage.setItem('foodboxx_user', JSON.stringify(nextUser));
+    window.dispatchEvent(new Event('foodboxx-auth-changed'));
   }
 
   async function login(email, password) {
@@ -79,6 +80,7 @@ export const useAuthStore = defineStore('auth', () => {
       const profile = response.data.user || response.data;
       user.value = profile;
       localStorage.setItem('foodboxx_user', JSON.stringify(profile));
+      window.dispatchEvent(new Event('foodboxx-auth-changed'));
       return profile;
     } catch (error) {
       throw error;
@@ -108,6 +110,7 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = '';
     localStorage.removeItem('foodboxx_token');
     localStorage.removeItem('foodboxx_user');
+    window.dispatchEvent(new Event('foodboxx-auth-changed'));
   }
 
   return {

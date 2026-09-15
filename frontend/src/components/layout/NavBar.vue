@@ -64,10 +64,6 @@
 
       <!-- RIGHT: Theme Toggle, Logout, & Mobile Hamburger -->
       <div class="navbar__right">
-        <button class="theme-toggle" @click="toggleTheme" :aria-label="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
-          {{ isDarkMode ? '☀️' : '🌙' }}
-        </button>
-
         <button class="logout-btn logout-desktop" @click="authStore.isAuthenticated ? handleLogout() : router.push('/login')">
           {{ authStore.isAuthenticated ? 'Logout' : 'Log In' }}
         </button>
@@ -113,23 +109,13 @@ const cartStore = useCartStore();
 const authStore = useAuthStore();
 
 const isScrolled = ref(false);
-const isDarkMode = ref(false);
 const isMobileMenuOpen = ref(false);
 
 onMounted(() => {
-  const savedTheme = localStorage.getItem('foodboxx_theme');
-  isDarkMode.value = savedTheme === 'dark';
-  document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dark' : 'light');
   window.addEventListener('scroll', () => {
     isScrolled.value = window.scrollY > 50;
   });
 });
-
-const toggleTheme = () => {
-  isDarkMode.value = !isDarkMode.value;
-  document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dark' : 'light');
-  localStorage.setItem('foodboxx_theme', isDarkMode.value ? 'dark' : 'light');
-};
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
@@ -174,8 +160,6 @@ const handleLogout = () => {
   box-shadow: var(--shadow-lg);
 }
 
-[data-theme="dark"] .navbar { background: #0B1120; }
-[data-theme="dark"] .navbar--scrolled { background: #0B1120; }
 
 .navbar__container {
   max-width: 1400px;
@@ -201,8 +185,6 @@ const handleLogout = () => {
 
 .navbar__logo-food { color: #FFFFFF !important; }
 .navbar__logo-boxx { color: var(--color-orange) !important; }
-[data-theme="dark"] .navbar__logo-food { color: var(--color-orange) !important; }
-[data-theme="dark"] .navbar__logo-boxx { color: #FFFFFF !important; }
 
 .navbar__center { display: flex; align-items: center; gap: 40px; }
 
@@ -293,18 +275,7 @@ const handleLogout = () => {
 
 .navbar__right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 
-.theme-toggle {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
 
-.theme-toggle:hover { border-color: var(--color-orange); transform: translateY(-2px); }
 
 .logout-desktop {
   background: transparent;
