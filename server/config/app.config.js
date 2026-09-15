@@ -14,6 +14,7 @@ let CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
 if (CORS_ORIGIN.trim() === '*') {
   console.warn('CORS_ORIGIN cannot be "*" when credentials are required; falling back to http://localhost:3000');
   CORS_ORIGIN = 'http://localhost:3000';
+  console.log('CORS_ORIGIN loaded as:', CORS_ORIGIN);
 }
 
 module.exports = {

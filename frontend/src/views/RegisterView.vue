@@ -199,10 +199,10 @@ async function handleRegister() {
   try {
     const result = await authStore.register(form);
     if (result.success) {
-      // Special SweetAlert Popup
+      // Registration success popup — plain text/icon only, no logo image or emoji
       Swal.fire({
-        title: 'Welcome to the FoodBoxx family! 🎉',
-        html: `<img src="/images/foodboxx-logo.png" style="width: 120px; margin-bottom: 10px;" /><br/><p>Your account has been created successfully.</p>`,
+        title: 'Welcome to the FoodBoxx family!',
+        text: 'Your account has been created successfully.',
         icon: 'success',
         confirmButtonText: 'Start Shopping!',
         confirmButtonColor: '#F26A1B',

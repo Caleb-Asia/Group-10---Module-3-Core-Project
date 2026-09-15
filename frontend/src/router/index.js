@@ -3,16 +3,13 @@
   Module: Frontend - Core Infrastructure
   Owner: Caleb Asia
   Created: 2026-08-31
-  Notes: Global guard forces non-authenticated users to /login. 
-         Forces logged-in users to /dashboard.
+  Notes: Global guard forces ALL pages (except /login and /register) to require authentication.
 */
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/authStore';
 
-// Import Home
+// Import Views
 import HomeView from '../views/HomeView.vue';
-
-// Import Caleb's Ready Views
 import CatalogueView from '../views/CatalogueView.vue';
 import CartView from '../views/CartView.vue';
 import CheckoutView from '../views/CheckoutView.vue';
@@ -29,7 +26,9 @@ import ProfileView from '../views/dashboard/ProfileView.vue';
 import SubscriptionsView from '../views/dashboard/SubscriptionsView.vue';
 import OrdersView from '../views/dashboard/OrdersView.vue';
 
-// Route Guards (Defined BEFORE routes)
+// ROUTE GUARDS
+
+// Requires the user to be logged in. Redirects to /login with the intended URL saved.
 const requireAuth = (to, from, next) => {
   const authStore = useAuthStore();
   if (!authStore.isAuthenticated) {
@@ -39,37 +38,49 @@ const requireAuth = (to, from, next) => {
   }
 };
 
+// Only accessible when logged OUT. Logged-in users get bounced to /menu.
 const guestOnly = (to, from, next) => {
   const authStore = useAuthStore();
   if (authStore.isAuthenticated) {
-    next({ name: 'Dashboard' });
+    next({ name: 'Catalogue' });
   } else {
     next();
   }
 };
 
 const routes = [
-  // Public Routes
-  { path: '/', name: 'Home', component: HomeView },  // <-- Now points to Sisamila's page
-  { path: '/menu', name: 'Catalogue', component: CatalogueView },
-  { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView },
-  { path: '/cart', name: 'Cart', component: CartView },
-  { path: '/builder', name: 'BoxBuilder', component: BoxBuilderView },
-  { path: '/pods', name: 'PickupLocator', component: PickupLocatorView },
+  // AUTH ROUTES (Guest only — must be logged OUT to view)
+  { 
+    path: '/login', 
+    name: 'Login', 
+    component: LoginView, 
+    beforeEnter: guestOnly, 
+    meta: { hideLayout: true } 
+  },
+  { 
+    path: '/register', 
+    name: 'Register', 
+    component: RegisterView, 
+    beforeEnter: guestOnly, 
+    meta: { hideLayout: true } 
+  },
 
-  // Auth Routes
-  { path: '/login', name: 'Login', component: LoginView, beforeEnter: guestOnly, meta: { hideLayout: true } },
-  { path: '/register', name: 'Register', component: RegisterView, beforeEnter: guestOnly, meta: { hideLayout: true } },
-
-  // Protected Transactional Routes
+  // PROTECTED ROUTES (Require authentication)
+  { path: '/', name: 'Home', component: HomeView, beforeEnter: requireAuth },
+  { path: '/menu', name: 'Catalogue', component: CatalogueView, beforeEnter: requireAuth },
+  { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView, beforeEnter: requireAuth },
+  { path: '/cart', name: 'Cart', component: CartView, beforeEnter: requireAuth },
+  { path: '/builder', name: 'BoxBuilder', component: BoxBuilderView, beforeEnter: requireAuth },
+  { path: '/pods', name: 'PickupLocator', component: PickupLocatorView, beforeEnter: requireAuth },
   { path: '/checkout', name: 'Checkout', component: CheckoutView, beforeEnter: requireAuth },
   { path: '/confirmation', name: 'Confirmation', component: ConfirmationView, beforeEnter: requireAuth },
-
-  // Dashboard Routes
   { path: '/dashboard', name: 'Dashboard', component: DashboardView, beforeEnter: requireAuth },
   { path: '/dashboard/profile', name: 'Profile', component: ProfileView, beforeEnter: requireAuth },
   { path: '/dashboard/subscriptions', name: 'Subscriptions', component: SubscriptionsView, beforeEnter: requireAuth },
   { path: '/dashboard/orders', name: 'Orders', component: OrdersView, beforeEnter: requireAuth },
+
+  // CATCH-ALL: Unknown routes bounce to login (or home if authed)
+  { path: '/:pathMatch(.*)*', redirect: '/' },
 ];
 
 const router = createRouter({
@@ -77,13 +88,18 @@ const router = createRouter({
   routes
 });
 
-// GLOBAL GUARD: Forces everyone to /login if not logged in
+// GLOBAL GUARD: Belt-and-suspenders. Even if a route forgets `requireAuth`,
+// this ensures non-authenticated users can never escape /login or /register.
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  const isPublicPage = ['Login', 'Register', 'Home', 'Catalogue', 'ProductDetail', 'Cart', 'BoxBuilder', 'PickupLocator'].includes(to.name);
+  const isAuthRoute = to.name === 'Login' || to.name === 'Register';
 
-  if (!authStore.isAuthenticated && !isPublicPage) {
-    next({ name: 'Login' });
+  if (!authStore.isAuthenticated && !isAuthRoute) {
+    // Not logged in and trying to leave the auth pages → redirect to login
+    next({ name: 'Login', query: { redirect: to.fullPath } });
+  } else if (authStore.isAuthenticated && isAuthRoute) {
+    // Logged in and trying to visit login/register → bounce to menu
+    next({ name: 'Catalogue' });
   } else {
     next();
   }
