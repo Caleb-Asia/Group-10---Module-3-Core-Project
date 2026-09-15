@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   dietary_preferences SET('standard','vegan','halal','keto','nut-free','gluten-free') DEFAULT 'standard',
+  pickup_pod VARCHAR(100) NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -19,7 +19,7 @@
           <div class="status-badge">
             <span class="status-dot"></span> ACTIVE SUBSCRIPTION
           </div>
-          <div class="subscription-price">R{{ subscription?.price || 79 }}/wk</div>
+          <div class="subscription-price">R{{ subscription?.product_price || 79 }}/wk</div>
         </div>
 
         <h3 class="text-navy mb-1">{{ subscription?.product_name || 'Standard Box' }}</h3>

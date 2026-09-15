@@ -26,7 +26,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const requestUrl = error.config?.url || '';
+    if (error.response && error.response.status === 401 && !requestUrl.includes('/auth/login') && !requestUrl.includes('/auth/register')) {
       // Token expired or invalid -> redirect to login
       localStorage.removeItem('foodboxx_token');
       localStorage.removeItem('foodboxx_user');

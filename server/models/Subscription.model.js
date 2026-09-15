@@ -47,7 +47,7 @@ const SubscriptionModel = {
   findByUserId: async (userId, conn = null) => {
     const client = conn || pool;
     const [rows] = await client.execute(
-      'SELECT * FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC',
+      'SELECT s.*, p.name AS product_name, p.price AS product_price FROM subscriptions s LEFT JOIN products p ON p.id = s.product_id WHERE s.user_id = ? ORDER BY s.created_at DESC',
       [userId]
     );
     return rows[0] || null; // returns the most recent subscription for that user

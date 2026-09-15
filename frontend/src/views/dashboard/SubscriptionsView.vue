@@ -54,10 +54,10 @@
             <div class="subscription-status" :class="{ 'is-paused': status === 'paused', 'is-cancelled': status === 'cancelled' }">
               <span class="status-dot"></span> {{ statusText }}
             </div>
-            <div class="subscription-price">R{{ currentBoxPrice }}/wk</div>
+            <div class="subscription-price">R{{ productPrice || currentBoxPrice }}/wk</div>
           </div>
 
-          <h3 class="subscription-box-name">{{ currentBoxName }}</h3>
+          <h3 class="subscription-box-name">{{ productName || currentBoxName }}</h3>
           <p class="text-muted small mb-5">Weekly delivery · UCT Library Pod</p>
 
           <div class="info-row mb-6">
@@ -184,11 +184,13 @@ const subscriptionId = ref(null);
 const showSwitchModal = ref(false);
 const status = ref('active'); // 'active' | 'paused' | 'cancelled'
 const boxesCompleted = ref(3); // Matches the 3/8 loyalty bar
+const productName = ref(null);
+const productPrice = ref(null);
 
 // --- COMPUTED VALUES (Dynamic!) ---
 const currentBox = computed(() => availableBoxes.find(b => b.id === currentBoxId.value));
-const currentBoxName = computed(() => currentBox.value ? currentBox.value.name : 'Standard Box');
-const currentBoxPrice = computed(() => currentBox.value ? currentBox.value.price : 79);
+const currentBoxName = computed(() => productName.value || (currentBox.value ? currentBox.value.name : 'Standard Box'));
+const currentBoxPrice = computed(() => productPrice.value || (currentBox.value ? currentBox.value.price : 79));
 
 const statusText = computed(() => {
   if (status.value === 'paused') return 'SUBSCRIPTION PAUSED';
@@ -211,9 +213,16 @@ const selectBox = (box) => {
   showSuccess('Price Updated', `New price: R${currentBoxPrice.value}/wk`);
 };
 
-const confirmSwitch = () => {
-  showSwitchModal.value = false;
-  showSuccess('Box Switched!', `You have switched to the ${currentBoxName.value}.`);
+const confirmSwitch = async () => {
+  const previous = currentBoxId.value;
+  try {
+    await api.patch(`/subscriptions/${subscriptionId.value}`, { productId: ({ standard: 2, premium: 3, vegan: 4, keto: 5 })[currentBoxId.value], pickupPod: 'UCT Library' });
+    showSwitchModal.value = false;
+    showSuccess('Box Switched!', `You have switched to the ${currentBoxName.value}.`);
+  } catch (error) {
+    currentBoxId.value = previous;
+    showError('Action failed', 'Your subscription could not be updated.');
+  }
 };
 
 const authStore = useAuthStore();
@@ -227,6 +236,8 @@ onMounted(async () => {
     subscriptionId.value = subscription.id;
     status.value = subscription.status;
     boxesCompleted.value = subscription.boxes_completed;
+    productName.value = subscription.product_name;
+    productPrice.value = subscription.product_price;
     const productBoxMap = { 2: 'standard', 3: 'premium', 4: 'vegan', 5: 'keto' };
     if (productBoxMap[subscription.product_id]) currentBoxId.value = productBoxMap[subscription.product_id];
   } catch (error) {
@@ -275,10 +286,20 @@ const handleAction = async (action) => {
   }
 };
 
-const restartSubscription = () => {
-  status.value = 'active';
-  boxesCompleted.value = 0;
-  showSuccess('Subscription Restarted', 'Welcome back! Your loyalty progress has reset.');
+const restartSubscription = async () => {
+  const previousStatus = status.value;
+  const previousBoxes = boxesCompleted.value;
+  try {
+    const response = await api.post('/subscriptions', { productId: ({ standard: 2, premium: 3, vegan: 4, keto: 5 })[currentBoxId.value], cardNumber: '4242424242424242', pickupPod: 'UCT Library' });
+    status.value = 'active';
+    boxesCompleted.value = 0;
+    if (response.data.subscriptionId) subscriptionId.value = response.data.subscriptionId;
+    showSuccess('Subscription Restarted', 'Welcome back! Your loyalty progress has reset.');
+  } catch (error) {
+    status.value = previousStatus;
+    boxesCompleted.value = previousBoxes;
+    showError('Action failed', 'Your subscription could not be restarted.');
+  }
 };
 </script>
 

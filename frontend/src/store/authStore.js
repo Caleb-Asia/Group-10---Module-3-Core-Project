@@ -85,6 +85,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function init() {
+    if (token.value && !user.value) {
+      try { await fetchMe(); } catch (error) { if (error?.response?.status === 401) logout(); }
+    }
+  }
+
   async function updateProfile(updates) {
     try {
       const response = await api.patch('/auth/me', updates);
@@ -112,6 +118,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     fetchMe,
+    init,
     updateProfile,
     logout
   };

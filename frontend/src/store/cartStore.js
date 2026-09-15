@@ -8,7 +8,6 @@
 */
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import api from '../services/api';
 
 export const useCartStore = defineStore('cart', () => {
   // State
@@ -30,8 +29,11 @@ export const useCartStore = defineStore('cart', () => {
   function restore() {
     // NavBar calls this on mount
     const savedCart = localStorage.getItem('foodboxx_cart');
-    if (savedCart) {
-      items.value = JSON.parse(savedCart);
+    try {
+      if (savedCart) items.value = JSON.parse(savedCart);
+    } catch (error) {
+      localStorage.removeItem('foodboxx_cart');
+      items.value = [];
     }
   }
 
@@ -76,26 +78,6 @@ export const useCartStore = defineStore('cart', () => {
     localStorage.removeItem('foodboxx_cart');
   }
 
-  async function checkout(payload) {
-    try {
-      const orderData = {
-        items: items.value.map(item => ({
-          productId: Number(item.id),
-          quantity: Number(item.quantity)
-        })),
-        cardNumber: payload.cardNumber,
-        pickupPod: payload.pickup_pod,
-        is_subscription: isSubscription.value
-      };
-
-      const response = await api.post('/orders', orderData);
-      clearCart();
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
   return {
     items,
     isSubscription,
@@ -107,6 +89,5 @@ export const useCartStore = defineStore('cart', () => {
     decreaseQty,
     removeFromCart,
     clearCart,
-    checkout
   };
 });

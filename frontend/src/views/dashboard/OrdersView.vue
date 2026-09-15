@@ -73,6 +73,7 @@ onMounted(async () => {
       date: new Date(order.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }),
       total: Number(order.total_amount),
       items: (order.items || []).map(item => ({
+        product_id: item.product_id,
         name: item.product_name || item.name,
         price: Number(item.unit_price),
         quantity: item.quantity
@@ -85,20 +86,9 @@ onMounted(async () => {
 
 // Reorder functionality
 const handleReorder = (order) => {
-  // For simplicity, recreate a product from the first item in the order
-  // In a real app, you'd loop through all items in the order
-  const firstItem = order.items && order.items.length > 0 ? order.items[0] : null;
-  
-  if (firstItem) {
-    const product = {
-      id: order.id,
-      name: firstItem.name,
-      price: firstItem.price, 
-      image_url: '', 
-      dietary_tags: []
-    };
-    cartStore.addToCart(product);
-    showSuccess('Added to Cart', `${firstItem.name} has been added to your cart.`);
+  if (order.items?.length) {
+    order.items.forEach(item => cartStore.addToCart({ id: item.product_id, name: item.product_name || item.name, price: Number(item.unit_price || item.price), quantity: item.quantity, image_url: '', dietary_tags: [] }));
+    showSuccess('Added to Cart', 'Your order has been added back to the cart.');
   } else {
     showSuccess('Added to Cart', 'Your order has been added back to the cart.');
   }

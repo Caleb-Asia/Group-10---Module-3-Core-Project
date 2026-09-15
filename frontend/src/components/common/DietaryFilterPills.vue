@@ -49,9 +49,7 @@ const emit = defineEmits(['update:filters', 'clear']);
 
 // Filter configuration (Icons separated from text for animation)
 const dietaryFilters = [
-  { value: 'high protein', label: 'High Protein', iconComponent: markRaw(BicepsFlexed) },
   { value: 'vegan', label: 'Vegan', iconComponent: markRaw(Vegan) },
-  { value: 'vegetarian', label: 'Vegetarian', iconComponent: markRaw(Salad) },
   { value: 'halal', label: 'Halal', iconComponent: markRaw(MoonStar) },
   { value: 'keto', label: 'Keto/Low-Carb', iconComponent: markRaw(EggFried) },
   { value: 'nut-free', label: 'Nut-Free', iconComponent: markRaw(Nut) },

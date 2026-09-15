@@ -7,7 +7,7 @@
 import Swal from 'sweetalert2';
 
 // Global SweetAlert configuration to force it above the sticky navbar
-Swal.mixin({
+const swal = Swal.mixin({
   customClass: {
     container: 'swal2-container' 
   },
@@ -21,7 +21,7 @@ Swal.mixin({
 
 // Success Toast
 export const showSuccess = (title, text = '', iconHtml = '') => {
-  Swal.fire({
+  swal.fire({
     icon: 'success',
     title,
     text,

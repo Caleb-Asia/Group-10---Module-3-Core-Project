@@ -32,6 +32,7 @@ const UserModel = {
     if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name); }
     if (data.email !== undefined) { fields.push('email = ?'); values.push(data.email); }
     if (data.dietary_preferences !== undefined) { fields.push('dietary_preferences = ?'); values.push(data.dietary_preferences); }
+    if (data.pickup_pod !== undefined) { fields.push('pickup_pod = ?'); values.push(data.pickup_pod); }
 
     if (fields.length === 0) return;
 

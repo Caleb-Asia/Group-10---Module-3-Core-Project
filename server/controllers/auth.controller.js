@@ -13,6 +13,7 @@ const ApiError = require('../utils/apiError');
 // Valid dietary preferences corresponding to MySQL SET
 const VALID_DIETARY_OPTIONS = new Set(['standard', 'vegan', 'halal', 'keto', 'nut-free', 'gluten-free']);
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const APPROVED_PICKUP_PODS = require('../utils/validators').APPROVED_PICKUP_PODS;
 
 /**
  * Validates and cleans dietary preference string against the whitelist
@@ -38,7 +39,7 @@ const authController = {
    */
   register: async (req, res, next) => {
     try {
-      const { name, email, password, dietary_preferences } = req.body;
+      const { name, email, password, dietary_preferences, pickup_pod } = req.body;
 
       if (!name || typeof name !== 'string' || name.trim() === '') {
         throw new ApiError(400, 'Name is required');
@@ -53,6 +54,7 @@ const authController = {
       }
 
       const cleanDietary = validateDietaryPreferences(dietary_preferences);
+      if (pickup_pod !== undefined && !APPROVED_PICKUP_PODS.includes(String(pickup_pod).trim())) throw new ApiError(400, 'Invalid pickup pod');
       const cleanEmail = email.trim().toLowerCase();
 
       const existing = await UserModel.findByEmail(cleanEmail);
@@ -113,6 +115,7 @@ const authController = {
           name: user.name,
           email: user.email,
           dietary_preferences: user.dietary_preferences
+          ,pickup_pod: user.pickup_pod
         }
       });
     } catch (error) {
@@ -136,6 +139,7 @@ const authController = {
           name: user.name,
           email: user.email,
           dietary_preferences: user.dietary_preferences
+          ,pickup_pod: user.pickup_pod
         }
       });
     } catch (error) {
@@ -148,7 +152,7 @@ const authController = {
    */
   updateProfile: async (req, res, next) => {
     try {
-      const { name, email, dietary_preferences } = req.body;
+      const { name, email, dietary_preferences, pickup_pod } = req.body;
       const updates = {};
 
       if (name !== undefined) {
@@ -173,6 +177,10 @@ const authController = {
       if (dietary_preferences !== undefined) {
         updates.dietary_preferences = validateDietaryPreferences(dietary_preferences);
       }
+      if (pickup_pod !== undefined) {
+        if (pickup_pod !== null && !APPROVED_PICKUP_PODS.includes(String(pickup_pod).trim())) throw new ApiError(400, 'Invalid pickup pod');
+        updates.pickup_pod = pickup_pod === null ? null : String(pickup_pod).trim();
+      }
 
       await UserModel.update(req.userId, updates);
       const updatedUser = await UserModel.findById(req.userId);
@@ -185,6 +193,7 @@ const authController = {
           name: updatedUser.name,
           email: updatedUser.email,
           dietary_preferences: updatedUser.dietary_preferences
+          ,pickup_pod: updatedUser.pickup_pod
         }
       });
     } catch (error) {

@@ -25,7 +25,7 @@ const pendingPayments = new Map();
  * @returns {string} The lowercase hexadecimal MD5 signature.
  */
 function generateSignature(data, passphrase) {
-  const fields = Object.keys(data)
+  const fields = Object.keys(data).sort()
     .filter(key => data[key] !== undefined && data[key] !== null && data[key] !== '')
     .map(key => `${key}=${encodeURIComponent(String(data[key])).replace(/%20/g, '+')}`);
 
@@ -79,7 +79,7 @@ const payfastService = {
     };
 
     const signature = generateSignature(payload, PAYFAST_PASSPHRASE);
-    const query = new URLSearchParams({ ...payload, signature }).toString();
+    const query = new URLSearchParams(Object.fromEntries(Object.entries({ ...payload, signature }).sort(([a], [b]) => a.localeCompare(b)))).toString();
 
     return {
       redirectUrl: `${processUrl}?${query}`,

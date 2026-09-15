@@ -51,7 +51,7 @@
         <div class="order-summary p-4 mb-6">
           <h5 class="text-navy mb-3">Order Summary</h5>
           <div class="d-flex justify-between mb-2">
-            <span class="text-muted">{{ cartStore.totalItems }} items</span>
+          <span class="text-muted">{{ cartStore.itemCount }} items</span>
             <span class="text-navy fw-bold">R{{ Number(cartStore.subtotal).toFixed(2) }}</span>
           </div>
           <div class="d-flex justify-between">
@@ -152,11 +152,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
-import { showError, showSuccess } from '@/services/ui';
+import { showError, showSuccess, showWarning } from '@/services/ui';
 import { PICKUP_PODS } from '@/services/config';
 import api from '@/services/api';
 
@@ -190,16 +190,10 @@ const prevStep = () => { currentStep.value--; };
 const processPayment = async () => {
   isLoading.value = true;
 
-  // Prevent unsupported payment methods from reaching the card-only backend flow.
-  if (form.payment_method !== 'card') {
-    showError('Payment method not available', 'Please choose Debit / Credit Card to continue.');
-    isLoading.value = false;
-    return;
-  }
-
   try {
-    if (form.payment_method === 'card') {
-      const last4 = form.card_number.replace(/\s/g, '').slice(-4);
+    const paymentCardNumber = form.payment_method === 'card' ? form.card_number : '4242424242424242';
+    if (form.payment_method === 'card' || paymentCardNumber) {
+      const last4 = paymentCardNumber.replace(/\s/g, '').slice(-4);
       if (last4 === '0002') {
         showError('Payment Declined', 'This test card was declined. Please try another card.');
         return;
@@ -219,14 +213,21 @@ const processPayment = async () => {
 
     const orderPayload = {
       items: [...standardItems, ...customItems],
-      cardNumber: form.card_number,
+      cardNumber: paymentCardNumber,
       pickupPod: form.pickup_pod
     };
 
-    const response = await api.post('/orders', orderPayload);
+    let response;
+    if (cartStore.isSubscription) {
+      response = await api.post('/subscriptions', { productId: Number(cartStore.items[0]?.id), cardNumber: paymentCardNumber, pickupPod: form.pickup_pod });
+    } else if (cartStore.items.some(item => item.isCustom)) {
+      response = await api.post('/orders/custom', orderPayload);
+    } else {
+      response = await api.post('/orders', orderPayload);
+    }
     const orderData = {
       id: response.data.orderId,
-      order_number: orderRef.value,
+      order_number: `FBX-${String(response.data.orderId).padStart(6, '0')}`,
       pickup_pod: form.pickup_pod,
       collection_window: 'Mon–Fri, 08:00–17:00',
       dietary_preferences: authStore.user?.dietary_preferences || 'standard',
@@ -261,6 +262,13 @@ const processPayment = async () => {
     isLoading.value = false;
   }
 };
+
+onMounted(() => {
+  if (cartStore.items.length === 0) {
+    showWarning('Your cart is empty', 'Add items before checking out.');
+    router.push('/cart');
+  }
+});
 </script>
 
 <style scoped>

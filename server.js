@@ -26,6 +26,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Serve the Vue production build when it is available.
 if (frontendBuildExists) {
@@ -39,9 +40,11 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', require('./server/routes/auth.routes'));
+// Simulated card payment endpoints.
 app.use('/api/payments', require('./server/routes/payment.routes'));
 app.use('/api/orders', require('./server/routes/order.routes'));
 app.use('/api/subscriptions', require('./server/routes/subscription.routes'));
+// Payfast gateway endpoints.
 app.use('/api/payments/payfast', require('./server/routes/payfast.routes'));
 app.use('/api/products', require('./server/routes/product.routes'));
 

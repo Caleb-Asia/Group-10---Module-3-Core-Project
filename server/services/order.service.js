@@ -375,6 +375,9 @@ const orderService = {
         } else {
           subscriptionId = existingSub.id;
         }
+        await SubscriptionModel.incrementBoxesCompleted(subscriptionId, connection);
+        const subscription = await SubscriptionModel.findById(subscriptionId, connection);
+        if (Number(subscription.boxes_completed) % 8 === 0) totalAmount = 0;
       }
       const orderId = await OrderModel.create({
         user_id: userId,

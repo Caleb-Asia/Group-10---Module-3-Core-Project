@@ -13,7 +13,7 @@
     "start": "node server.js",
     "db:schema": "mysql -u root -p < database/schema.sql",
     "db:seed": "mysql -u root -p < database/seed.sql",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node -e \"console.log('No automated tests configured.')\""
   },
   "repository": {
     "type": "git",

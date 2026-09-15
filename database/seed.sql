@@ -43,4 +43,13 @@ VALUES
 (12, 'Gluten-Free Box', 'Gluten-free performance fuel', 79.00, 'box', JSON_ARRAY('gluten-free'), '/images/placeholder-product.png', TRUE),
 
 (9, 'Builder Meal', 'Custom meal item', 25.00, 'meal', JSON_ARRAY('standard'), '/images/builder-meal.png', TRUE),
-(10, 'Builder Snack', 'Custom snack item', 12.00, 'snack', JSON_ARRAY('standard'), '/images/builder-snack.png', TRUE);
+(10, 'Builder Snack', 'Custom snack item', 12.00, 'snack', JSON_ARRAY('standard'), '/images/builder-snack.png', TRUE),
+(13, 'Power Rice Bowl', 'Builder meal', 25.00, 'meal', JSON_ARRAY('standard'), '/images/power-rice-bowl.png', TRUE),
+(14, 'Lean Steak & Greens', 'Builder meal', 25.00, 'meal', JSON_ARRAY('standard'), '/images/lean-steak-greens.png', TRUE),
+(15, 'Harvest Veggie Curry', 'Builder meal', 25.00, 'meal', JSON_ARRAY('standard'), '/images/harvest-curry.png', TRUE),
+(16, 'Grilled Chicken Meal', 'Builder meal', 25.00, 'meal', JSON_ARRAY('standard'), '/images/builder-meal.png', TRUE),
+(17, 'Dark Choc Almonds', 'Builder snack', 12.00, 'snack', JSON_ARRAY('standard'), '/images/dark-choc-almonds.png', TRUE),
+(18, 'Apple Cinnamon Bites', 'Builder snack', 12.00, 'snack', JSON_ARRAY('standard'), '/images/apple-cinnamon-bites.png', TRUE),
+(19, 'Pretzel Sticks', 'Builder snack', 12.00, 'snack', JSON_ARRAY('standard'), '/images/pretzel-sticks.png', TRUE),
+(20, 'Protein Balls', 'Builder snack', 12.00, 'snack', JSON_ARRAY('standard'), '/images/builder-snack.png', TRUE),
+(21, 'Builder Snack Mix', 'Builder snack', 12.00, 'snack', JSON_ARRAY('standard'), '/images/builder-snack.png', TRUE);

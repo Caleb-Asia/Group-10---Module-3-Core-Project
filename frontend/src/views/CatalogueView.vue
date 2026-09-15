@@ -129,7 +129,7 @@ const filteredProducts = computed(() => {
     const query = searchQuery.value.toLowerCase().trim();
     products = products.filter(p =>
       p.name.toLowerCase().includes(query) ||
-      p.description.toLowerCase().includes(query) ||
+      (p.description || '').toLowerCase().includes(query) ||
       (p.dietary_tags && p.dietary_tags.some(tag => tag.toLowerCase().includes(query)))
     );
   }

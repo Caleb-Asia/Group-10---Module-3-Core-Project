@@ -26,10 +26,14 @@
 
 <script setup>
 import { useRoute } from 'vue-router';
+import { onMounted } from 'vue';
+import { useAuthStore } from '@/store/authStore';
 import NavBar from '@/components/layout/NavBar.vue';
 import Footer from '@/components/layout/Footer.vue';
 
 const appRoute = useRoute();
+const authStore = useAuthStore();
+onMounted(() => authStore.init());
 </script>
 
 <style>
