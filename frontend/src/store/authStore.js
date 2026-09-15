@@ -43,24 +43,32 @@ export const useAuthStore = defineStore('auth', () => {
   async function register(userData) {
     try {
       const payload = {
-        name: userData.name,
-        email: userData.email,
-        password: userData.password,
+        name: String(userData.name || '').trim(),
+        email: String(userData.email || '').trim().toLowerCase(),
+        password: String(userData.password || ''),
         dietary_preferences: Array.isArray(userData.dietary_preferences)
-          ? userData.dietary_preferences.join(',')
-          : userData.dietary_preferences || 'standard'
+          ? userData.dietary_preferences.map(item => String(item).trim().toLowerCase()).join(',')
+          : String(userData.dietary_preferences || 'standard').trim().toLowerCase()
       };
 
-      await api.post('/auth/register', payload);
+      const response = await api.post('/auth/register', payload);
+      const registerData = response?.data || {};
 
-      const loginResult = await login(userData.email, userData.password);
+      if (!registerData.success) {
+        return { success: false, message: registerData?.error?.message || 'Registration failed.' };
+      }
+
+      const loginResult = await login(payload.email, payload.password);
       if (!loginResult.success) {
-        return { success: false, message: loginResult.message };
+        return {
+          success: false,
+          message: 'Account created successfully. Please log in with your new account.'
+        };
       }
 
       return { success: true, user: loginResult.user, token: loginResult.token };
     } catch (error) {
-      const message = error?.response?.data?.error?.message || 'Registration failed.';
+      const message = error?.response?.data?.error?.message || error?.message || 'Registration failed.';
       return { success: false, message };
     }
   }
