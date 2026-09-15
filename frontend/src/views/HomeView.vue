@@ -41,10 +41,13 @@
           </router-link>
         </div>
 
-        <div class="box-grid">
+        <div v-if="isLoading" class="home-product-state">Loading boxes...</div>
+        <div v-else-if="productError" class="home-product-state">{{ productError }}</div>
+        <div v-else-if="featuredBoxes.length === 0" class="home-product-state">No boxes are available right now.</div>
+        <div v-else class="box-grid">
           <article v-for="box in featuredBoxes" :key="box.id" class="box-card">
             <div class="box-image-wrap">
-              <img :src="box.image" :alt="`${box.name} meal box`" class="box-image" />
+              <img :src="box.image_url || '/images/placeholder-product.png'" :alt="`${box.name} meal box`" class="box-image" />
             </div>
 
             <div class="box-content">
@@ -52,7 +55,7 @@
               <p class="price">R{{ box.price }}</p>
 
               <div class="tags">
-                <span v-for="tag in box.tags" :key="tag" class="tag">{{ tag }}</span>
+                <span v-for="tag in getDietaryTags(box)" :key="tag" class="tag">{{ tag }}</span>
               </div>
 
               <button class="btn btn--primary btn--full" @click="addToCart(box)">
@@ -129,17 +132,15 @@
  * Owner: Sisamila Sigab
  * Notes: Uses local cart state via localStorage. Uses FoodBoxx design tokens.
  */
-import { ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useCartStore } from '@/store/cartStore';
+import { useProductStore } from '@/store/productStore';
 
 const cartStore = useCartStore();
-
-const featuredBoxes = [
-  { id: 1, name: "Starter Box", price: 49, tags: ["Standard"], image: "/images/starter-box.png" },
-  { id: 2, name: "Standard Box", price: 79, tags: ["Standard", "High Protein"], image: "/images/standard-box.png" },
-  { id: 3, name: "Premium Box", price: 99, tags: ["Standard", "Keto"], image: "/images/premium-box.png" },
-  { id: 4, name: "Vegan Boost Box", price: 79, tags: ["Vegan"], image: "/images/vegan-box.png" },
-];
+const productStore = useProductStore();
+const isLoading = ref(false);
+const productError = ref('');
+const featuredBoxes = computed(() => productStore.products.filter(product => product.category === 'box'));
 
 const steps = [
   { number: 1, title: "Order by Fri 6PM", description: "Place your order before the weekend cutoff" },
@@ -160,10 +161,10 @@ function addToCart(box) {
   cartStore.addToCart({
     id: box.id,
     name: box.name,
-    price: box.price,
+    price: parseFloat(box.price),
     quantity: 1,
-    image_url: box.image,
-    dietary_tags: box.tags
+    image_url: box.image_url || '',
+    dietary_tags: box.dietary_tags || []
   });
   message.value = `${box.name} added to your cart`;
   window.clearTimeout(addToCart.timeout);
@@ -171,6 +172,25 @@ function addToCart(box) {
     message.value = "";
   }, 2200);
 }
+
+function getDietaryTags(product) {
+  if (Array.isArray(product.dietary_tags)) return product.dietary_tags;
+  if (typeof product.dietary_tags === 'string' && product.dietary_tags.trim()) {
+    return product.dietary_tags.split(',').map(tag => tag.trim());
+  }
+  return [];
+}
+
+onMounted(async () => {
+  isLoading.value = true;
+  try {
+    await productStore.fetchProducts();
+  } catch (error) {
+    productError.value = 'Unable to load boxes right now.';
+  } finally {
+    isLoading.value = false;
+  }
+});
 </script>
 
 <style scoped>
@@ -301,6 +321,12 @@ function addToCart(box) {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-6);
+}
+
+.home-product-state {
+  padding: var(--spacing-8) 0;
+  color: var(--color-gray-600);
+  text-align: center;
 }
 
 .box-card {

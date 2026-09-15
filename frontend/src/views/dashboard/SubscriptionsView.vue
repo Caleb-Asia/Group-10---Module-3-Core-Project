@@ -140,7 +140,11 @@
           </div>
 
           <div class="box-options">
-            <div 
+            <p v-if="productLoading" class="text-muted">Loading available boxes...</p>
+            <p v-else-if="productError" class="text-muted">{{ productError }}</p>
+            <p v-else-if="availableBoxes.length === 0" class="text-muted">No subscription boxes are available.</p>
+            <div
+              v-else
               v-for="box in availableBoxes" 
               :key="box.id"
               :class="['box-option', { 'box-option--selected': currentBoxId === box.id }]"
@@ -169,28 +173,26 @@ import { ref, computed, onMounted } from 'vue';
 import { showConfirm, showSuccess, showError } from '@/services/ui';
 import api from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
+import { useProductStore } from '@/store/productStore';
 
-// Mock available boxes for switching
-const availableBoxes = [
-  { id: 'standard', name: 'Standard Box', price: 79 },
-  { id: 'premium', name: 'Premium Box', price: 99 },
-  { id: 'vegan', name: 'Vegan Boost Box', price: 79 },
-  { id: 'keto', name: 'Keto Fuel Box', price: 89 },
-];
+const productStore = useProductStore();
 
 // --- REACTIVE STATE ---
-const currentBoxId = ref('standard');
+const currentBoxId = ref(null);
 const subscriptionId = ref(null);
 const showSwitchModal = ref(false);
 const status = ref('active'); // 'active' | 'paused' | 'cancelled'
 const boxesCompleted = ref(3); // Matches the 3/8 loyalty bar
 const productName = ref(null);
 const productPrice = ref(null);
+const productLoading = ref(false);
+const productError = ref('');
 
 // --- COMPUTED VALUES (Dynamic!) ---
-const currentBox = computed(() => availableBoxes.find(b => b.id === currentBoxId.value));
-const currentBoxName = computed(() => productName.value || (currentBox.value ? currentBox.value.name : 'Standard Box'));
-const currentBoxPrice = computed(() => productPrice.value || (currentBox.value ? currentBox.value.price : 79));
+const availableBoxes = computed(() => productStore.products.filter(product => product.category === 'box'));
+const currentBox = computed(() => availableBoxes.value.find(box => Number(box.id) === Number(currentBoxId.value)));
+const currentBoxName = computed(() => productName.value || currentBox.value?.name || 'No box selected');
+const currentBoxPrice = computed(() => productPrice.value || currentBox.value?.price || 0);
 
 const statusText = computed(() => {
   if (status.value === 'paused') return 'SUBSCRIPTION PAUSED';
@@ -216,7 +218,8 @@ const selectBox = (box) => {
 const confirmSwitch = async () => {
   const previous = currentBoxId.value;
   try {
-    await api.patch(`/subscriptions/${subscriptionId.value}`, { productId: ({ standard: 2, premium: 3, vegan: 4, keto: 5 })[currentBoxId.value], pickupPod: 'UCT Library' });
+    if (!currentBoxId.value) throw new Error('No product selected');
+    await api.patch(`/subscriptions/${subscriptionId.value}`, { productId: currentBoxId.value, pickupPod: 'UCT Library' });
     showSwitchModal.value = false;
     showSuccess('Box Switched!', `You have switched to the ${currentBoxName.value}.`);
   } catch (error) {
@@ -229,6 +232,15 @@ const authStore = useAuthStore();
 
 // Load the current subscription state before enabling lifecycle actions.
 onMounted(async () => {
+  productLoading.value = true;
+  try {
+    await productStore.fetchProducts();
+  } catch (error) {
+    productError.value = 'Available boxes could not be loaded.';
+  } finally {
+    productLoading.value = false;
+  }
+
   try {
     const response = await api.get('/subscriptions/user/' + authStore.user.id);
     const subscription = response.data.subscription;
@@ -238,8 +250,7 @@ onMounted(async () => {
     boxesCompleted.value = subscription.boxes_completed;
     productName.value = subscription.product_name;
     productPrice.value = subscription.product_price;
-    const productBoxMap = { 2: 'standard', 3: 'premium', 4: 'vegan', 5: 'keto' };
-    if (productBoxMap[subscription.product_id]) currentBoxId.value = productBoxMap[subscription.product_id];
+    currentBoxId.value = subscription.product_id;
   } catch (error) {
     // Preserve the existing defaults when the subscription cannot be loaded.
   }
@@ -290,7 +301,8 @@ const restartSubscription = async () => {
   const previousStatus = status.value;
   const previousBoxes = boxesCompleted.value;
   try {
-    const response = await api.post('/subscriptions', { productId: ({ standard: 2, premium: 3, vegan: 4, keto: 5 })[currentBoxId.value], cardNumber: '4242424242424242', pickupPod: 'UCT Library' });
+    if (!currentBoxId.value) throw new Error('No product selected');
+    const response = await api.post('/subscriptions', { productId: currentBoxId.value, cardNumber: '4242424242424242', pickupPod: 'UCT Library' });
     status.value = 'active';
     boxesCompleted.value = 0;
     if (response.data.subscriptionId) subscriptionId.value = response.data.subscriptionId;

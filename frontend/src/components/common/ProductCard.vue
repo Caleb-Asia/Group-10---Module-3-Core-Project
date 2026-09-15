@@ -91,40 +91,7 @@ onMounted(() => {
 onBeforeUnmount(() => observer?.disconnect());
 
 const getImage = (product) => {
-  if (product.image_url) return product.image_url;
-  const imageMap = {
-    'Starter Box': '/images/starter-box.png',
-    'Standard Box': '/images/standard-box.png',
-    'Premium Box': '/images/premium-box.png',
-    'Vegan Boost Box': '/images/vegan-box.png',
-    'Keto Fuel Box': '/images/keto-box.png',
-    'Nut-Free Safety Box': '/images/nut-free-box.png',
-    'Monthly Snack Box': '/images/snack-box.png',
-    'Builder Snack Mix': '/images/builder-snack.png',
-    'Gluten-Free': '/images/gluten-free-box.png',
-    'Builder Meals': '/images/builder-meal.png',
-    'Builder Snacks': '/images/builder-snack.png',
-    'Grilled Chicken Meal': '/images/builder-meal.png',
-    'Protein Balls': '/images/builder-snack.png',
-    // New Creative Boxes
-    'Campus Grind Box': '/images/campus-grind.png',
-    'Freshman 15 (Keto)': '/images/freshman-15.png',
-    'Varsity Athlete Box': '/images/varsity-athlete.png',
-    'All-Nighter Box': '/images/all-nighter.png',
-    'Coffee Shop Box': '/images/coffee-shop.png',
-    // Exam Week Boxes
-    'Exam Week Survival: Study Fuel': '/images/exam-box1.png',
-    'Exam Week Survival: Brain Boost': '/images/exam-box2.png',
-    // Builder Meals (New)
-    'Power Rice Bowl': '/images/power-rice-bowl.png',
-    'Lean Steak & Greens': '/images/lean-steak-greens.png',
-    'Harvest Veggie Curry': '/images/harvest-curry.png',
-    // Builder Snacks (New)
-    'Dark Choc Almonds': '/images/dark-choc-almonds.png',
-    'Apple Cinnamon Bites': '/images/apple-cinnamon-bites.png',
-    'Pretzel Sticks': '/images/pretzel-sticks.png'
-  };
-  return imageMap[product.name] || '/images/placeholder-product.png';
+  return product.image_url || '/images/placeholder-product.png';
 };
 
 const getDietaryTags = (product) => {
