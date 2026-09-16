@@ -111,10 +111,6 @@ onMounted(async () => {
       };
 
       sessionStorage.setItem('foodboxx_last_order', JSON.stringify(builtOrderData));
-      localStorage.setItem('foodboxx_orders', JSON.stringify([
-        builtOrderData,
-        ...JSON.parse(localStorage.getItem('foodboxx_orders') || '[]')
-      ]));
       orderData.value = builtOrderData;
     } catch (error) {
       console.log('[CONFIRM] error:', error?.response?.status, error?.response?.data);
@@ -168,10 +164,6 @@ onMounted(async () => {
       };
 
       sessionStorage.setItem('foodboxx_last_order', JSON.stringify(builtOrderData));
-      localStorage.setItem('foodboxx_orders', JSON.stringify([
-        builtOrderData,
-        ...JSON.parse(localStorage.getItem('foodboxx_orders') || '[]')
-      ]));
       orderData.value = builtOrderData;
     } catch (error) {
       console.log('[CONFIRM] sandbox fallback error:', error?.response?.status, error?.response?.data);

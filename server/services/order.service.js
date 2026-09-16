@@ -12,6 +12,17 @@ const OrderModel = require('../models/Order.model');
 const OrderItemModel = require('../models/OrderItem.model');
 const SubscriptionModel = require('../models/Subscription.model');
 const { APPROVED_PICKUP_PODS, isApprovedPickupPod } = require('../utils/validators');
+const UserModel = require('../models/User.model');
+const { sendPaymentConfirmation } = require('./email.service');
+
+async function sendConfirmation(userId, result) {
+  try {
+    const user = await UserModel.findById(userId);
+    if (user) await sendPaymentConfirmation({ email: user.email, name: user.name, ...result });
+  } catch (error) {
+    console.error('Payment confirmation email failed:', error.message);
+  }
+}
 
 function validatePickupPod(pickupPod) {
   if (!isApprovedPickupPod(pickupPod)) {
@@ -160,7 +171,9 @@ const orderService = {
       }
 
       await connection.commit();
-      return { orderId, txnRef: paymentResult.txnRef, totalAmount };
+      const result = { orderId, txnRef: paymentResult.txnRef, totalAmount };
+      await sendConfirmation(userId, result);
+      return result;
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -208,7 +221,9 @@ const orderService = {
       const orderId = await OrderModel.create({ user_id: userId, subscription_id: subscriptionId, order_type: orderType, total_amount: totalAmount, payment_status: 'paid', payment_txn_ref: txnRef, pickup_pod: pickupPod, status: 'confirmed' }, connection);
       for (const item of items) await OrderItemModel.create(orderId, item.productId, item.quantity, item.unitPrice, connection);
       await connection.commit();
-      return { orderId, txnRef, totalAmount };
+      const result = { orderId, txnRef, totalAmount };
+      await sendConfirmation(userId, result);
+      return result;
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -251,7 +266,9 @@ const orderService = {
       }
 
       await connection.commit();
-      return { orderId, txnRef: paymentResult.txnRef, totalAmount };
+      const result = { orderId, txnRef: paymentResult.txnRef, totalAmount };
+      await sendConfirmation(userId, result);
+      return result;
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -331,13 +348,15 @@ const orderService = {
       );
 
       await connection.commit();
-      return {
+      const result = {
         orderId,
         subscriptionId,
         txnRef: paymentResult.txnRef,
         totalAmount: chargedAmount,
         loyaltyReward
       };
+      await sendConfirmation(userId, result);
+      return result;
     } catch (error) {
       await connection.rollback();
       throw error;

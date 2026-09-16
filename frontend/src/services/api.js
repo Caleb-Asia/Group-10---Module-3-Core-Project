@@ -13,7 +13,7 @@ const api = axios.create({
 // Request Interceptor: Attach JWT token if it exists
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('foodboxx_token');
+    const token = window.__foodboxxToken || '';
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,8 +29,7 @@ api.interceptors.response.use(
     const requestUrl = error.config?.url || '';
     if (error.response && error.response.status === 401 && !requestUrl.includes('/auth/login') && !requestUrl.includes('/auth/register')) {
       // Token expired or invalid -> redirect to login
-      localStorage.removeItem('foodboxx_token');
-      localStorage.removeItem('foodboxx_user');
+      delete window.__foodboxxToken;
       
       // Show SweetAlert2 instead of alert
       Swal.fire({

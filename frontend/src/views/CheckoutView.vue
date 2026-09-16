@@ -261,11 +261,6 @@ const processPayment = async () => {
       txnRef: response.data.txnRef
     };
 
-    localStorage.setItem('foodboxx_orders', JSON.stringify([
-      orderData,
-      ...JSON.parse(localStorage.getItem('foodboxx_orders') || '[]')
-    ]));
-
     sessionStorage.setItem('foodboxx_last_order', JSON.stringify(orderData));
 
     cartStore.clearCart();

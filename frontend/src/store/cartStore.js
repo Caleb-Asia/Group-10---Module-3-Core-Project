@@ -12,7 +12,7 @@ import { ref, computed } from 'vue';
 export const useCartStore = defineStore('cart', () => {
   const cartStorageKey = () => {
     try {
-      const user = JSON.parse(localStorage.getItem('foodboxx_user') || 'null');
+      const user = window.__foodboxxUser || null;
       return user?.id ? `foodboxx_cart_user_${user.id}` : 'foodboxx_cart_guest';
     } catch (error) {
       return 'foodboxx_cart_guest';

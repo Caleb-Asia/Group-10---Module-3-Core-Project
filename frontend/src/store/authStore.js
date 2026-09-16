@@ -9,8 +9,8 @@ import { ref, computed } from 'vue';
 import api from '../services/api';
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref(JSON.parse(localStorage.getItem('foodboxx_user') || 'null'));
-  const token = ref(localStorage.getItem('foodboxx_token') || '');
+  const user = ref(null);
+  const token = ref('');
 
   const isAuthenticated = computed(() => !!token.value);
   const currentUser = computed(() => user.value);
@@ -19,8 +19,8 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = nextToken;
     user.value = nextUser;
 
-    localStorage.setItem('foodboxx_token', nextToken);
-    localStorage.setItem('foodboxx_user', JSON.stringify(nextUser));
+    window.__foodboxxToken = nextToken;
+    window.__foodboxxUser = nextUser;
     window.dispatchEvent(new Event('foodboxx-auth-changed'));
   }
 
@@ -79,7 +79,6 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.get('/auth/me');
       const profile = response.data.user || response.data;
       user.value = profile;
-      localStorage.setItem('foodboxx_user', JSON.stringify(profile));
       window.dispatchEvent(new Event('foodboxx-auth-changed'));
       return profile;
     } catch (error) {
@@ -98,7 +97,6 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.patch('/auth/me', updates);
       const updatedUser = response.data.user || response.data;
       user.value = updatedUser;
-      localStorage.setItem('foodboxx_user', JSON.stringify(updatedUser));
       return updatedUser;
     } catch (error) {
       throw error;
@@ -108,8 +106,8 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     user.value = null;
     token.value = '';
-    localStorage.removeItem('foodboxx_token');
-    localStorage.removeItem('foodboxx_user');
+    delete window.__foodboxxToken;
+    delete window.__foodboxxUser;
     window.dispatchEvent(new Event('foodboxx-auth-changed'));
   }
 

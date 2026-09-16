@@ -3,7 +3,7 @@
   Module: Frontend - Views - Dashboard
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: Reads orders from localStorage. Empty state for new users.
+  Notes: Reads orders from the authenticated user's server-side order history.
 -->
 <template>
   <div class="orders-page">
