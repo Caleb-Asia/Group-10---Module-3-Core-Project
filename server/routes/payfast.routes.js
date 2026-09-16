@@ -28,7 +28,7 @@ router.post('/confirm', async (req, res, next) => {
     if (payfastData.payment_status !== 'COMPLETE') throw new ApiError(400, `Payment was not completed (status: ${payfastData.payment_status})`);
     const result = await orderService.createOrderFromPayfast({ ...pending, txnRef: payfastData.pf_payment_id || ref });
     payfastService.clearPendingOrder(ref);
-    res.json({ success: true, orderId: result.orderId, qrToken: result.qrToken, totalAmount: result.totalAmount });
+    res.json({ success: true, orderId: result.orderId, totalAmount: result.totalAmount });
   } catch (error) {
     next(error);
   }

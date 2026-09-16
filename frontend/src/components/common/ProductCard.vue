@@ -10,7 +10,7 @@
   <div ref="card" class="product-card" :class="{ 'product-card--revealed': isRevealed }" @click="goToDetail">
     
     <!-- Image Area -->
-    <div v-if="product.id === 11 || product.id === 12" class="product-card__image-wrapper">
+    <div class="product-card__image-wrapper">
       <img 
         :src="getImage(product)" 
         :alt="product.name" 
@@ -90,15 +90,35 @@ onMounted(() => {
 
 onBeforeUnmount(() => observer?.disconnect());
 
+const imageMap = {
+  1: '/images/starter-box.png',
+  2: '/images/standard-box.png',
+  3: '/images/premium-box.png',
+  4: '/images/vegan-box.png',
+  5: '/images/keto-box.png',
+  6: '/images/nut-free-box.png',
+  7: '/images/snack-box.png',
+  8: '/images/snack-box.png',
+  9: '/images/grilled-chicken-rice.png',
+  10: '/images/builder-snack.png',
+  11: '/images/halaal-box.png',
+  12: '/images/gluten-free.png',
+  13: '/images/power-rice-bowl.png',
+  14: '/images/lean-steak-greens.png',
+  15: '/images/vegan-box.png',
+  16: '/images/grilled-chicken-rice.png',
+  17: '/images/dark-choc-almonds.png',
+  18: '/images/apple-cinnamon-bites.png',
+  19: '/images/pretzel-sticks.png',
+  20: '/images/protein-power-balls.png',
+  21: '/images/builder-snack.png'
+};
+
 const getImage = (product) => {
-  const imageMap = {
-    'Halal Fuel Box': '/images/halaal-box.png',
-    'Gluten-Free Box': '/images/gluten-free.png'
-  };
-  if (imageMap[product.name] && (!product.image_url || product.image_url.includes('placeholder-product'))) {
-    return imageMap[product.name];
+  if (product && product.id && imageMap[product.id]) {
+    return imageMap[product.id];
   }
-  return product.image_url || '/images/placeholder-product.png';
+  return product?.image_url || '/images/placeholder-product.png';
 };
 
 const getDietaryTags = (product) => {

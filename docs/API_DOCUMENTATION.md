@@ -132,7 +132,7 @@ Request body:
 }
 ```
 
-Returns: `{ success, orderId, qrToken, totalAmount }`
+Returns: `{ success, orderId, totalAmount }`
 
 ### POST /api/payments/payfast/notify
 
@@ -179,7 +179,6 @@ Both one-off and custom order endpoints return `201 Created`:
   "message": "Order created successfully",
   "orderId": 101,
   "totalAmount": 79,
-  "qrToken": "5f8a7e3d1b9c24e6a8d0f1a3b5c7e9f05f8a7e3d1b9c24e6a8d0f1a3b5c7e9f0",
   "txnRef": "FBX-1756800000-a1b2c3d4"
 }
 ```
@@ -196,28 +195,7 @@ This is the **canonical subscription creation endpoint**. It derives the single 
 }
 ```
 
-Returns `201 Created` with `{ success, message, orderId, subscriptionId, totalAmount, qrToken, txnRef }`.
-
-### PATCH /api/orders/:id/pick-up
-
-Validates the body `qrToken` against `orders.qr_token` for an order owned by the authenticated user, then sets the status to `picked_up`.
-
-```json
-{
-  "qrToken": "5f8a7e3d1b9c24e6a8d0f1a3b5c7e9f05f8a7e3d1b9c24e6a8d0f1a3b5c7e9f0"
-}
-```
-
-```json
-{
-  "success": true,
-  "message": "Order picked up successfully",
-  "order": {
-    "id": 101,
-    "status": "picked_up"
-  }
-}
-```
+Returns `201 Created` with `{ success, message, orderId, subscriptionId, totalAmount, txnRef }`.
 
 ### GET /api/orders/user/:userId
 
@@ -258,7 +236,7 @@ All subscription routes require authentication and enforce ownership.
 
 ### POST /api/subscriptions
 
-This brief-compatible endpoint creates a subscription and its first order. `POST /api/orders/subscription` remains the canonical endpoint. The server derives the box price, processes payment, creates the subscription and first order in one transaction, and generates a QR token.
+This brief-compatible endpoint creates a subscription and its first order. `POST /api/orders/subscription` remains the canonical endpoint. The server derives the box price, processes payment, and creates the subscription and first order in one transaction.
 
 ```json
 {
@@ -275,7 +253,6 @@ Returns `201 Created`:
   "success": true,
   "subscriptionId": 5,
   "orderId": 103,
-  "qrToken": "7d9e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b1c3d5e7f9a1b3c5d7e9f1a3b5c7d9e",
   "txnRef": "FBX-1756800000-e9f0a1b2",
   "totalAmount": 89
 }
@@ -385,7 +362,7 @@ Returns meal and snack products available to the custom box builder.
 | --- | --- |
 | `200` | Successful retrieval, update, or sandbox payment. |
 | `201` | Resource created. |
-| `400` | Invalid request, invalid state transition, or invalid QR token. |
+| `400` | Invalid request or invalid state transition. |
 | `401` | Missing or invalid JWT. |
 | `402` | Simulated card decline. |
 | `403` | Resource belongs to another user. |

@@ -183,7 +183,6 @@
 * [ ] Database works
 * [ ] Main user journey works
 * [ ] Payment demo works
-* [ ] QR code works
 * [ ] Subscription demo works
 * [ ] Backend failure demo works
 * [ ] Postman is ready

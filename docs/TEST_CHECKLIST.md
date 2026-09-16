@@ -64,8 +64,6 @@
 * ⬜ User with no orders gets an empty list
 * ⬜ Individual order can be viewed
 * ⬜ Invalid order ID gives 404
-* ⬜ QR code/token is generated
-* ⬜ QR tokens are unique
 
 ## **Problems / Notes:**
 
@@ -122,7 +120,7 @@
 
 Run the full journey:
 
-**Register → Login → Menu → Builder → Cart → Checkout → Payment → QR → Dashboard**
+**Register → Login → Menu → Builder → Cart → Checkout → Payment → Confirmation → Dashboard**
 
 ### 🖥️ Desktop
 
@@ -135,7 +133,7 @@ Run the full journey:
 * ⬜ Cart
 * ⬜ Checkout
 * ⬜ Payment
-* ⬜ QR confirmation
+* ⬜ Order confirmation
 * ⬜ Dashboard
 
 **Firefox**
@@ -162,7 +160,7 @@ Run the full journey:
 * ⬜ Builder works
 * ⬜ Cart works
 * ⬜ Checkout works
-* ⬜ QR displays properly
+* ⬜ Order confirmation displays properly
 
 **iPhone / Safari**
 
@@ -230,7 +228,6 @@ Before rehearsal on **23 September**:
 * ⬜ Mobile checked
 * ⬜ Desktop checked
 * ⬜ Payment tested
-* ⬜ QR tested
 * ⬜ Subscription tested
 * ⬜ Major bugs fixed
 * ⬜ Remaining bugs reported to the team

@@ -19,9 +19,6 @@ router.post('/custom', validateOrderPayload, orderController.createCustomOrder);
 // Deprecated alias for POST /api/subscriptions — kept for backward compatibility.
 router.post('/subscription', validateOrderPayload, orderController.createSubscriptionOrder);
 
-// Confirm a QR token and mark an order as collected.
-router.patch('/:id/pick-up', orderController.pickUpOrder);
-
 // GET order retrieval routes (user route must precede :id to prevent collision)
 router.get('/user/:userId', orderController.getOrdersByUser);
 router.get('/:id', orderController.getOrderById);

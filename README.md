@@ -1,6 +1,6 @@
 # FoodBoxx
 
-FoodBoxx is a meal prep and snack-box e-commerce application for students and young professionals. It supports product browsing, custom-box building, orders, subscriptions, payments, and QR-based pickup.
+FoodBoxx is a meal prep and snack-box e-commerce application for students and young professionals. It supports product browsing, custom-box building, orders, subscriptions, and payments.
 
 ## Single-server architecture
 
@@ -80,10 +80,9 @@ The API is available under `/api`.
 
 - `/api/auth` — authentication
 - `/api/products` — products and builder items
-- `/api/orders` — orders and pickup
+- `/api/orders` — orders
 - `/api/payments` — payment sandbox
 - `/api/subscriptions` — subscriptions
-
 - `/api/payments/payfast` — Payfast sandbox integration (initiate, confirm, notify)
 
 Detailed endpoint documentation is in [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md).

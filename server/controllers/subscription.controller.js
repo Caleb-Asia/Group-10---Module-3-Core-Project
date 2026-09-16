@@ -52,7 +52,6 @@ const subscriptionController = {
         success: true,
         subscriptionId: result.subscriptionId,
         orderId: result.orderId,
-        qrToken: result.qrToken,
         txnRef: result.txnRef,
         totalAmount: result.totalAmount,
         ...(result.loyaltyReward ? { loyaltyReward: true } : {})

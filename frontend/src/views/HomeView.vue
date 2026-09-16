@@ -19,7 +19,7 @@
             </h1>
             <p class="hero-subtitle">
               Fresh, nutrient-dense meal boxes for Cape Town's busy students and young professionals.
-              Pickup on campus, scan your QR, and get back to what matters.
+              Pickup on campus and get back to what matters.
             </p>
             <div class="hero-actions">
               <router-link to="/menu" class="btn btn--primary btn--lg">Order Now →</router-link>
@@ -139,7 +139,7 @@ const featuredBoxes = computed(() => productStore.products.filter(product => pro
 const steps = [
   { number: 1, title: "Order by Fri 6PM", description: "Place your order before the weekend cutoff" },
   { number: 2, title: "Visit a Pickup Pod", description: "Choose from 6 campus locations on Monday" },
-  { number: 3, title: "Scan & Collect", description: "Show your unique QR code to grab your box" },
+  { number: 3, title: "Pickup & Enjoy", description: "Collect your fresh box from your chosen pod" },
 ];
 
 const stats = [
@@ -234,6 +234,13 @@ onMounted(async () => {
   display: flex;
   gap: var(--spacing-3);
   flex-wrap: wrap;
+}
+
+.hero-actions .btn--primary:hover,
+.promo-actions .btn--primary:hover,
+.btn--primary:hover {
+  color: #FFFFFF;
+  background: var(--color-orange-hover);
 }
 
 /* CONTENT SECTIONS */

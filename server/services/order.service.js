@@ -8,7 +8,6 @@ const pool = require('../config/db');
 const ApiError = require('../utils/apiError');
 const paymentService = require('./payment.service');
 const payfastService = require('./payfast.service');
-const qrService = require('./qr.service');
 const OrderModel = require('../models/Order.model');
 const OrderItemModel = require('../models/OrderItem.model');
 const SubscriptionModel = require('../models/Subscription.model');
@@ -143,10 +142,7 @@ const orderService = {
       // 2. Process payment (if declined, throws ApiError 402; order is never created)
       const paymentResult = await paymentService.processPayment({ cardNumber, amount: totalAmount });
 
-      // 3. Generate secure QR token
-      const qrToken = qrService.generateToken();
-
-      // 4. Insert order using the active transaction connection
+      // 3. Insert order using the active transaction connection
       const orderId = await OrderModel.create({
         user_id: userId,
         subscription_id: null,
@@ -154,18 +150,17 @@ const orderService = {
         total_amount: totalAmount,
         payment_status: 'paid',
         payment_txn_ref: paymentResult.txnRef,
-        qr_token: qrToken,
         pickup_pod: pickupPod,
         status: 'confirmed'
       }, connection);
 
-      // 5. Insert order items using the active transaction connection
+      // 4. Insert order items using the active transaction connection
       for (const item of calculatedItems) {
         await OrderItemModel.create(orderId, item.productId, item.quantity, item.unitPrice, connection);
       }
 
       await connection.commit();
-      return { orderId, qrToken, txnRef: paymentResult.txnRef, totalAmount };
+      return { orderId, txnRef: paymentResult.txnRef, totalAmount };
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -199,7 +194,6 @@ const orderService = {
     const connection = await pool.getConnection();
     try {
       await connection.beginTransaction();
-      const qrToken = qrService.generateToken();
       let subscriptionId = null;
       if (orderType === 'subscription') {
         const existingSub = await SubscriptionModel.findByUserId(userId, connection);
@@ -211,10 +205,10 @@ const orderService = {
         const subscription = await SubscriptionModel.findById(subscriptionId, connection);
         if (Number(subscription.boxes_completed) % 8 === 0) totalAmount = 0;
       }
-      const orderId = await OrderModel.create({ user_id: userId, subscription_id: subscriptionId, order_type: orderType, total_amount: totalAmount, payment_status: 'paid', payment_txn_ref: txnRef, qr_token: qrToken, pickup_pod: pickupPod, status: 'confirmed' }, connection);
+      const orderId = await OrderModel.create({ user_id: userId, subscription_id: subscriptionId, order_type: orderType, total_amount: totalAmount, payment_status: 'paid', payment_txn_ref: txnRef, pickup_pod: pickupPod, status: 'confirmed' }, connection);
       for (const item of items) await OrderItemModel.create(orderId, item.productId, item.quantity, item.unitPrice, connection);
       await connection.commit();
-      return { orderId, qrToken, txnRef, totalAmount };
+      return { orderId, txnRef, totalAmount };
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -239,10 +233,7 @@ const orderService = {
       // 2. Process payment (if declined, throws ApiError 402; order is never created)
       const paymentResult = await paymentService.processPayment({ cardNumber, amount: totalAmount });
 
-      // 3. Generate secure QR token
-      const qrToken = qrService.generateToken();
-
-      // 4. Insert order with order_type = 'custom' using transaction connection
+      // 3. Insert order with order_type = 'custom' using transaction connection
       const orderId = await OrderModel.create({
         user_id: userId,
         subscription_id: null,
@@ -250,18 +241,17 @@ const orderService = {
         total_amount: totalAmount,
         payment_status: 'paid',
         payment_txn_ref: paymentResult.txnRef,
-        qr_token: qrToken,
         pickup_pod: pickupPod,
         status: 'confirmed'
       }, connection);
 
-      // 5. Insert order items using transaction connection
+      // 4. Insert order items using transaction connection
       for (const item of calculatedItems) {
         await OrderItemModel.create(orderId, item.productId, item.quantity, item.unitPrice, connection);
       }
 
       await connection.commit();
-      return { orderId, qrToken, txnRef: paymentResult.txnRef, totalAmount };
+      return { orderId, txnRef: paymentResult.txnRef, totalAmount };
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -319,10 +309,7 @@ const orderService = {
         ? { txnRef: 'FBX-LOYALTY-FREE' }
         : await paymentService.processPayment({ cardNumber, amount: chargedAmount });
 
-      // 4. Generate the pickup token after payment/reward determination.
-      const qrToken = qrService.generateToken();
-
-      // 5. Persist the first or recurring subscription order.
+      // 4. Persist the first or recurring subscription order.
       const orderId = await OrderModel.create({
         user_id: userId,
         subscription_id: subscriptionId,
@@ -330,12 +317,11 @@ const orderService = {
         total_amount: chargedAmount,
         payment_status: 'paid',
         payment_txn_ref: paymentResult.txnRef,
-        qr_token: qrToken,
         pickup_pod: pickupPod,
         status: 'confirmed'
       }, connection);
 
-      // 6. Persist exactly one server-derived subscription box line item.
+      // 5. Persist exactly one server-derived subscription box line item.
       await OrderItemModel.create(
         orderId,
         calculatedItem.productId,
@@ -348,7 +334,6 @@ const orderService = {
       return {
         orderId,
         subscriptionId,
-        qrToken,
         txnRef: paymentResult.txnRef,
         totalAmount: chargedAmount,
         loyaltyReward
@@ -405,28 +390,6 @@ const orderService = {
       ...order,
       items: itemsByOrderId.get(String(order.id)) || []
     }));
-  },
-
-  /**
-   * Validate a QR token for an owned order and mark it as collected.
-   */
-  pickUpOrder: async ({ orderId, userId, qrToken }) => {
-    const order = await OrderModel.findById(orderId);
-    if (!order) {
-      throw new ApiError(404, 'Order not found');
-    }
-    if (Number(order.user_id) !== Number(userId)) {
-      throw new ApiError(403, 'Forbidden: You do not have access to this order');
-    }
-    if (order.qr_token !== qrToken) {
-      throw new ApiError(400, 'Invalid QR token');
-    }
-    if (order.status === 'picked_up') {
-      throw new ApiError(400, 'Order has already been picked up');
-    }
-
-    await OrderModel.updateStatus(orderId, 'picked_up');
-    return { ...order, status: 'picked_up' };
   }
 };
 

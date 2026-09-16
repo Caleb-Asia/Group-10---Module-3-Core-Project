@@ -202,11 +202,10 @@ Use an approved successful payment card.
 ### Show
 
 * Successful order
-* QR code
 
 ### Talking point
 
-> Once the payment is successful, the order is confirmed and a unique QR code is generated for collection.
+> Once the payment is successful, the order is confirmed with complete pickup details and collection window.
 
 ---
 
@@ -239,7 +238,7 @@ Use an approved successful payment card.
 * Transaction rollback
 * JWT
 * bcrypt
-* QR token
+* Dual payment gateways (Simulated Payment + PayFast sandbox)
 
 ### Talking points
 
@@ -251,7 +250,7 @@ Use an approved successful payment card.
 >
 > We also use bcrypt to hash passwords and JWT for authentication.
 >
-> Finally, each successful order receives a unique, cryptographically random QR token which can be used for pickup.
+> Finally, we support two robust payment systems: an instant simulated card gateway for testing and a full PayFast sandbox integration for real-world card and Instant EFT checkout.
 
 ### Show
 

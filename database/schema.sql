@@ -60,7 +60,6 @@ CREATE TABLE IF NOT EXISTS orders (
   total_amount DECIMAL(10,2) NOT NULL,
   payment_status ENUM('pending','paid','failed') DEFAULT 'pending',
   payment_txn_ref VARCHAR(100),
-  qr_token VARCHAR(64) UNIQUE,
   pickup_pod VARCHAR(100) NOT NULL,
   status ENUM('pending','confirmed','picked_up') DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

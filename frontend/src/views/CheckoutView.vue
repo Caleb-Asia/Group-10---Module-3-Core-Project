@@ -79,7 +79,7 @@
           </div>
 
           <!-- Card Payment Form -->
-          <div v-if="form.payment_method === 'card'" class="card-form">
+          <div v-if="form.payment_method === 'simulated'" class="card-form">
             <div class="form-group mb-4">
               <label for="cardNumber" class="form-label">Card Number</label>
               <input 
@@ -118,13 +118,6 @@
             </div>
           </div>
 
-          <!-- SnapScan Instruction -->
-          <div v-if="form.payment_method === 'snapscan'" class="simulated-payment-instruction">
-            <div class="simulated-icon">📱</div>
-            <p class="text-navy fw-bold mb-1">SnapScan</p>
-            <p class="text-muted small mb-4">Open the SnapScan app and scan the QR code at the pickup point.</p>
-          </div>
-
           <div class="d-flex justify-between">
             <button type="button" class="btn btn--outline" @click="prevStep">← Back</button>
             <button type="submit" class="btn btn--primary" :disabled="isLoading">
@@ -159,13 +152,13 @@ const pickupPods = PICKUP_PODS;
 const orderRef = computed(() => `FBX-${Math.floor(100000 + Math.random() * 900000)}`);
 
 const paymentMethods = [
-  { id: 'card', name: 'Debit / Credit Card', desc: 'Visa, Mastercard, Amex', icon: '💳' },
-  { id: 'snapscan', name: 'SnapScan', desc: 'Scan & pay with your phone', icon: '📱' },
+  { id: 'simulated', name: 'Simulated Payment', desc: 'Sandbox card gateway for demo', icon: '💳' },
+  { id: 'payfast', name: 'PayFast', desc: 'Card, Instant EFT', icon: '🏦' },
 ];
 
 const form = reactive({
   pickup_pod: '',
-  payment_method: 'card',
+  payment_method: 'simulated',
   card_number: '',
   expiry: '',
   cvv: ''
@@ -178,15 +171,6 @@ const processPayment = async () => {
   isLoading.value = true;
 
   try {
-    const paymentCardNumber = form.payment_method === 'card' ? form.card_number : '4242424242424242';
-    if (form.payment_method === 'card' || paymentCardNumber) {
-      const last4 = paymentCardNumber.replace(/\s/g, '').slice(-4);
-      if (last4 === '0002') {
-        showError('Payment Declined', 'This test card was declined. Please try another card.');
-        return;
-      }
-    }
-
     // Flatten custom-box contents into the same product payload used by standard items.
     const standardItems = cartStore.items
       .filter(item => !item.isCustom)
@@ -198,8 +182,50 @@ const processPayment = async () => {
       .filter(item => item.isCustom)
       .flatMap(item => item.customItems || []);
 
+    const payloadItems = [...standardItems, ...customItems];
+
+    let orderType = 'one-off';
+    if (cartStore.isSubscription) {
+      orderType = 'subscription';
+    } else if (cartStore.items.some(item => item.isCustom)) {
+      orderType = 'custom';
+    }
+
+    if (form.payment_method === 'payfast') {
+      const firstBoxItem = cartStore.items.find(item => !item.isCustom);
+      if (orderType === 'subscription' && !firstBoxItem) {
+        showError('Subscription unavailable', 'Add a box to your cart before subscribing.');
+        return;
+      }
+      const payfastPayload = {
+        items: payloadItems,
+        pickupPod: form.pickup_pod,
+        orderType,
+        nameFirst: authStore.user?.name?.split(' ')[0] || 'Customer',
+        email: authStore.user?.email || 'customer@foodboxx.co.za'
+      };
+      const response = await api.post('/payments/payfast/initiate', payfastPayload);
+      sessionStorage.setItem('foodboxx_payfast_pending', JSON.stringify({
+        ref: response.data.ref,
+        pickupPod: form.pickup_pod,
+        items: payloadItems,
+        orderType
+      }));
+      window.location.href = response.data.redirectUrl;
+      return;
+    }
+
+    const paymentCardNumber = form.payment_method === 'simulated' ? form.card_number : '4242424242424242';
+    if (form.payment_method === 'simulated' || paymentCardNumber) {
+      const last4 = paymentCardNumber.replace(/\s/g, '').slice(-4);
+      if (last4 === '0002') {
+        showError('Payment Declined', 'This test card was declined. Please try another card.');
+        return;
+      }
+    }
+
     const orderPayload = {
-      items: [...standardItems, ...customItems],
+      items: payloadItems,
       cardNumber: paymentCardNumber,
       pickupPod: form.pickup_pod
     };
@@ -232,8 +258,7 @@ const processPayment = async () => {
       total: cartStore.subtotal,
       status: 'confirmed',
       date: new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }),
-      txnRef: response.data.txnRef,
-      qrToken: response.data.qrToken
+      txnRef: response.data.txnRef
     };
 
     localStorage.setItem('foodboxx_orders', JSON.stringify([
@@ -375,19 +400,6 @@ onMounted(() => {
   cursor: pointer;
 }
 
-/* Simulated Payment Instructions */
-.simulated-payment-instruction {
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-8);
-  text-align: center;
-  box-shadow: var(--shadow-sm);
-}
-
-.simulated-icon {
-  font-size: 3rem;
-  margin-bottom: var(--spacing-3);
-}
 
 .eft-details {
   background: var(--color-gray-50);

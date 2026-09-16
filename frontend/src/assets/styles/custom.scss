@@ -324,12 +324,14 @@ ul, ol {
 
 .btn--primary:hover {
   background: var(--color-orange-hover);
+  color: var(--color-white);
   border-color: var(--color-orange-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
 .btn--primary:active {
+  color: var(--color-white);
   transform: translateY(0);
 }
 

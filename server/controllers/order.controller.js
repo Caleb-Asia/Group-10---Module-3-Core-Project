@@ -29,7 +29,6 @@ const orderController = {
         message: 'Order created successfully',
         orderId: result.orderId,
         totalAmount: result.totalAmount,
-        qrToken: result.qrToken,
         txnRef: result.txnRef
       });
     } catch (error) {
@@ -58,7 +57,6 @@ const orderController = {
         message: 'Custom box order created successfully',
         orderId: result.orderId,
         totalAmount: result.totalAmount,
-        qrToken: result.qrToken,
         txnRef: result.txnRef
       });
     } catch (error) {
@@ -88,32 +86,9 @@ const orderController = {
         orderId: result.orderId,
         subscriptionId: result.subscriptionId,
         totalAmount: result.totalAmount,
-        qrToken: result.qrToken,
         txnRef: result.txnRef,
         ...(result.loyaltyReward ? { loyaltyReward: true } : {})
       });
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  /**
-   * Verify an order QR token and transition the order to picked_up.
-   */
-  pickUpOrder: async (req, res, next) => {
-    try {
-      const orderId = Number(req.params.id);
-      const { qrToken } = req.body;
-
-      if (!orderId || Number.isNaN(orderId)) {
-        throw new ApiError(400, 'Invalid order ID');
-      }
-      if (!qrToken) {
-        throw new ApiError(400, 'qrToken is required');
-      }
-
-      const order = await orderService.pickUpOrder({ orderId, userId: req.userId, qrToken });
-      res.json({ success: true, message: 'Order picked up successfully', order });
     } catch (error) {
       next(error);
     }

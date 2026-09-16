@@ -1,9 +1,9 @@
 <!-- 
-  Purpose: Order confirmation page with QR code and pickup details.
+  Purpose: Order confirmation page with pickup details.
   Module: Frontend - Views
   Owner: Caleb Asia
   Created: 2026-09-01
-  Notes: Reads the confirmed order from session storage, then renders the QR code from that order.
+  Notes: Reads the confirmed order from session storage or confirms PayFast redirect.
 -->
 <template>
   <div class="confirmation-page">
@@ -17,14 +17,6 @@
 
         <h1 class="text-navy mb-2">Order Placed!</h1>
         <p class="text-muted mb-6">Your box will be ready for pickup from Monday</p>
-
-        <div class="qr-card mb-6">
-          <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="Pickup QR Code" class="qr-image mb-4" />
-          <div class="qr-placeholder" v-else>QR Code</div>
-          
-          <p class="qr-label mb-1">Pickup QR Code</p>
-          <p class="qr-order-number">{{ orderData.order_number }}</p>
-        </div>
 
         <div class="details-card p-6 mb-6">
           <div class="detail-row mb-4">
@@ -61,24 +53,80 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { generateQRCode } from '@/services/qr';
+import { useRoute, useRouter } from 'vue-router';
+import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
+import { showError, showWarning } from '@/services/ui';
+import Swal from 'sweetalert2';
+import api from '@/services/api';
+
+const route = useRoute();
+const router = useRouter();
+const cartStore = useCartStore();
+const authStore = useAuthStore();
 
 const orderData = ref(null);
-const qrCodeDataUrl = ref('');
 
 onMounted(async () => {
-  const storedOrder = sessionStorage.getItem('foodboxx_last_order');
-  if (!storedOrder) {
-    return;
-  }
+  if (route.query.ref) {
+    const pending = JSON.parse(sessionStorage.getItem('foodboxx_payfast_pending') || 'null');
+    if (!pending) {
+      showWarning('No Pending Payment', 'Pending payment session not found.');
+      router.push('/checkout');
+      return;
+    }
 
-  orderData.value = JSON.parse(storedOrder);
+    const { ref: queryRef, ...payfastData } = route.query;
 
-  try {
-    const qrSource = orderData.value.qrToken || orderData.value.order_number;
-    qrCodeDataUrl.value = await generateQRCode(qrSource);
-  } catch (error) {
-    console.error('Failed to generate QR code:', error);
+    try {
+      const response = await api.post('/payments/payfast/confirm', {
+        ref: route.query.ref,
+        payfastData
+      });
+
+      cartStore.clearCart();
+      sessionStorage.removeItem('foodboxx_payfast_pending');
+
+      const builtOrderData = {
+        id: response.data.orderId,
+        order_number: `FBX-${String(response.data.orderId).padStart(6, '0')}`,
+        pickup_pod: pending.pickupPod,
+        collection_window: 'Mon–Fri, 08:00–17:00',
+        dietary_preferences: authStore.user?.dietary_preferences || 'standard',
+        payment_method: 'payfast',
+        items: pending.items || [],
+        total: response.data.totalAmount,
+        status: 'confirmed',
+        date: new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }),
+        txnRef: payfastData.pf_payment_id || route.query.ref
+      };
+
+      sessionStorage.setItem('foodboxx_last_order', JSON.stringify(builtOrderData));
+      localStorage.setItem('foodboxx_orders', JSON.stringify([
+        builtOrderData,
+        ...JSON.parse(localStorage.getItem('foodboxx_orders') || '[]')
+      ]));
+
+      orderData.value = builtOrderData;
+    } catch (error) {
+      const msg = error?.response?.data?.error?.message || 'PayFast payment confirmation failed.';
+      Swal.fire({
+        icon: 'error',
+        title: 'Payment Confirmation Failed',
+        text: msg,
+        footer: '<a href="/checkout" style="color: #F26A1B; font-weight: bold;">Back to checkout</a>',
+        confirmButtonColor: '#F26A1B',
+        confirmButtonText: 'Back to checkout'
+      }).then(() => {
+        router.push('/checkout');
+      });
+    }
+  } else {
+    const storedOrder = sessionStorage.getItem('foodboxx_last_order');
+    if (!storedOrder) {
+      return;
+    }
+    orderData.value = JSON.parse(storedOrder);
   }
 });
 </script>
@@ -102,46 +150,6 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* QR Code Card */
-.qr-card {
-  max-width: 300px;
-  margin: 0 auto;
-  padding: var(--spacing-8);
-  border: 2px dashed var(--color-orange);
-  border-radius: var(--radius-xl);
-  background: var(--color-white);
-}
-
-.qr-image {
-  width: 150px;
-  height: 150px;
-  margin: 0 auto;
-}
-
-.qr-placeholder {
-  width: 150px;
-  height: 150px;
-  margin: 0 auto;
-  background: var(--color-gray-100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-gray-500);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.qr-label {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-navy);
-}
-
-.qr-order-number {
-  font-size: var(--font-size-sm);
-  color: var(--color-gray-500);
 }
 
 /* Details Card */
@@ -239,11 +247,4 @@ onMounted(async () => {
   margin: 0 var(--spacing-2);
   margin-bottom: 20px;
 }
-
-/* Dark Mode Tracker Fixes */
-
-
-
-
-
 </style>

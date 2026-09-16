@@ -22,7 +22,6 @@ const OrderModel = {
       total_amount,
       payment_status,
       payment_txn_ref,
-      qr_token,
       pickup_pod,
       status
     } = orderData;
@@ -30,9 +29,9 @@ const OrderModel = {
     // Parameterised INSERT statement preserving 5-table schema integrity
     const [result] = await client.execute(
       `INSERT INTO orders 
-       (user_id, subscription_id, order_type, total_amount, payment_status, payment_txn_ref, qr_token, pickup_pod, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [user_id, subscription_id || null, order_type, total_amount, payment_status, payment_txn_ref, qr_token, pickup_pod, status]
+       (user_id, subscription_id, order_type, total_amount, payment_status, payment_txn_ref, pickup_pod, status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [user_id, subscription_id || null, order_type, total_amount, payment_status, payment_txn_ref, pickup_pod, status]
     );
     return result.insertId;
   },
@@ -81,17 +80,6 @@ const OrderModel = {
   updateStatus: async (id, status, conn = null) => {
     const client = conn || pool;
     await client.execute('UPDATE orders SET status = ? WHERE id = ?', [status, id]);
-  },
-
-  /**
-   * Update QR token for an order
-   * @param {number} id - Order ID
-   * @param {string} qr_token - Unique QR token
-   * @param {Object|null} conn - Optional transaction connection
-   */
-  updateQrToken: async (id, qr_token, conn = null) => {
-    const client = conn || pool;
-    await client.execute('UPDATE orders SET qr_token = ? WHERE id = ?', [qr_token, id]);
   }
 };
 
