@@ -73,7 +73,9 @@ const routes = [
   { path: '/builder', name: 'BoxBuilder', component: BoxBuilderView, beforeEnter: requireAuth },
   { path: '/pods', name: 'PickupLocator', component: PickupLocatorView, beforeEnter: requireAuth },
   { path: '/checkout', name: 'Checkout', component: CheckoutView, beforeEnter: requireAuth },
-  { path: '/confirmation', name: 'Confirmation', component: ConfirmationView, beforeEnter: requireAuth },
+  // PayFast returns to this route in a fresh browser load, so it must remain
+  // reachable while the server confirms the pending payment.
+  { path: '/confirmation', name: 'Confirmation', component: ConfirmationView },
   { path: '/dashboard', name: 'Dashboard', component: DashboardView, beforeEnter: requireAuth },
   { path: '/dashboard/profile', name: 'Profile', component: ProfileView, beforeEnter: requireAuth },
   { path: '/dashboard/subscriptions', name: 'Subscriptions', component: SubscriptionsView, beforeEnter: requireAuth },
@@ -93,8 +95,9 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   const isAuthRoute = to.name === 'Login' || to.name === 'Register';
+  const isPaymentReturn = to.name === 'Confirmation';
 
-  if (!authStore.isAuthenticated && !isAuthRoute) {
+  if (!authStore.isAuthenticated && !isAuthRoute && !isPaymentReturn) {
     // Not logged in and trying to leave the auth pages → redirect to login
     next({ name: 'Login', query: { redirect: to.fullPath } });
   } else if (authStore.isAuthenticated && isAuthRoute) {
