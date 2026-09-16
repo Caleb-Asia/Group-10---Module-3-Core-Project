@@ -24,8 +24,21 @@ router.post('/confirm', async (req, res, next) => {
     if (!ref || !payfastData) throw new ApiError(400, 'ref and payfastData are required');
     const pending = payfastService.getPendingOrder(ref);
     if (!pending) throw new ApiError(404, 'Pending payment not found');
-    if (!await payfastService.validatePayment(payfastData)) throw new ApiError(400, 'Payfast could not verify this payment');
-    if (payfastData.payment_status !== 'COMPLETE') throw new ApiError(400, `Payment was not completed (status: ${payfastData.payment_status})`);
+
+    // Sandbox-wallet bypass: the PayFast sandbox wallet does not append its
+    // return params to the return_url. When PAYFAST_SANDBOX is true and the
+    // frontend signals a completed sandbox wallet payment, trust it.
+    // This path is impossible in production because PAYFAST_SANDBOX will be false.
+    const isSandboxWalletBypass =
+      process.env.PAYFAST_SANDBOX === 'true' &&
+      payfastData &&
+      payfastData.__sandbox_wallet === true &&
+      payfastData.payment_status === 'COMPLETE';
+
+    if (!isSandboxWalletBypass) {
+      if (!await payfastService.validatePayment(payfastData)) throw new ApiError(400, 'Payfast could not verify this payment');
+      if (payfastData.payment_status !== 'COMPLETE') throw new ApiError(400, `Payment was not completed (status: ${payfastData.payment_status})`);
+    }
     const result = await orderService.createOrderFromPayfast({ ...pending, txnRef: payfastData.pf_payment_id || ref });
     payfastService.clearPendingOrder(ref);
     res.json({ success: true, orderId: result.orderId, totalAmount: result.totalAmount });

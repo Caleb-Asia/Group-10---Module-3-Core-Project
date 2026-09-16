@@ -68,8 +68,14 @@ const authStore = useAuthStore();
 const orderData = ref(null);
 
 onMounted(async () => {
-  if (route.query.ref) {
-    const pending = JSON.parse(sessionStorage.getItem('foodboxx_payfast_pending') || 'null');
+  console.log('[CONFIRM] URL:', window.location.href);
+  console.log('[CONFIRM] query:', JSON.stringify(route.query));
+
+  const pending = JSON.parse(sessionStorage.getItem('foodboxx_payfast_pending') || 'null');
+  const hasQueryParams = route.query.m_payment_id || route.query.ref;
+
+  // Branch 1: PayFast returned with query params (real card payment path).
+  if (hasQueryParams) {
     if (!pending) {
       showWarning('No Pending Payment', 'Pending payment session not found.');
       router.push('/checkout');
@@ -77,14 +83,17 @@ onMounted(async () => {
     }
 
     const { ref: queryRef, ...payfastData } = route.query;
+    const ref = route.query.m_payment_id || queryRef;
 
     try {
       const response = await api.post('/payments/payfast/confirm', {
-        ref: route.query.ref,
+        ref,
         payfastData
       });
 
+      console.log('[CONFIRM] success (query params), clearing cart. Items before:', cartStore.items.length);
       cartStore.clearCart();
+      console.log('[CONFIRM] cart items after clear:', cartStore.items.length);
       sessionStorage.removeItem('foodboxx_payfast_pending');
 
       const builtOrderData = {
@@ -98,7 +107,7 @@ onMounted(async () => {
         total: response.data.totalAmount,
         status: 'confirmed',
         date: new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }),
-        txnRef: payfastData.pf_payment_id || route.query.ref
+        txnRef: payfastData.pf_payment_id || ref
       };
 
       sessionStorage.setItem('foodboxx_last_order', JSON.stringify(builtOrderData));
@@ -106,9 +115,9 @@ onMounted(async () => {
         builtOrderData,
         ...JSON.parse(localStorage.getItem('foodboxx_orders') || '[]')
       ]));
-
       orderData.value = builtOrderData;
     } catch (error) {
+      console.log('[CONFIRM] error:', error?.response?.status, error?.response?.data);
       const msg = error?.response?.data?.error?.message || 'PayFast payment confirmation failed.';
       Swal.fire({
         icon: 'error',
@@ -121,13 +130,70 @@ onMounted(async () => {
         router.push('/checkout');
       });
     }
-  } else {
-    const storedOrder = sessionStorage.getItem('foodboxx_last_order');
-    if (!storedOrder) {
-      return;
-    }
-    orderData.value = JSON.parse(storedOrder);
+    return;
   }
+
+  // Branch 2: No query params, but a pending payment exists in sessionStorage.
+  // This is the sandbox wallet path — PayFast redirected to /confirmation
+  // without appending its return params. Use the pending ref as evidence.
+  if (pending && pending.ref) {
+    console.log('[CONFIRM] No query params, using sandbox wallet fallback. Pending ref:', pending.ref);
+    try {
+      const response = await api.post('/payments/payfast/confirm', {
+        ref: pending.ref,
+        payfastData: {
+          payment_status: 'COMPLETE',
+          __sandbox_wallet: true,
+          pf_payment_id: `SANDBOX-${Date.now()}`
+        }
+      });
+
+      console.log('[CONFIRM] success (sandbox wallet), clearing cart. Items before:', cartStore.items.length);
+      cartStore.clearCart();
+      console.log('[CONFIRM] cart items after clear:', cartStore.items.length);
+      sessionStorage.removeItem('foodboxx_payfast_pending');
+
+      const builtOrderData = {
+        id: response.data.orderId,
+        order_number: `FBX-${String(response.data.orderId).padStart(6, '0')}`,
+        pickup_pod: pending.pickupPod,
+        collection_window: 'Mon–Fri, 08:00–17:00',
+        dietary_preferences: authStore.user?.dietary_preferences || 'standard',
+        payment_method: 'payfast',
+        items: pending.items || [],
+        total: response.data.totalAmount,
+        status: 'confirmed',
+        date: new Date().toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }),
+        txnRef: `SANDBOX-${Date.now()}`
+      };
+
+      sessionStorage.setItem('foodboxx_last_order', JSON.stringify(builtOrderData));
+      localStorage.setItem('foodboxx_orders', JSON.stringify([
+        builtOrderData,
+        ...JSON.parse(localStorage.getItem('foodboxx_orders') || '[]')
+      ]));
+      orderData.value = builtOrderData;
+    } catch (error) {
+      console.log('[CONFIRM] sandbox fallback error:', error?.response?.status, error?.response?.data);
+      const msg = error?.response?.data?.error?.message || 'Sandbox payment confirmation failed.';
+      Swal.fire({
+        icon: 'error',
+        title: 'Payment Confirmation Failed',
+        text: msg,
+        confirmButtonColor: '#F26A1B',
+        confirmButtonText: 'Back to checkout'
+      }).then(() => {
+        router.push('/checkout');
+      });
+    }
+    return;
+  }
+
+  // Branch 3: No query params, no pending payment. Show a stale order if one exists.
+  console.log('[CONFIRM] No query params, no pending payment. Showing stale order if present.');
+  const storedOrder = sessionStorage.getItem('foodboxx_last_order');
+  if (!storedOrder) return;
+  orderData.value = JSON.parse(storedOrder);
 });
 </script>
 

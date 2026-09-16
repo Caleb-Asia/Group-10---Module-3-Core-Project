@@ -86,7 +86,10 @@ export const useCartStore = defineStore('cart', () => {
   function clearCart() {
     items.value = [];
     isSubscription.value = false;
-    localStorage.removeItem(cartStorageKey());
+    // Remove every possible cart key so no per-user variant survives.
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('foodboxx_cart_'))
+      .forEach(k => localStorage.removeItem(k));
   }
 
   window.addEventListener('foodboxx-auth-changed', restore);

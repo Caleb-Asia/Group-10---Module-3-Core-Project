@@ -52,7 +52,7 @@ const payfastService = {
     const payload = {
       merchant_id: PAYFAST_MERCHANT_ID,
       merchant_key: PAYFAST_MERCHANT_KEY,
-      return_url: `${BASE_URL}/confirmation?ref=${ref}`,
+      return_url: `${BASE_URL}/confirmation`,
       cancel_url: `${BASE_URL}/checkout?cancelled=1`,
       notify_url: `${BASE_URL}/api/payments/payfast/notify`,
       name_first: orderData.nameFirst || 'Customer',
