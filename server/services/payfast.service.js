@@ -11,13 +11,26 @@ const LIVE_PROCESS_URL = 'https://www.payfast.co.za/eng/process';
 const processUrl = PAYFAST_SANDBOX === 'true' ? SANDBOX_PROCESS_URL : LIVE_PROCESS_URL;
 const pendingPayments = new Map();
 
+// PHP-compatible URL encoder matching PHP's urlencode(), which PayFast's
+// server uses to re-compute the signature during verification.
+function phpUrlEncode(value) {
+  return encodeURIComponent(String(value))
+    .replace(/%20/g, '+')
+    .replace(/!/g, '%21')
+    .replace(/'/g, '%27')
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29')
+    .replace(/~/g, '%7E')
+    .replace(/\*/g, '%2A');
+}
+
 function generateSignature(data, passphrase) {
   const fields = Object.keys(data)
     .sort()
     .filter(key => data[key] !== undefined && data[key] !== null && data[key] !== '')
-    .map(key => `${key}=${encodeURIComponent(String(data[key])).replace(/%20/g, '+')}`);
+    .map(key => `${key}=${phpUrlEncode(data[key])}`);
   let fullString = fields.join('&');
-  if (passphrase) fullString += `&passphrase=${encodeURIComponent(passphrase).replace(/%20/g, '+')}`;
+  if (passphrase) fullString += `&passphrase=${phpUrlEncode(passphrase)}`;
   return crypto.createHash('md5').update(fullString).digest('hex');
 }
 
@@ -49,7 +62,10 @@ const payfastService = {
       item_name: itemName
     };
     const signature = generateSignature(payload, PAYFAST_PASSPHRASE);
-    const query = new URLSearchParams(Object.fromEntries(Object.entries({ ...payload, signature }).sort(([a], [b]) => a.localeCompare(b)))).toString();
+    const query = Object.keys(payload)
+      .sort()
+      .map(key => `${key}=${phpUrlEncode(payload[key])}`)
+      .join('&') + `&signature=${signature}`;
     return { redirectUrl: `${processUrl}?${query}`, ref };
   },
 
@@ -58,20 +74,30 @@ const payfastService = {
 
   validatePayment: async (payfastData) => {
     try {
-      if (!payfastData || typeof payfastData !== 'object' || Array.isArray(payfastData) || Object.keys(payfastData).length === 0) return false;
-      const data = { ...payfastData };
-      delete data.pf_signature;
-      data.signature = generateSignature(data, PAYFAST_PASSPHRASE);
+      if (!payfastData || typeof payfastData !== 'object' || Array.isArray(payfastData) || Object.keys(payfastData).length === 0) {
+        return false;
+      }
+
+      // PayFast's /eng/query/validate endpoint expects the data it sent to us
+      // forwarded back UNCHANGED — including the signature field it generated.
+      // Do NOT regenerate or delete anything here.
+      const body = new URLSearchParams(payfastData).toString();
+
       const validateUrl = PAYFAST_SANDBOX === 'true'
         ? 'https://sandbox.payfast.co.za/eng/query/validate'
         : 'https://www.payfast.co.za/eng/query/validate';
+
       const response = await fetch(validateUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(Object.fromEntries(Object.entries(data).sort(([a], [b]) => a.localeCompare(b)))).toString()
+        body
       });
-      return (await response.text()).trim().toUpperCase() === 'VALID';
+
+      const text = (await response.text()).trim().toUpperCase();
+      console.log('[PAYFAST] validate response:', text);
+      return text === 'VALID';
     } catch (error) {
+      console.error('[PAYFAST] validate error:', error);
       return false;
     }
   },
