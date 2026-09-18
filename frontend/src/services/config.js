@@ -4,7 +4,7 @@
   Owner: Caleb Asia
   Notes: Holds API base URL and app-wide design tokens.
 */
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Static Pickup Pods (Will be used in Checkout)
 export const PICKUP_PODS = [
