@@ -19,6 +19,11 @@ const frontendDistPath = path.join(__dirname, 'frontend', 'dist');
 const frontendIndexPath = path.join(frontendDistPath, 'index.html');
 const frontendBuildExists = fs.existsSync(frontendIndexPath);
 
+// Railway (and most hosting platforms) sit behind a reverse proxy that adds
+// the X-Forwarded-For header. Trust one hop so express-rate-limit can
+// correctly identify clients instead of throwing ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+app.set('trust proxy', 1);
+
 const corsOptions = {
   origin: CORS_ORIGIN === '*' ? '*' : CORS_ORIGIN.split(',').map(item => item.trim()),
   credentials: true
